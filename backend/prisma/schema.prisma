@@ -1,0 +1,39 @@
+// Schema do banco de dados - NôdjuntaAgro GB
+// Rode: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Tipos de perfil de usuário do app
+enum UserRole {
+  AGRICULTOR
+  PESCADOR
+  COMPRADOR
+  COMERCIANTE
+  AGENTE_DIGITAL
+  TRANSPORTADOR
+  GOVERNO
+  ONG
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?  @unique
+  password  String
+  role      UserRole
+  location  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
