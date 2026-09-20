@@ -1,23 +1,28 @@
-# Módulo de Autenticação — NôdjuntaAgro GB
+# Módulo de Produtos — AgroConecta GB
 
-Este é o primeiro módulo do backend: cadastro e login de usuários, com suporte
-aos diferentes perfis do app (agricultor, pescador, comprador, comerciante,
-agente digital, transportador, governo, ONG).
+Este módulo permite que agricultores, pescadores e comerciantes anunciem
+produtos para venda, e que compradores naveguem e vejam esses produtos.
 
-## Arquivos deste módulo
-- `prisma/schema.prisma` — modelo do usuário no banco de dados
-- `src/services/authService.ts` — regras de negócio (criar conta, logar)
-- `src/controllers/authController.ts` — recebe os pedidos da API
-- `src/routes/authRoutes.ts` — define os endereços (endpoints) da API
-- `src/middleware/auth.ts` — protege rotas que exigem login
-- `src/utils/jwt.ts` — cria e valida o "crachá digital" (token) do usuário
-- `src/server.ts` — arquivo que liga tudo e inicia o servidor
+## Arquivos NOVOS deste módulo
+- `src/services/productService.ts`
+- `src/controllers/productController.ts`
+- `src/routes/productRoutes.ts`
 
-## Como rodar (quando tiver um computador por perto)
-```bash
-cd backend
-npm install
-cp .env.example .env
-# edite o .env com os dados reais do seu banco PostgreSQL
-npx prisma migrate dev --name init
-npm run dev
+## Arquivos que foram EDITADOS neste módulo
+- `prisma/schema.prisma` — adicionado o modelo de Produto
+- `src/server.ts` — ligadas as novas rotas de produto
+
+## Como testar depois de rodar
+- `GET /api/products` — lista todos os produtos disponíveis
+- `GET /api/products/:id` — vê um produto específico
+- `POST /api/products` — cria um produto (precisa estar logado)
+  ```json
+  {
+    "title": "Sacos de arroz",
+    "description": "Arroz colhido este mês",
+    "category": "AGRICOLA",
+    "price": 500,
+    "unit": "saco de 50kg",
+    "quantity": 20,
+    "location": "Bissau"
+  }
