@@ -16,6 +16,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 import translationRoutes from "./routes/translationRoutes";
 import smsRoutes from "./routes/smsRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
+import verificationRoutes from "./routes/verificationRoutes";
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/translations", translationRoutes);
 app.use("/api/sms", smsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/verifications", verificationRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
