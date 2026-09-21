@@ -14,6 +14,7 @@ import marketPriceRoutes from "./routes/marketPriceRoutes";
 import transportRoutes from "./routes/transportRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import translationRoutes from "./routes/translationRoutes";
+import smsRoutes from "./routes/smsRoutes";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/api/market-prices", marketPriceRoutes);
 app.use("/api/transport", transportRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/translations", translationRoutes);
+app.use("/api/sms", smsRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
