@@ -46,6 +46,8 @@ model User {
   transportOffers TransportOffer[]
   purchasesMade Payment[] @relation("Buyer")
   salesReceived Payment[] @relation("Seller")
+  isVerified   Boolean               @default(false)
+  verifications VerificationRequest[]
   @@map("users")
 }
 enum ProductCategory {
@@ -226,4 +228,21 @@ model SmsLog {
   createdAt DateTime     @default(now())
 
   @@map("sms_logs")
+}
+enum VerificationStatus {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+model VerificationRequest {
+  id           String             @id @default(uuid())
+  userId       String
+  user         User               @relation(fields: [userId], references: [id])
+  documentType String
+  documentNote String?
+  status       VerificationStatus @default(PENDENTE)
+  createdAt    DateTime           @default(now())
+
+  @@map("verification_requests")
 }
