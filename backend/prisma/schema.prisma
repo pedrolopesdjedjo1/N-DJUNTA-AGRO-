@@ -41,6 +41,7 @@ model User {
   reviewsReceived Review[] @relation("ReviewTarget")
   notifications Notification[]
   favorites Favorite[]
+  reportsMade Report[]
   @@map("users")
 }
 enum ProductCategory {
@@ -126,4 +127,28 @@ model Favorite {
 
   @@unique([userId, productId])
   @@map("favorites")
+}
+enum ReportTargetType {
+  USER
+  PRODUCT
+}
+
+enum ReportStatus {
+  PENDENTE
+  EM_ANALISE
+  RESOLVIDA
+  REJEITADA
+}
+
+model Report {
+  id         String           @id @default(uuid())
+  reporterId String
+  reporter   User             @relation(fields: [reporterId], references: [id])
+  targetType ReportTargetType
+  targetId   String
+  reason     String
+  status     ReportStatus     @default(PENDENTE)
+  createdAt  DateTime         @default(now())
+
+  @@map("reports")
 }
