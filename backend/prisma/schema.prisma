@@ -39,6 +39,7 @@ model User {
   receivedMessages Message[] @relation("ReceivedMessages")
   reviewsGiven    Review[] @relation("ReviewAuthor")
   reviewsReceived Review[] @relation("ReviewTarget")
+  notifications Notification[]
   @@map("users")
 }
 enum ProductCategory {
@@ -93,4 +94,23 @@ model Review {
   createdAt  DateTime @default(now())
 
   @@map("reviews")
+}
+enum NotificationType {
+  MENSAGEM
+  AVALIACAO
+  PRODUTO
+  SISTEMA
+}
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  type      NotificationType
+  title     String
+  message   String
+  relatedId String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@map("notifications")
 }
