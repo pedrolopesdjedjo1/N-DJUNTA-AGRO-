@@ -6,6 +6,7 @@ import messageRoutes from "./routes/messageRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
 import profileRoutes from "./routes/profileRoutes";
+import searchRoutes from "./routes/searchRoutes";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/search", searchRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
