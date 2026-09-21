@@ -48,6 +48,7 @@ model User {
   salesReceived Payment[] @relation("Seller")
   isVerified   Boolean               @default(false)
   verifications VerificationRequest[]
+  alertsCreated WeatherAlert[]
   @@map("users")
 }
 enum ProductCategory {
@@ -245,4 +246,32 @@ model VerificationRequest {
   createdAt    DateTime           @default(now())
 
   @@map("verification_requests")
+}
+
+enum AlertType {
+  CHUVA
+  SECA
+  PRAGA
+  OUTRO
+}
+
+enum AlertSeverity {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+model WeatherAlert {
+  id          String        @id @default(uuid())
+  createdById String
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  region      String
+  type        AlertType
+  severity    AlertSeverity
+  title       String
+  description String
+  expiresAt   DateTime?
+  createdAt   DateTime      @default(now())
+
+  @@map("weather_alerts")
 }
