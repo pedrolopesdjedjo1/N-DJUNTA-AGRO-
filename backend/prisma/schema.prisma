@@ -43,6 +43,8 @@ model User {
   favorites Favorite[]
   reportsMade Report[]
   transportOffers TransportOffer[]
+  purchasesMade Payment[] @relation("Buyer")
+  salesReceived Payment[] @relation("Seller")
   @@map("users")
 }
 enum ProductCategory {
@@ -167,4 +169,31 @@ model TransportOffer {
   createdAt     DateTime @default(now())
 
   @@map("transport_offers")
+}
+enum PaymentMethod {
+  DINHEIRO
+  TRANSFERENCIA
+  MOBILE_MONEY
+}
+
+enum PaymentStatus {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+}
+
+model Payment {
+  id        String        @id @default(uuid())
+  buyerId   String
+  buyer     User          @relation("Buyer", fields: [buyerId], references: [id])
+  sellerId  String
+  seller    User          @relation("Seller", fields: [sellerId], references: [id])
+  productId String?
+  amount    Float
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDENTE)
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  @@map("payments")
 }
