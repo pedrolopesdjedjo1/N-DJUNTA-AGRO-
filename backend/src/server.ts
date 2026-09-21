@@ -1,3 +1,4 @@
+
 import express from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
@@ -8,6 +9,7 @@ import notificationRoutes from "./routes/notificationRoutes";
 import profileRoutes from "./routes/profileRoutes";
 import searchRoutes from "./routes/searchRoutes";
 import favoriteRoutes from "./routes/favoriteRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/favorites", favoriteRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
