@@ -212,3 +212,18 @@ model Translation {
 
   @@map("translations")
 }
+
+enum SmsDirection {
+  RECEBIDO
+  ENVIADO
+}
+
+model SmsLog {
+  id        String       @id @default(uuid())
+  phone     String
+  direction SmsDirection
+  message   String
+  createdAt DateTime     @default(now())
+
+  @@map("sms_logs")
+}
