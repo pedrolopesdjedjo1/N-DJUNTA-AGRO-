@@ -42,6 +42,7 @@ model User {
   notifications Notification[]
   favorites Favorite[]
   reportsMade Report[]
+  transportOffers TransportOffer[]
   @@map("users")
 }
 enum ProductCategory {
@@ -151,4 +152,19 @@ model Report {
   createdAt  DateTime         @default(now())
 
   @@map("reports")
+}
+model TransportOffer {
+  id            String   @id @default(uuid())
+  transporterId String
+  transporter   User     @relation(fields: [transporterId], references: [id])
+  origin        String
+  destination   String
+  capacity      String
+  price         Float
+  availableDate DateTime
+  notes         String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  @@map("transport_offers")
 }
