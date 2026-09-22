@@ -49,6 +49,8 @@ model User {
   isVerified   Boolean               @default(false)
   verifications VerificationRequest[]
   alertsCreated WeatherAlert[]
+  cooperativesLed Cooperative[]
+  cooperativeMemberships CooperativeMember[]
   @@map("users")
 }
 enum ProductCategory {
@@ -274,4 +276,28 @@ model WeatherAlert {
   createdAt   DateTime      @default(now())
 
   @@map("weather_alerts")
+}
+model Cooperative {
+  id          String              @id @default(uuid())
+  name        String
+  description String?
+  region      String
+  leaderId    String
+  leader      User                @relation(fields: [leaderId], references: [id])
+  members     CooperativeMember[]
+  createdAt   DateTime            @default(now())
+
+  @@map("cooperatives")
+}
+
+model CooperativeMember {
+  id            String      @id @default(uuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  joinedAt      DateTime    @default(now())
+
+  @@unique([cooperativeId, userId])
+  @@map("cooperative_members")
 }
