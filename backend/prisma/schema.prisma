@@ -200,7 +200,8 @@ model Payment {
   status    PaymentStatus @default(PENDENTE)
   notes     String?
   createdAt DateTime      @default(now())
-
+  feeAmount Float?
+  netAmount Float?
   @@map("payments")
 }
 enum Language {
@@ -301,3 +302,4 @@ model CooperativeMember {
   @@unique([cooperativeId, userId])
   @@map("cooperative_members")
 }
+
