@@ -302,4 +302,10 @@ model CooperativeMember {
   @@unique([cooperativeId, userId])
   @@map("cooperative_members")
 }
+model PlatformSettings {
+  id                    String   @id @default(uuid())
+  commissionPercentage  Float    @default(0)
+  updatedAt             DateTime @updatedAt
 
+  @@map("platform_settings")
+}
