@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../lib/prisma";
 
 // Só existe UMA linha de configurações na plataforma inteira.
 // Se ainda não existir, cria com taxa 0% (gratuito) por padrão.
