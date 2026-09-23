@@ -37,7 +37,6 @@ export async function listMyPayments(userId: string) {
     include: {
       buyer: { select: { id: true, name: true } },
       seller: { select: { id: true, name: true } },
-      product: { select: { id: true, title: true } },
     },
     orderBy: { createdAt: "desc" },
   });
