@@ -1,6 +1,5 @@
-import { PrismaClient, ProductCategory } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ProductCategory } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
 // Preço médio geral por categoria (em todas as regiões)
 export async function getAveragePriceByCategory() {
