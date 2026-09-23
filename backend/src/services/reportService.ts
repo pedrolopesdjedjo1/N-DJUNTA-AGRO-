@@ -1,6 +1,5 @@
-import { PrismaClient, ReportTargetType, ReportStatus } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ReportTargetType, ReportStatus } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
 interface CreateReportInput {
   reporterId: string;
