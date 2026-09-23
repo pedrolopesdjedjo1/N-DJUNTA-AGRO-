@@ -1,6 +1,5 @@
-import { PrismaClient, Language } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Language } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
 // Devolve todas as traduções no formato { chave: texto }, já no idioma pedido
 export async function getAllTranslations(language: Language) {
