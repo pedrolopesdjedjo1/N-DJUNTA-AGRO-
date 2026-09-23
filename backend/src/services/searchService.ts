@@ -1,6 +1,5 @@
-import { PrismaClient, ProductCategory } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ProductCategory } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
 interface SearchFilters {
   query?: string;
