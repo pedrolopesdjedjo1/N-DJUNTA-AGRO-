@@ -1,6 +1,5 @@
-import { PrismaClient, AlertType, AlertSeverity } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { AlertType, AlertSeverity } from "@prisma/client";
+import { prisma } from "../lib/prisma";
 
 interface CreateAlertInput {
   createdById: string;
