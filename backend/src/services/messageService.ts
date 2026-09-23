@@ -1,7 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "../lib/prisma";
 interface SendMessageInput {
   senderId: string;
   receiverId: string;
