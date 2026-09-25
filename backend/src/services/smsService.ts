@@ -1,7 +1,6 @@
-import { PrismaClient, SmsDirection } from "@prisma/client";
+import { SmsDirection } from "@prisma/client";
 import { getAveragePriceByCategory } from "./marketPriceService";
-
-const prisma = new PrismaClient();
+import { prisma } from "../lib/prisma";
 
 // Este módulo prepara a lógica para funcionar com SMS. Para funcionar de
 // verdade em produção, é preciso contratar um serviço de gateway de SMS

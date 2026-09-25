@@ -19,6 +19,7 @@ import dashboardRoutes from "./routes/dashboardRoutes";
 import verificationRoutes from "./routes/verificationRoutes";
 import weatherAlertRoutes from "./routes/weatherAlertRoutes";
 import cooperativeRoutes from "./routes/cooperativeRoutes";
+import platformSettingsRoutes from "./routes/platformSettingsRoutes";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/verifications", verificationRoutes);
 app.use("/api/weather-alerts", weatherAlertRoutes);
 app.use("/api/cooperatives", cooperativeRoutes);
+app.use("/api/platform-settings", platformSettingsRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });

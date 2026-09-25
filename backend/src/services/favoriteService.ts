@@ -1,7 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma } from "../lib/prisma";
 export async function addFavorite(userId: string, productId: string) {
   const existing = await prisma.favorite.findUnique({
     where: { userId_productId: { userId, productId } },

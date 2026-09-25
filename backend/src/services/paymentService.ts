@@ -1,6 +1,6 @@
-import { PrismaClient, PaymentMethod, PaymentStatus } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { PaymentMethod, PaymentStatus } from "@prisma/client";
+import { calculateFee } from "./platformSettingsService";
+import { prisma } from "../lib/prisma";
 
 interface CreatePaymentInput {
   buyerId: string;
