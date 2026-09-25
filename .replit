@@ -2,6 +2,7 @@ modules = ["nodejs-20", "python-base-3.13"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["glib", "nspr", "nss", "dbus", "atk", "cups", "cairo", "gtk3"]
 
 [agent]
 expertMode = true
@@ -33,3 +34,15 @@ outputType = "console"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[[ports]]
+localPort = 4040
+externalPort = 3000
+exposeLocalhost = true
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
+
+[[ports]]
+localPort = 8082
