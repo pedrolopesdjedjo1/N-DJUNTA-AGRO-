@@ -1,3 +1,15 @@
+## Executar no Replit com Expo Go
+
+Para iniciar o Metro com um túnel e abrir o projeto no Expo Go:
+
+```bash
+cd mobile
+npm run start:tunnel
+```
+
+O script usa o modo headless do Expo para não iniciar o shell desktop do
+React Native DevTools no ambiente Linux. O QR code e a URL `exp://` continuam
+disponíveis para o Expo Go.
 # Módulo 1 do Mobile — Configuração + Login/Cadastro
 
 Primeira parte do app mobile: estrutura do projeto Expo, tema de cores

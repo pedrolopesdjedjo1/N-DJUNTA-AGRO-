@@ -1,0 +1,1 @@
+- [Expo no Replit](expo-replit.md) — o mobile precisa do preset Expo declarado e deve usar o modo headless para iniciar o túnel sem o shell gráfico do DevTools.

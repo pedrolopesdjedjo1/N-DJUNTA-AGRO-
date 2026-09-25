@@ -2,7 +2,7 @@ modules = ["nodejs-20", "python-base-3.13"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["glib", "nspr", "nss", "dbus", "atk", "cups", "cairo", "gtk3"]
+packages = ["glib", "nspr", "nss", "dbus", "atk", "cups", "cairo", "gtk3", "mesa"]
 
 [agent]
 expertMode = true
