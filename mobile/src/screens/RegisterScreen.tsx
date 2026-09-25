@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
+import { getApiErrorMessage } from "../api/errorMessage";
 
 const ROLES = [
   { label: "Agricultor", value: "AGRICULTOR" },
@@ -36,9 +37,15 @@ export default function RegisterScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      await register({ name, email, password, role, location });
+      await register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role,
+        location: location.trim(),
+      });
     } catch (error: any) {
-      const message = error?.response?.data?.error ?? "Não foi possível criar a conta.";
+      const message = getApiErrorMessage(error, "Não foi possível criar a conta.");
       Alert.alert("Erro", message);
     } finally {
       setLoading(false);

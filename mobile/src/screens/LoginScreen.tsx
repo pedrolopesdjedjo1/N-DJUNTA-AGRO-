@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
+import { getApiErrorMessage } from "../api/errorMessage";
 
 export default function LoginScreen({ navigation }: any) {
   const { login } = useAuth();
@@ -25,9 +26,9 @@ export default function LoginScreen({ navigation }: any) {
 
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email.trim(), password);
     } catch (error: any) {
-      const message = error?.response?.data?.error ?? "Não foi possível entrar.";
+      const message = getApiErrorMessage(error, "Não foi possível entrar.");
       Alert.alert("Erro", message);
     } finally {
       setLoading(false);

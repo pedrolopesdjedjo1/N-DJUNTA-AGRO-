@@ -18,7 +18,8 @@ interface LoginInput {
 }
 
 export async function registerUser(data: RegisterInput) {
-  const existing = await prisma.user.findUnique({ where: { email: data.email } });
+  const email = data.email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     throw new Error("Este e-mail já está cadastrado.");
   }
@@ -28,7 +29,7 @@ export async function registerUser(data: RegisterInput) {
   const user = await prisma.user.create({
     data: {
       name: data.name,
-      email: data.email,
+       email,
       phone: data.phone,
       password: hashedPassword,
       role: data.role,
@@ -50,7 +51,8 @@ export async function registerUser(data: RegisterInput) {
 }
 
 export async function loginUser(data: LoginInput) {
-  const user = await prisma.user.findUnique({ where: { email: data.email } });
+  const email = data.email.trim().toLowerCase();
+  const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     throw new Error("E-mail ou senha inválidos.");
   }
