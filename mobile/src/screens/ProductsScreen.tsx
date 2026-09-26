@@ -149,4 +149,12 @@ const styles = StyleSheet.create({
   productName: { fontSize: 16, fontWeight: "600" },
   productPrice: { fontSize: 14, color: "#1B5E20", marginTop: 4 },
   productCategory: { fontSize: 12, color: "#888", marginTop: 2 },
+  addButton: {
+    backgroundColor: "#1B5E20",
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  addButtonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 });
