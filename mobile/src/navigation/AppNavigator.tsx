@@ -8,7 +8,7 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProductsScreen from "../screens/ProductsScreen";
-
+import AddProductScreen from "../screens/AddProductScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -56,5 +56,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background ?? "#fff",
-  },
+    <Stack.Screen
+  name="AddProduct"
+  component={AddProductScreen}
+  options={{ headerShown: true, title: "Cadastrar Produto" }}
+/>
+  }, 
 });
