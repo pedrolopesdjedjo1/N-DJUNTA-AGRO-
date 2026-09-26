@@ -9,6 +9,9 @@ import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProductsScreen from "../screens/ProductsScreen";
 import AddProductScreen from "../screens/AddProductScreen";
+import ProfileScreen from "../screens/ProfileScreen";
+import ConversationsScreen from "../screens/ConversationsScreen";
+import ChatScreen from "../screens/ChatScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -39,6 +42,21 @@ export default function AppNavigator() {
               component={AddProductScreen}
               options={{ headerShown: true, title: "Cadastrar Produto" }}
             />
+            <Stack.Screen
+    name="Profile"
+    component={ProfileScreen}
+    options={{ headerShown: true, title: "Meu Perfil" }}
+/>
+<Stack.Screen
+    name="Conversations"
+    component={ConversationsScreen}
+    options={{ headerShown: true, title: "Mensagens" }}
+/>
+<Stack.Screen
+    name="Chat"
+    component={ChatScreen}
+    options={({ route }: any) => ({ headerShown: true, title: route.params?.userName ?? "Chat" })}
+/>
           </>
         ) : (
           <>
