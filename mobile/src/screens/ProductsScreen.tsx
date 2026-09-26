@@ -73,6 +73,34 @@ export default function ProductsScreen({ navigation }: any) {
 
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddProduct")}
+      >
+        <Text style={styles.addButtonText}>+ Cadastrar Produto</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddProduct")}
+      >
+        <Text style={styles.addButtonText}>+ Cadastrar Produto</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddProduct")}
+      >
+        <Text style={styles.addButtonText}>+ Cadastrar Produto</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate("AddProduct")}
+      >
+        <Text style={styles.addButtonText}>+ Cadastrar Produto</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
