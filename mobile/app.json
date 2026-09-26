@@ -5,12 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "splash": {
-      "backgroundColor": "#FFFFFF"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -18,9 +13,6 @@
       "adaptiveIcon": {
         "backgroundColor": "#1B5E20"
       }
-    },
-    "plugins": [
-      "expo-status-bar"
-    ]
+    }
   }
 }
