@@ -8,7 +8,6 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
 import ProductsScreen from "../screens/ProductsScreen";
-import AddProductScreen from "../screens/AddProductScreen";//
 
 const Stack = createNativeStackNavigator();
 
@@ -58,12 +57,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background ?? "#fff",
   },
-  addButton: {
-    backgroundColor: "#1B5E20",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  addButtonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
 });
