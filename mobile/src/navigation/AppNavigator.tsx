@@ -7,6 +7,7 @@ import { colors } from "../theme/colors";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import HomeScreen from "../screens/HomeScreen";
+import ProductsScreen from "../screens/ProductsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,7 +26,14 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen
+              name="Products"
+              component={ProductsScreen}
+              options={{ headerShown: true, title: "Produtos" }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -42,6 +50,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.background,
+    backgroundColor: colors.background ?? "#fff",
   },
 });
