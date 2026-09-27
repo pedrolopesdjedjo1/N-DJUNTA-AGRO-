@@ -12,7 +12,7 @@ import AddProductScreen from "../screens/AddProductScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ConversationsScreen from "../screens/ConversationsScreen";
 import ChatScreen from "../screens/ChatScreen";
-import NotificationsScreen from '../screens/NotificationsScreen';
+import NotificationsScreen from "../screens/NotificationsScreen";
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
@@ -39,42 +39,3 @@ export default function AppNavigator() {
             />
             <Stack.Screen
               name="AddProduct"
-              component={AddProductScreen}
-              options={{ headerShown: true, title: "Cadastrar Produto" }}
-            />
-            <Stack.Screen
-    name="Profile"
-    component={ProfileScreen}
-    options={{ headerShown: true, title: "Meu Perfil" }}
-/>
-<Stack.Screen
-    name="Conversations"
-    component={ConversationsScreen}
-    options={{ headerShown: true, title: "Mensagens" }}
-/>
-<Stack.Screen
-    name="Chat"
-    component={ChatScreen}
-    options={({ route }: any) => ({ headerShown: true, title: route.params?.userName ?? "Chat" })}
-/>
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notificações' }} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.background ?? "#fff",
-  },
-});
