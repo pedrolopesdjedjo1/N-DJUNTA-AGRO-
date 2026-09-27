@@ -29,12 +29,13 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.buttonText}>Mensagens</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Notifications")}>
+        <Text style={styles.buttonText}>Notificações</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-   <Text>Notificações</Text>
-  </TouchableOpacity>
     </View>
   );
 }
