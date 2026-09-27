@@ -11,7 +11,7 @@ export default function HomeScreen({ navigation }: any) {
       <Text style={styles.title}>Bem-vindo, {user?.name}!</Text>
       <Text style={styles.subtitle}>Perfil: {user?.role}</Text>
       <Text style={styles.info}>
-        Esta é a tela inicial. Explore os produtos disponíveis no mercado.
+        Esta e a tela inicial. Explore os produtos disponiveis no mercado.
       </Text>
 
       <TouchableOpacity
@@ -30,7 +30,7 @@ export default function HomeScreen({ navigation }: any) {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Notifications")}>
-        <Text style={styles.buttonText}>Notificações</Text>
+        <Text style={styles.buttonText}>Notificacoes</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
