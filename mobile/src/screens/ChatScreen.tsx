@@ -67,4 +67,4 @@ export default function ChatScreen() {
       setReviewModalVisible(false);
       setReviewComment("");
       setSelectedRating(5);
-      Alert.alert("Obrigado!
+      Alert.alert("Obrigado!", "Sua avaliacao foi enviada com sucesso.");
