@@ -32,6 +32,9 @@ export default function HomeScreen({ navigation }: any) {
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+   <Text>Notificações</Text>
+  </TouchableOpacity>
     </View>
   );
 }
