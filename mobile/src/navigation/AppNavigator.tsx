@@ -62,6 +62,7 @@ export default function AppNavigator() {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notificações' }} />
           </>
         )}
       </Stack.Navigator>
