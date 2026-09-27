@@ -39,3 +39,46 @@ export default function AppNavigator() {
             />
             <Stack.Screen
               name="AddProduct"
+              component={AddProductScreen}
+              options={{ headerShown: true, title: "Cadastrar Produto" }}
+            />
+            <Stack.Screen
+              name="Profile"
+              component={ProfileScreen}
+              options={{ headerShown: true, title: "Meu Perfil" }}
+            />
+            <Stack.Screen
+              name="Conversations"
+              component={ConversationsScreen}
+              options={{ headerShown: true, title: "Mensagens" }}
+            />
+            <Stack.Screen
+              name="Chat"
+              component={ChatScreen}
+              options={({ route }: any) => ({ headerShown: true, title: route.params?.userName ?? "Chat" })}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={{ headerShown: true, title: "Notificacoes" }}
+            />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background ?? "#fff",
+  },
+});
