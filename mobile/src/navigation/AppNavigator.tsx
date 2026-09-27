@@ -12,7 +12,7 @@ import AddProductScreen from "../screens/AddProductScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ConversationsScreen from "../screens/ConversationsScreen";
 import ChatScreen from "../screens/ChatScreen";
-
+import NotificationsScreen from '../screens/NotificationsScreen';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
