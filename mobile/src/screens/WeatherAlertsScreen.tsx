@@ -37,7 +37,7 @@ export default function WeatherAlertsScreen() {
     try {
       setError("");
       const data = await getWeatherAlerts();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Não foi possível carregar os alertas de clima.");
     } finally {
@@ -69,7 +69,7 @@ export default function WeatherAlertsScreen() {
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
