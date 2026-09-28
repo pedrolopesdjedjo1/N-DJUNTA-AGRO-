@@ -16,6 +16,7 @@ import NotificationsScreen from "../screens/NotificationsScreen";
 const Stack = createNativeStackNavigator();
 import MarketPricesScreen from "../screens/MarketPricesScreen";
 import WeatherAlertsScreen from "../screens/WeatherAlertsScreen";
+import TransportScreen from "../screens/TransportScreen";
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
@@ -71,6 +72,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="WeatherAlerts" component={WeatherAlertsScreen} />
+            <Stack.Screen name="Transport" component={TransportScreen} />
           </>
         )}
       </Stack.Navigator>
