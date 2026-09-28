@@ -36,8 +36,11 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("MarketPrices")}>
-  <Text style={styles.buttonText}>Preços de Mercado</Text>
-</TouchableOpacity>
+       <Text style={styles.buttonText}>Preços de Mercado</Text>
+      </TouchableOpacity>
+       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("WeatherAlerts")}>
+       <Text style={styles.buttonText}>Clima e Alertas</Text>
+        </TouchableOpacity>
     </View>
   );
 }
