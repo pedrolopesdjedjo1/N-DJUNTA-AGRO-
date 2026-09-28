@@ -35,11 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Ao abrir o app, verifica se já existe um login salvo
   useEffect(() => {
     async function loadStoredUser() {
-      const storedUser = await AsyncStorage.getItem("@nodjuntaagro:user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      try {
+        const storedUser = await AsyncStorage.getItem("@nodjuntaagro:user");
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (err) {
+        // Dados salvos corrompidos: limpa e volta para o login
+        await AsyncStorage.removeItem("@nodjuntaagro:token");
+        await AsyncStorage.removeItem("@nodjuntaagro:user");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadStoredUser();
   }, []);
