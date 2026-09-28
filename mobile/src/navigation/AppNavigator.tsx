@@ -17,6 +17,7 @@ const Stack = createNativeStackNavigator();
 import MarketPricesScreen from "../screens/MarketPricesScreen";
 import WeatherAlertsScreen from "../screens/WeatherAlertsScreen";
 import TransportScreen from "../screens/TransportScreen";
+import CooperativesScreen from "../screens/CooperativesScreen";
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
@@ -73,6 +74,7 @@ export default function AppNavigator() {
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="WeatherAlerts" component={WeatherAlertsScreen} />
             <Stack.Screen name="Transport" component={TransportScreen} />
+            <Stack.Screen name="Cooperatives" component={CooperativesScreen} />
           </>
         )}
       </Stack.Navigator>
