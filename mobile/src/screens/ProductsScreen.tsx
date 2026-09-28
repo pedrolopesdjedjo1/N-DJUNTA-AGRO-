@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
@@ -30,7 +29,7 @@ export default function ProductsScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const CATEGORIES = ["AGRICOLA", "PESCA", "COMERCIO", "ARTESANATO"];
+  const CATEGORIES = ["AGRICOLA", "PESCA", "ARTESANATO", "OUTRO"];
   const [error, setError] = useState("");
   const { user } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
@@ -139,7 +138,7 @@ export default function ProductsScreen({ navigation }: any) {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -149,13 +148,13 @@ export default function ProductsScreen({ navigation }: any) {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={styles.productName}>{item.title}</Text>
-            <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
-              <Text style={{ fontSize: 20 }}>
-                {favoriteIds.includes(item.id) ? "❤️" : "🤍"}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              <Text style={styles.productName}>{item.title}</Text>
+              <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+                <Text style={{ fontSize: 20 }}>
+                  {favoriteIds.includes(item.id) ? "❤️" : "🤍"}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <Text style={styles.productPrice}>
               {item.price} FCFA {item.unit ? `/ ${item.unit}` : ""}
             </Text>
@@ -163,19 +162,19 @@ export default function ProductsScreen({ navigation }: any) {
               <Text style={styles.productCategory}>{item.category}</Text>
             ) : null}
 
-          {item.ownerId !== user?.id && (
-            <TouchableOpacity
-              style={styles.contactButton}
-              onPress={() =>
-                navigation.navigate("Chat", {
-                  userId: item.ownerId,
-                  userName: item.owner?.name ?? "Vendedor",
-                })
-              }
-            >
-              <Text style={styles.contactButtonText}>Falar com vendedor</Text>
-            </TouchableOpacity>
-          )}
+            {item.ownerId !== user?.id && (
+              <TouchableOpacity
+                style={styles.contactButton}
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    userId: item.ownerId,
+                    userName: item.owner?.name ?? "Vendedor",
+                  })
+                }
+              >
+                <Text style={styles.contactButtonText}>Falar com vendedor</Text>
+              </TouchableOpacity>
+            )}
           </TouchableOpacity>
         )}
       />
