@@ -35,6 +35,9 @@ export default function HomeScreen({ navigation }: any) {
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
+       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("MarketPrices")}>
+  <Text style={styles.buttonText}>Preços de Mercado</Text>
+</TouchableOpacity>
     </View>
   );
 }
