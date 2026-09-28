@@ -40,7 +40,7 @@ export default function CooperativesScreen({ navigation }: any) {
     try {
       setError("");
       const data = await getCooperatives();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Não foi possível carregar as cooperativas.");
     } finally {
@@ -89,7 +89,7 @@ export default function CooperativesScreen({ navigation }: any) {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
