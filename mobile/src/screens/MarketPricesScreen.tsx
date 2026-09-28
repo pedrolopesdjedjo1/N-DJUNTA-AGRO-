@@ -33,7 +33,7 @@ export default function MarketPricesScreen() {
     try {
       setError("");
       const data = await getMarketPrices();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Não foi possível carregar os preços de mercado.");
     } finally {
@@ -79,7 +79,7 @@ export default function MarketPricesScreen() {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
