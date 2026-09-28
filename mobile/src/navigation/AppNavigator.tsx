@@ -13,11 +13,12 @@ import ProfileScreen from "../screens/ProfileScreen";
 import ConversationsScreen from "../screens/ConversationsScreen";
 import ChatScreen from "../screens/ChatScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
-const Stack = createNativeStackNavigator();
 import MarketPricesScreen from "../screens/MarketPricesScreen";
 import WeatherAlertsScreen from "../screens/WeatherAlertsScreen";
 import TransportScreen from "../screens/TransportScreen";
 import CooperativesScreen from "../screens/CooperativesScreen";
+
+const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
@@ -59,34 +60,4 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Chat"
               component={ChatScreen}
-              options={({ route }: any) => ({ headerShown: true, title: route.params?.userName ?? "Chat" })}
-            />
-            <Stack.Screen
-              name="Notifications"
-              component={NotificationsScreen}
-              options={{ headerShown: true, title: "Notificacoes" }}
-            />
-             <Stack.Screen name="MarketPrices" component={MarketPricesScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="WeatherAlerts" component={WeatherAlertsScreen} />
-            <Stack.Screen name="Transport" component={TransportScreen} />
-            <Stack.Screen name="Cooperatives" component={CooperativesScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.background ?? "#fff",
-  },
-});
+              options={({ route }: any) => ({
