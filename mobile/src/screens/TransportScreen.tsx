@@ -39,7 +39,7 @@ export default function TransportScreen({ navigation }: any) {
     try {
       setError("");
       const data = await getTransports();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Não foi possível carregar os transportes.");
     } finally {
@@ -88,7 +88,7 @@ export default function TransportScreen({ navigation }: any) {
 
       <FlatList
         data={filtered}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -96,8 +96,10 @@ export default function TransportScreen({ navigation }: any) {
           <Text style={styles.emptyText}>Nenhum transporte encontrado.</Text>
         }
         renderItem={({ item }) => {
-          const ownerId = item.ownerId ?? item.userId ?? item.owner?.id ?? item.user?.id;
-          const ownerName = item.owner?.name ?? item.user?.name ?? "Transportador";
+          const ownerId =
+            item.ownerId ?? item.userId ?? item.owner?.id ?? item.user?.id;
+          const ownerName =
+            item.owner?.name ?? item.user?.name ?? "Transportador";
           return (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>
