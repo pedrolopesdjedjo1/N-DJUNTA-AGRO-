@@ -14,6 +14,7 @@ import ConversationsScreen from "../screens/ConversationsScreen";
 import ChatScreen from "../screens/ChatScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 const Stack = createNativeStackNavigator();
+import MarketPricesScreen from "../screens/MarketPricesScreen";
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
@@ -62,6 +63,7 @@ export default function AppNavigator() {
               component={NotificationsScreen}
               options={{ headerShown: true, title: "Notificacoes" }}
             />
+             <Stack.Screen name="MarketPrices" component={MarketPricesScreen} />
           </>
         ) : (
           <>
