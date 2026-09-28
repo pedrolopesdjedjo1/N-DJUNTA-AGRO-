@@ -29,7 +29,7 @@ export default function NotificationsScreen() {
     try {
       setError("");
       const data = await getNotifications();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError("Não foi possível carregar as notificações.");
     } finally {
@@ -48,7 +48,7 @@ export default function NotificationsScreen() {
   };
 
   async function handlePress(item: Notification) {
-    if (item.read) return;
+    if (item.read || !item.id) return;
     setItems((prev) =>
       prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
     );
@@ -73,7 +73,7 @@ export default function NotificationsScreen() {
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
       <FlatList
         data={items}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
