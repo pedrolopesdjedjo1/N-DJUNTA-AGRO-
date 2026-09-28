@@ -61,3 +61,52 @@ export default function AppNavigator() {
               name="Chat"
               component={ChatScreen}
               options={({ route }: any) => ({
+                headerShown: true,
+                title: route.params?.userName ?? "Chat",
+              })}
+            />
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={{ headerShown: true, title: "Notificações" }}
+            />
+            <Stack.Screen
+              name="MarketPrices"
+              component={MarketPricesScreen}
+              options={{ headerShown: true, title: "Preços de Mercado" }}
+            />
+            <Stack.Screen
+              name="WeatherAlerts"
+              component={WeatherAlertsScreen}
+              options={{ headerShown: true, title: "Clima e Alertas" }}
+            />
+            <Stack.Screen
+              name="Transport"
+              component={TransportScreen}
+              options={{ headerShown: true, title: "Transporte" }}
+            />
+            <Stack.Screen
+              name="Cooperatives"
+              component={CooperativesScreen}
+              options={{ headerShown: true, title: "Cooperativas" }}
+            />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background ?? "#fff",
+  },
+});
