@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
 
@@ -6,7 +6,10 @@ export default function HomeScreen({ navigation }: any) {
   const { user, logout } = useAuth();
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+    >
       <Text style={styles.title}>Bem-vindo, {user?.name}!</Text>
       <Text style={styles.subtitle}>Perfil: {user?.role}</Text>
       <Text style={styles.info}>
@@ -32,26 +35,36 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.buttonText}>Notificacoes</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("MarketPrices")}>
+        <Text style={styles.buttonText}>Preços de Mercado</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("WeatherAlerts")}>
+        <Text style={styles.buttonText}>Clima e Alertas</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Transport")}>
+        <Text style={styles.buttonText}>Transporte</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
-       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("MarketPrices")}>
-       <Text style={styles.buttonText}>Preços de Mercado</Text>
-      </TouchableOpacity>
-       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("WeatherAlerts")}>
-       <Text style={styles.buttonText}>Clima e Alertas</Text>
-        </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
+    paddingVertical: 32,
   },
   title: {
     fontSize: 22,
