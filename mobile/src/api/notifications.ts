@@ -1,18 +1,10 @@
-import api from './client';
+import { api } from "./client";
 
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  read: boolean;
-  createdAt: string;
+export async function getNotifications() {
+  const response = await api.get("/api/notifications");
+  return response.data.notifications || response.data || [];
 }
 
-export const getNotifications = async (): Promise<Notification[]> => {
-  const response = await api.get('/api/notifications');
-  return response.data;
-};
-
-export const markNotificationRead = async (id: string): Promise<void> => {
+export async function markAsRead(id: string) {
   await api.patch(`/api/notifications/${id}/read`);
-};
+}
