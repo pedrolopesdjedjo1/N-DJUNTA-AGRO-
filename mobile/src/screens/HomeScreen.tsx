@@ -50,6 +50,9 @@ export default function HomeScreen({ navigation }: any) {
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
       </TouchableOpacity>
+       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Cooperatives")}>
+       <Text style={styles.buttonText}>Cooperativas</Text>
+        </TouchableOpacity>
     </ScrollView>
   );
 }
