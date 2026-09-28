@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   StyleSheet, KeyboardAvoidingView, Platform,
@@ -18,21 +18,19 @@ interface Message {
 
 export default function ChatScreen() {
   const route = useRoute<any>();
-  const { userId, userName } = route.params;
+  const { userId } = route.params;
   const { user } = useAuth();
+  const listRef = useRef<FlatList<Message>>(null);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
 
   const loadMessages = useCallback(async () => {
     try {
       const data = await getMessages(userId);
-      setMessages(data);
+      setMessages(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log("Erro ao carregar mensagens", err);
-    } finally {
-      setLoading(false);
     }
   }, [userId]);
 
@@ -51,6 +49,7 @@ export default function ChatScreen() {
       loadMessages();
     } catch (err) {
       console.log("Erro ao enviar mensagem", err);
+      setText(content);
     }
   }
 
@@ -60,9 +59,16 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <FlatList
+        ref={listRef}
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => String(item.id ?? index)}
         contentContainerStyle={{ padding: 12 }}
+        onContentSizeChange={() =>
+          listRef.current?.scrollToEnd({ animated: false })
+        }
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Nenhuma mensagem ainda.</Text>
+        }
         renderItem={({ item }) => {
           const isMine = item.senderId === user?.id;
           return (
@@ -91,6 +97,7 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  emptyText: { textAlign: "center", color: colors.textSecondary, marginTop: 40 },
   bubble: { maxWidth: "75%", padding: 10, borderRadius: 12, marginBottom: 8 },
   bubbleMine: { backgroundColor: colors.primary, alignSelf: "flex-end" },
   bubbleTheirs: { backgroundColor: colors.surface, alignSelf: "flex-start", borderWidth: 1, borderColor: colors.border },
@@ -104,6 +111,4 @@ const styles = StyleSheet.create({
     flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 8, marginRight: 8, maxHeight: 100,
   },
-  sendButton: { backgroundColor: colors.primary, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10 },
-  sendText: { color: colors.white, fontWeight: "bold" },
-});
+  sendButton: { backgroundCol
