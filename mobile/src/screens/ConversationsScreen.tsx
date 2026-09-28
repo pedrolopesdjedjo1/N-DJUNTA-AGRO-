@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { colors } from "../theme/colors";
@@ -18,31 +18,41 @@ export default function ConversationsScreen() {
   const load = useCallback(async () => {
     try {
       const data = await getConversations();
-      setConversations(data);
+      setConversations(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log("Erro ao carregar conversas", err);
     }
   }, []);
 
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   return (
     <View style={styles.container}>
       <FlatList
         data={conversations}
-        keyExtractor={(item) => item.userId}
+        keyExtractor={(item, index) => String(item.userId ?? index)}
         ListEmptyComponent={<Text style={styles.empty}>Nenhuma conversa ainda</Text>}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.item}
-            onPress={() => navigation.navigate("Chat", { userId: item.userId, userName: item.userName })}
+            onPress={() =>
+              navigation.navigate("Chat", { userId: item.userId, userName: item.userName })
+            }
           >
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.userName?.charAt(0).toUpperCase()}</Text>
+              <Text style={styles.avatarText}>
+                {item.userName?.charAt(0).toUpperCase() ?? "?"}
+              </Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.userName}</Text>
-              <Text style={styles.last} numberOfLines={1}>{item.lastMessage}</Text>
+              <Text style={styles.name}>{item.userName ?? "Usuário"}</Text>
+              <Text style={styles.last} numberOfLines={1}>
+                {item.lastMessage}
+              </Text>
             </View>
           </TouchableOpacity>
         )}
