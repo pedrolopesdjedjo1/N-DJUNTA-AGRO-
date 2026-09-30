@@ -1,10 +1,11 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-https://n-djunta-agro.onrender.com
+"https://n-djunta-agro.onrender.com/api";
 
 export const api = axios.create({
   baseURL: API_URL,
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
