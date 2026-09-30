@@ -10,7 +10,7 @@ import {
 
 export async function create(req: AuthRequest, res: Response) {
   try {
-    const { title, description, category, price, unit, quantity, location } = req.body;
+    const { title, description, category, price, unit, quantity, location, imageUrl } = req.body;
 
     if (!title || !category || !price || !unit || !quantity) {
       return res.status(400).json({
@@ -27,6 +27,7 @@ export async function create(req: AuthRequest, res: Response) {
       unit,
       quantity,
       location,
+      imageUrl,
     });
 
     return res.status(201).json(product);
