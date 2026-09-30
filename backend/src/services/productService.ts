@@ -10,6 +10,7 @@ interface CreateProductInput {
   unit: string;
   quantity: number;
   location?: string;
+  imageUrl?: string;
 }
 
 interface UpdateProductInput {
@@ -18,6 +19,7 @@ interface UpdateProductInput {
   price?: number;
   quantity?: number;
   isAvailable?: boolean;
+  imageUrl?: string;
 }
 
 export async function createProduct(data: CreateProductInput) {
@@ -31,6 +33,7 @@ export async function createProduct(data: CreateProductInput) {
       unit: data.unit,
       quantity: data.quantity,
       location: data.location,
+      imageUrl: data.imageUrl,
     },
   });
 }
