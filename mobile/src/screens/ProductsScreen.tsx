@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Image,
 } from "react-native";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
@@ -21,6 +22,7 @@ type Product = {
   price: number;
   unit?: string;
   category?: string;
+  imageUrl?: string | null;
 };
 
 export default function ProductsScreen({ navigation }: any) {
@@ -147,6 +149,13 @@ export default function ProductsScreen({ navigation }: any) {
         }
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card}>
+            {item.imageUrl ? (
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={styles.productImage}
+                resizeMode="cover"
+              />
+            ) : null}
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={styles.productName}>{item.title}</Text>
               <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
@@ -201,6 +210,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 10,
+  },
+  productImage: {
+    width: "100%",
+    height: 180,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: "#f0f0f0",
   },
   productName: { fontSize: 16, fontWeight: "600" },
   productPrice: { fontSize: 14, color: "#1B5E20", marginTop: 4 },
