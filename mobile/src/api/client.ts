@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-"https://n-djunta-agro.onrender.com/api";
+const API_URL = "https://n-djunta-agro.onrender.com";
 
 export const api = axios.create({
   baseURL: API_URL,
