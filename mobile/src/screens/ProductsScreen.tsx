@@ -171,6 +171,19 @@ export default function ProductsScreen({ navigation }: any) {
               <Text style={styles.productCategory}>{item.category}</Text>
             ) : null}
 
+            <TouchableOpacity
+              style={styles.reviewsButton}
+              onPress={() =>
+                navigation.navigate("Reviews", {
+                  userId: item.ownerId,
+                  userName: item.owner?.name ?? "Vendedor",
+                  productId: item.id,
+                })
+              }
+            >
+              <Text style={styles.reviewsButtonText}>Ver avaliações</Text>
+            </TouchableOpacity>
+
             {item.ownerId !== user?.id && (
               <TouchableOpacity
                 style={styles.contactButton}
@@ -229,6 +242,15 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   addButtonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  reviewsButton: {
+    borderWidth: 1,
+    borderColor: "#1B5E20",
+    borderRadius: 6,
+    paddingVertical: 8,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  reviewsButtonText: { color: "#1B5E20", fontSize: 13, fontWeight: "600" },
   contactButton: {
     backgroundColor: "#000",
     borderRadius: 6,
