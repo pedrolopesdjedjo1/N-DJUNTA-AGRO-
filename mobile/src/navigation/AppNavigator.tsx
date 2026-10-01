@@ -18,6 +18,7 @@ import WeatherAlertsScreen from "../screens/WeatherAlertsScreen";
 import TransportScreen from "../screens/TransportScreen";
 import CooperativesScreen from "../screens/CooperativesScreen";
 import ReviewsScreen from "../screens/ReviewsScreen";
+import AdminScreen from "../screens/AdminScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -95,6 +96,11 @@ export default function AppNavigator() {
               name="Reviews"
               component={ReviewsScreen}
               options={{ headerShown: true, title: "Avaliações" }}
+            />
+            <Stack.Screen
+              name="Admin"
+              component={AdminScreen}
+              options={{ headerShown: true, title: "Painel do Admin" }}
             />
           </>
         ) : (
