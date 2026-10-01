@@ -1,11 +1,18 @@
 import { api } from "./client";
 
-export async function getReviewsForUser(userId: string) {
+export async function getUserReviews(userId: string) {
   const response = await api.get(`/api/reviews/user/${userId}`);
-  return response.data;
+  const data = response.data;
+  if (Array.isArray(data)) return data;
+  return data?.reviews ?? [];
 }
 
-export async function createReview(targetId: string, rating: number, comment: string) {
-  const response = await api.post("/api/reviews", { targetId, rating, comment });
+export async function createReview(data: {
+  targetId: string;
+  rating: number;
+  comment?: string;
+  productId?: string;
+}) {
+  const response = await api.post("/api/reviews", data);
   return response.data;
 }
