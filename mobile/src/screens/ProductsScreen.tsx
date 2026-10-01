@@ -13,6 +13,7 @@ import {
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { getFavorites, addFavorite, removeFavorite } from "../api/favorites";
+import ReportButton from "../components/ReportButton";
 
 type Product = {
   id: string;
@@ -197,6 +198,8 @@ export default function ProductsScreen({ navigation }: any) {
                 <Text style={styles.contactButtonText}>Falar com vendedor</Text>
               </TouchableOpacity>
             )}
+
+            <ReportButton productId={item.id} ownerId={item.ownerId} />
           </TouchableOpacity>
         )}
       />
