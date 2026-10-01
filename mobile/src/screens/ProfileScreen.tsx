@@ -3,6 +3,15 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
 
+function formatRole(role?: string) {
+  if (!role) return "";
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
 
@@ -22,7 +31,7 @@ export default function ProfileScreen() {
       </View>
 
       <Text style={styles.name}>{user?.name}</Text>
-      <Text style={styles.role}>{user?.role}</Text>
+      <Text style={styles.role}>{formatRole(user?.role)}</Text>
 
       <View style={styles.infoBox}>
         <Text style={styles.label}>Email</Text>
@@ -45,7 +54,7 @@ const styles = StyleSheet.create({
   },
   avatarText: { color: colors.white, fontSize: 36, fontWeight: "bold" },
   name: { fontSize: 20, fontWeight: "bold", color: colors.text },
-  role: { fontSize: 14, color: colors.textSecondary, marginBottom: 24, textTransform: "capitalize" },
+  role: { fontSize: 14, color: colors.textSecondary, marginBottom: 24 },
   infoBox: {
     width: "100%", backgroundColor: colors.surface, borderRadius: 10,
     padding: 16, marginBottom: 30, borderWidth: 1, borderColor: colors.border,
