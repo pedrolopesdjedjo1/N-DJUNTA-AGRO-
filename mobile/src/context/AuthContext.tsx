@@ -37,8 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function loadStoredUser() {
       try {
         const storedUser = await AsyncStorage.getItem("@nodjuntaagro:user");
-        if (storedUser) {
+        const storedToken = await AsyncStorage.getItem("@nodjuntaagro:token");
+
+        if (storedUser && storedToken) {
           setUser(JSON.parse(storedUser));
+        } else {
+          // Login incompleto: limpa e volta para a tela de login
+          await AsyncStorage.removeItem("@nodjuntaagro:token");
+          await AsyncStorage.removeItem("@nodjuntaagro:user");
         }
       } catch (err) {
         // Dados salvos corrompidos: limpa e volta para o login
