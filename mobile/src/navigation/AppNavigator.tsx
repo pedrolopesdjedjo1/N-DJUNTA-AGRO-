@@ -17,6 +17,7 @@ import MarketPricesScreen from "../screens/MarketPricesScreen";
 import WeatherAlertsScreen from "../screens/WeatherAlertsScreen";
 import TransportScreen from "../screens/TransportScreen";
 import CooperativesScreen from "../screens/CooperativesScreen";
+import ReviewsScreen from "../screens/ReviewsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -89,6 +90,11 @@ export default function AppNavigator() {
               name="Cooperatives"
               component={CooperativesScreen}
               options={{ headerShown: true, title: "Cooperativas" }}
+            />
+            <Stack.Screen
+              name="Reviews"
+              component={ReviewsScreen}
+              options={{ headerShown: true, title: "Avaliações" }}
             />
           </>
         ) : (
