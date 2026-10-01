@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
@@ -18,6 +20,7 @@ const ROLES = [
   { label: "Pescador", value: "PESCADOR" },
   { label: "Comprador", value: "COMPRADOR" },
   { label: "Comerciante", value: "COMERCIANTE" },
+  { label: "Transportador", value: "TRANSPORTADOR" },
 ];
 
 export default function RegisterScreen({ navigation }: any) {
@@ -42,7 +45,7 @@ export default function RegisterScreen({ navigation }: any) {
         email: email.trim(),
         password,
         role,
-        location: location.trim(),
+        location: location.trim() || undefined,
       });
     } catch (error: any) {
       const message = getApiErrorMessage(error, "Não foi possível criar a conta.");
@@ -53,79 +56,97 @@ export default function RegisterScreen({ navigation }: any) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Criar conta</Text>
-      <Text style={styles.subtitle}>Junte-se ao NôdjuntaAgro GB</Text>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Criar conta</Text>
+        <Text style={styles.subtitle}>Junte-se ao NôdjuntaAgro GB</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome completo"
-        placeholderTextColor={colors.textSecondary}
-        value={name}
-        onChangeText={setName}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Nome completo"
+          placeholderTextColor={colors.textSecondary}
+          value={name}
+          onChangeText={setName}
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="E-mail"
-        placeholderTextColor={colors.textSecondary}
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-        keyboardType="email-address"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="E-mail"
+          placeholderTextColor={colors.textSecondary}
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        placeholderTextColor={colors.textSecondary}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          placeholderTextColor={colors.textSecondary}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Região (ex: Bissau)"
-        placeholderTextColor={colors.textSecondary}
-        value={location}
-        onChangeText={setLocation}
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Região (ex: Bissau)"
+          placeholderTextColor={colors.textSecondary}
+          value={location}
+          onChangeText={setLocation}
+        />
 
-      <Text style={styles.label}>Eu sou:</Text>
-      <View style={styles.roleContainer}>
-        {ROLES.map((r) => (
-          <TouchableOpacity
-            key={r.value}
-            style={[styles.roleChip, role === r.value && styles.roleChipActive]}
-            onPress={() => setRole(r.value)}
-          >
-            <Text style={[styles.roleText, role === r.value && styles.roleTextActive]}>
-              {r.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+        <Text style={styles.label}>Eu sou:</Text>
+        <View style={styles.roleContainer}>
+          {ROLES.map((r) => (
+            <TouchableOpacity
+              key={r.value}
+              style={[styles.roleChip, role === r.value && styles.roleChipActive]}
+              onPress={() => setRole(r.value)}
+            >
+              <Text
+                style={[styles.roleText, role === r.value && styles.roleTextActive]}
+              >
+                {r.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color={colors.white} />
-        ) : (
-          <Text style={styles.buttonText}>Criar conta</Text>
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <Text style={styles.buttonText}>Criar conta</Text>
+          )}
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={styles.link}>Já tem conta? Entrar</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+          <Text style={styles.link}>Já tem conta? Entrar</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flexGrow: 1,
-    backgroundColor: colors.background,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 40,
@@ -163,7 +184,6 @@ const styles = StyleSheet.create({
   roleContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
     marginBottom: 24,
   },
   roleChip: {
