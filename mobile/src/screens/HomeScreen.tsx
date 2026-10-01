@@ -46,10 +46,16 @@ export default function HomeScreen({ navigation }: any) {
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Transport")}>
         <Text style={styles.buttonText}>Transporte</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Cooperatives")}>
-      <Text style={styles.buttonText}>Cooperativas</Text>
+        <Text style={styles.buttonText}>Cooperativas</Text>
       </TouchableOpacity>
+
+      {user?.role === "ADMIN" && (
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Admin")}>
+          <Text style={styles.buttonText}>Painel do Admin</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
