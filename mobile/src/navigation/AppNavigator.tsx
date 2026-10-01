@@ -19,6 +19,7 @@ import TransportScreen from "../screens/TransportScreen";
 import CooperativesScreen from "../screens/CooperativesScreen";
 import ReviewsScreen from "../screens/ReviewsScreen";
 import AdminScreen from "../screens/AdminScreen";
+import AdminReportsScreen from "../screens/AdminReportsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -101,6 +102,11 @@ export default function AppNavigator() {
               name="Admin"
               component={AdminScreen}
               options={{ headerShown: true, title: "Painel do Admin" }}
+            />
+            <Stack.Screen
+              name="AdminReports"
+              component={AdminReportsScreen}
+              options={{ headerShown: true, title: "Denúncias" }}
             />
           </>
         ) : (
