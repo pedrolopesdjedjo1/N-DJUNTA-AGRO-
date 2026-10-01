@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { colors } from "../theme/colors";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -20,11 +21,13 @@ import CooperativesScreen from "../screens/CooperativesScreen";
 import ReviewsScreen from "../screens/ReviewsScreen";
 import AdminScreen from "../screens/AdminScreen";
 import AdminReportsScreen from "../screens/AdminReportsScreen";
+import LanguageScreen from "../screens/LanguageScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
 
   if (loading) {
     return (
@@ -53,12 +56,12 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Profile"
               component={ProfileScreen}
-              options={{ headerShown: true, title: "Meu Perfil" }}
+              options={{ headerShown: true, title: t("profile") }}
             />
             <Stack.Screen
               name="Conversations"
               component={ConversationsScreen}
-              options={{ headerShown: true, title: "Mensagens" }}
+              options={{ headerShown: true, title: t("messages") }}
             />
             <Stack.Screen
               name="Chat"
@@ -71,27 +74,27 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}
-              options={{ headerShown: true, title: "Notificações" }}
+              options={{ headerShown: true, title: t("notifications") }}
             />
             <Stack.Screen
               name="MarketPrices"
               component={MarketPricesScreen}
-              options={{ headerShown: true, title: "Preços de Mercado" }}
+              options={{ headerShown: true, title: t("marketPrices") }}
             />
             <Stack.Screen
               name="WeatherAlerts"
               component={WeatherAlertsScreen}
-              options={{ headerShown: true, title: "Clima e Alertas" }}
+              options={{ headerShown: true, title: t("weather") }}
             />
             <Stack.Screen
               name="Transport"
               component={TransportScreen}
-              options={{ headerShown: true, title: "Transporte" }}
+              options={{ headerShown: true, title: t("transport") }}
             />
             <Stack.Screen
               name="Cooperatives"
               component={CooperativesScreen}
-              options={{ headerShown: true, title: "Cooperativas" }}
+              options={{ headerShown: true, title: t("cooperatives") }}
             />
             <Stack.Screen
               name="Reviews"
@@ -101,12 +104,17 @@ export default function AppNavigator() {
             <Stack.Screen
               name="Admin"
               component={AdminScreen}
-              options={{ headerShown: true, title: "Painel do Admin" }}
+              options={{ headerShown: true, title: t("admin") }}
             />
             <Stack.Screen
               name="AdminReports"
               component={AdminReportsScreen}
               options={{ headerShown: true, title: "Denúncias" }}
+            />
+            <Stack.Screen
+              name="Language"
+              component={LanguageScreen}
+              options={{ headerShown: true, title: t("language") }}
             />
           </>
         ) : (
