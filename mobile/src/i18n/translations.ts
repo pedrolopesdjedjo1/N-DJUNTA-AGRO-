@@ -11,6 +11,8 @@ type Dict = Record<string, string>;
 export const translations: Record<Lang, Dict> = {
   pt: {
     welcome: "Bem-vindo",
+    roleLabel: "Perfil",
+    homeInfo: "Esta é a tela inicial. Explore os produtos disponíveis no mercado.",
     products: "Ver Produtos",
     profile: "Meu Perfil",
     messages: "Mensagens",
@@ -26,6 +28,8 @@ export const translations: Record<Lang, Dict> = {
   },
   crl: {
     welcome: "Bon bindu",
+    roleLabel: "Perfil",
+    homeInfo: "Esta é tela inicial. Odja produtus ki ta bai na mérkadu.",
     products: "Odja Produtus",
     profile: "Meu Perfil",
     messages: "Mensajens",
@@ -41,6 +45,8 @@ export const translations: Record<Lang, Dict> = {
   },
   fr: {
     welcome: "Bienvenue",
+    roleLabel: "Profil",
+    homeInfo: "Ceci est l'écran d'accueil. Explorez les produits disponibles sur le marché.",
     products: "Voir les produits",
     profile: "Mon profil",
     messages: "Messages",
