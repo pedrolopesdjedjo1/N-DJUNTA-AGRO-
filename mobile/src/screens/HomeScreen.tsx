@@ -1,64 +1,72 @@
 import { ScrollView, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { colors } from "../theme/colors";
 
 export default function HomeScreen({ navigation }: any) {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <ScrollView
       style={styles.scroll}
       contentContainerStyle={styles.container}
     >
-      <Text style={styles.title}>Bem-vindo, {user?.name}!</Text>
-      <Text style={styles.subtitle}>Perfil: {user?.role}</Text>
-      <Text style={styles.info}>
-        Esta e a tela inicial. Explore os produtos disponiveis no mercado.
+      <Text style={styles.title}>
+        {t("welcome")}, {user?.name}!
       </Text>
+      <Text style={styles.subtitle}>
+        {t("roleLabel")}: {user?.role}
+      </Text>
+      <Text style={styles.info}>{t("homeInfo")}</Text>
 
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Products")}
       >
-        <Text style={styles.buttonText}>Ver Produtos</Text>
+        <Text style={styles.buttonText}>{t("products")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
-        <Text style={styles.buttonText}>Meu Perfil</Text>
+        <Text style={styles.buttonText}>{t("profile")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Conversations")}>
-        <Text style={styles.buttonText}>Mensagens</Text>
+        <Text style={styles.buttonText}>{t("messages")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Notifications")}>
-        <Text style={styles.buttonText}>Notificacoes</Text>
+        <Text style={styles.buttonText}>{t("notifications")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("MarketPrices")}>
-        <Text style={styles.buttonText}>Preços de Mercado</Text>
+        <Text style={styles.buttonText}>{t("marketPrices")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("WeatherAlerts")}>
-        <Text style={styles.buttonText}>Clima e Alertas</Text>
+        <Text style={styles.buttonText}>{t("weather")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Transport")}>
-        <Text style={styles.buttonText}>Transporte</Text>
+        <Text style={styles.buttonText}>{t("transport")}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Cooperatives")}>
-        <Text style={styles.buttonText}>Cooperativas</Text>
+        <Text style={styles.buttonText}>{t("cooperatives")}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Language")}>
+        <Text style={styles.buttonText}>🌐 {t("language")}</Text>
       </TouchableOpacity>
 
       {user?.role === "ADMIN" && (
         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Admin")}>
-          <Text style={styles.buttonText}>Painel do Admin</Text>
+          <Text style={styles.buttonText}>{t("admin")}</Text>
         </TouchableOpacity>
       )}
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-        <Text style={styles.logoutButtonText}>Sair</Text>
+        <Text style={styles.logoutButtonText}>{t("logout")}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
