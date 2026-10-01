@@ -15,6 +15,24 @@ import { colors } from "../theme/colors";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, BUCKET } from "../config/supabase";
 
 const CATEGORIES = ["AGRICOLA", "PESCA", "ARTESANATO", "OUTRO"];
+const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function base64ToArrayBuffer(b64: string): ArrayBuffer {
+  const clean = b64.replace(/[^A-Za-z0-9+/]/g, "");
+  const len = clean.length;
+  const bytes = new Uint8Array(Math.floor((len * 3) / 4));
+  let p = 0;
+  for (let i = 0; i < len; i += 4) {
+    const e1 = B64.indexOf(clean[i]);
+    const e2 = B64.indexOf(clean[i + 1]);
+    const e3 = i + 2 < len ? B64.indexOf(clean[i + 2]) : 0;
+    const e4 = i + 3 < len ? B64.indexOf(clean[i + 3]) : 0;
+    if (p < bytes.length) bytes[p++] = (e1 << 2) | (e2 >> 4);
+    if (p < bytes.length) bytes[p++] = ((e2 & 15) << 4) | (e3 >> 2);
+    if (p < bytes.length) bytes[p++] = ((e3 & 3) << 6) | e4;
+  }
+  return bytes.buffer;
+}
 
 export default function AddProductScreen({ navigation }: any) {
   const [title, setTitle] = useState("");
@@ -25,6 +43,7 @@ export default function AddProductScreen({ navigation }: any) {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("AGRICOLA");
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const pickFromGallery = async () => {
@@ -37,10 +56,12 @@ export default function AddProductScreen({ navigation }: any) {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.6,
+      quality: 0.5,
+      base64: true,
     });
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 ?? null);
     }
   };
 
@@ -53,17 +74,22 @@ export default function AddProductScreen({ navigation }: any) {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.6,
+      quality: 0.5,
+      base64: true,
     });
     if (!result.canceled) {
       setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 ?? null);
     }
   };
 
-  const uploadImage = async (uri: string): Promise<string> => {
+  const uploadImage = async (base64: string): Promise<string> => {
     const fileName = `${Date.now()}-${Math.floor(Math.random() * 100000)}.jpg`;
-    const fileResponse = await fetch(uri);
-    const blob = await fileResponse.blob();
+    const body = base64ToArrayBuffer(base64);
+
+    if (body.byteLength < 1000) {
+      throw new Error("A foto não foi lida corretamente. Escolha a foto de novo.");
+    }
 
     const uploadResponse = await fetch(
       `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${fileName}`,
@@ -73,7 +99,7 @@ export default function AddProductScreen({ navigation }: any) {
           apikey: SUPABASE_ANON_KEY,
           "Content-Type": "image/jpeg",
         },
-        body: blob,
+        body,
       }
     );
 
@@ -97,8 +123,8 @@ export default function AddProductScreen({ navigation }: any) {
     setLoading(true);
     try {
       let imageUrl: string | undefined;
-      if (imageUri) {
-        imageUrl = await uploadImage(imageUri);
+      if (imageBase64) {
+        imageUrl = await uploadImage(imageBase64);
       }
 
       await api.post("/api/products", {
