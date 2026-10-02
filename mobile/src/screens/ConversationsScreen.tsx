@@ -3,11 +3,12 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } fr
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { colors } from "../theme/colors";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { getConversations } from "../api/messages";
 
 interface Conv { key: string; userId: string; userName: string; lastMessage: string; productTitle: string }
 
-function normalize(data: any, myId?: string): Conv[] {
+function normalize(data: any, myId: string | undefined, fallbackName: string): Conv[] {
   const list: any[] = Array.isArray(data) ? data : Array.isArray(data?.conversations) ? data.conversations : Array.isArray(data?.data) ? data.data : [];
   const result: Conv[] = [];
   list.forEach((item: any, index: number) => {
@@ -28,7 +29,7 @@ function normalize(data: any, myId?: string): Conv[] {
     result.push({
       key: `${otherId}-${item?.productId ?? "geral"}-${index}`,
       userId: String(otherId),
-      userName: String(otherName ?? "Usuário"),
+      userName: String(otherName ?? fallbackName),
       lastMessage: typeof content === "string" ? content : "",
       productTitle: item?.product?.title ? String(item.product.title) : "",
     });
@@ -39,6 +40,7 @@ function normalize(data: any, myId?: string): Conv[] {
 export default function ConversationsScreen() {
   const navigation = useNavigation<any>();
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [conversations, setConversations] = useState<Conv[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -48,13 +50,13 @@ export default function ConversationsScreen() {
     try {
       setError("");
       const data = await getConversations();
-      setConversations(normalize(data, myId));
+      setConversations(normalize(data, myId, t("defaultUser")));
     } catch (err: any) {
-      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || "Não foi possível carregar as conversas.");
+      setError(err?.response?.data?.error || err?.response?.data?.message || t("conversationsError"));
     } finally {
       setRefreshing(false);
     }
-  }, [myId]);
+  }, [myId, t]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
@@ -65,7 +67,7 @@ export default function ConversationsScreen() {
         data={conversations}
         keyExtractor={(item) => item.key}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
-        ListEmptyComponent={!error ? <Text style={s.empty}>Nenhuma conversa ainda</Text> : null}
+        ListEmptyComponent={!error ? <Text style={s.empty}>{t("noConversations")}</Text> : null}
         renderItem={({ item }) => (
           <TouchableOpacity style={s.item} onPress={() => navigation.navigate("Chat", { userId: item.userId, userName: item.userName })}>
             <View style={s.avatar}>
