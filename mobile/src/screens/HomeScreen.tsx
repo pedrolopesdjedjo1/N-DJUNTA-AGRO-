@@ -3,9 +3,13 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { colors } from "../theme/colors";
 
+const DASHBOARD_ROLES = ["ADMIN", "GOVERNO", "ONG"];
+
 export default function HomeScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
+
+  const canSeeDashboard = DASHBOARD_ROLES.includes(String(user?.role ?? ""));
 
   return (
     <ScrollView
@@ -62,6 +66,12 @@ export default function HomeScreen({ navigation }: any) {
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Language")}>
         <Text style={styles.buttonText}>🌐 {t("language")}</Text>
       </TouchableOpacity>
+
+      {canSeeDashboard && (
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Dashboard")}>
+          <Text style={styles.buttonText}>📊 {t("dashboard")}</Text>
+        </TouchableOpacity>
+      )}
 
       {user?.role === "ADMIN" && (
         <>
