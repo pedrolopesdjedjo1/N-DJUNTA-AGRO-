@@ -11,14 +11,17 @@ import {
   ScrollView,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { createProductReport } from '../api/productReports';
 
+// "value" é o texto enviado ao backend (sempre em português);
+// "key" é a chave de tradução usada só para mostrar na tela.
 const REASONS = [
-  'Golpe ou fraude',
-  'Produto falso ou enganoso',
-  'Preço abusivo',
-  'Conteúdo impróprio',
-  'Outro motivo',
+  { value: 'Golpe ou fraude', key: 'reasonFraud' },
+  { value: 'Produto falso ou enganoso', key: 'reasonFake' },
+  { value: 'Preço abusivo', key: 'reasonPrice' },
+  { value: 'Conteúdo impróprio', key: 'reasonContent' },
+  { value: 'Outro motivo', key: 'reasonOther' },
 ];
 
 type Props = {
@@ -28,6 +31,7 @@ type Props = {
 
 export default function ReportButton({ productId, ownerId }: Props) {
   const auth: any = useAuth();
+  const { t } = useLanguage();
   const currentUserId = auth?.user?.id;
 
   const [visible, setVisible] = useState(false);
@@ -47,7 +51,7 @@ export default function ReportButton({ productId, ownerId }: Props) {
 
   const submit = async () => {
     if (!reason) {
-      Alert.alert('Denunciar', 'Escolha um motivo.');
+      Alert.alert(t('report'), t('reportChoose'));
       return;
     }
     try {
@@ -59,9 +63,9 @@ export default function ReportButton({ productId, ownerId }: Props) {
         description: description.trim(),
       });
       close();
-      Alert.alert('Obrigado', 'Sua denúncia foi enviada e será analisada pela equipe.');
+      Alert.alert(t('reportThanks'), t('reportSent'));
     } catch (e: any) {
-      Alert.alert('Erro', e?.message || 'Não foi possível enviar a denúncia.');
+      Alert.alert(t('error'), e?.message || t('reportError'));
     } finally {
       setSending(false);
     }
@@ -70,34 +74,34 @@ export default function ReportButton({ productId, ownerId }: Props) {
   return (
     <>
       <TouchableOpacity style={styles.button} onPress={() => setVisible(true)}>
-        <Text style={styles.buttonText}>🚩 Denunciar</Text>
+        <Text style={styles.buttonText}>🚩 {t('report')}</Text>
       </TouchableOpacity>
 
       <Modal visible={visible} animationType="slide" transparent onRequestClose={close}>
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <ScrollView keyboardShouldPersistTaps="handled">
-              <Text style={styles.title}>Denunciar produto</Text>
-              <Text style={styles.label}>Qual o motivo?</Text>
+              <Text style={styles.title}>{t('reportProduct')}</Text>
+              <Text style={styles.label}>{t('reportWhy')}</Text>
 
               {REASONS.map((r) => (
                 <TouchableOpacity
-                  key={r}
-                  style={[styles.reason, reason === r && styles.reasonActive]}
-                  onPress={() => setReason(r)}
+                  key={r.value}
+                  style={[styles.reason, reason === r.value && styles.reasonActive]}
+                  onPress={() => setReason(r.value)}
                 >
-                  <Text style={[styles.reasonText, reason === r && styles.reasonTextActive]}>
-                    {r}
+                  <Text style={[styles.reasonText, reason === r.value && styles.reasonTextActive]}>
+                    {t(r.key)}
                   </Text>
                 </TouchableOpacity>
               ))}
 
-              <Text style={styles.label}>Detalhes (opcional)</Text>
+              <Text style={styles.label}>{t('reportDetails')}</Text>
               <TextInput
                 style={styles.input}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Conte o que aconteceu"
+                placeholder={t('reportPlaceholder')}
                 multiline
                 maxLength={500}
               />
@@ -110,12 +114,12 @@ export default function ReportButton({ productId, ownerId }: Props) {
                 {sending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.submitText}>Enviar denúncia</Text>
+                  <Text style={styles.submitText}>{t('reportSend')}</Text>
                 )}
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.cancel} onPress={close} disabled={sending}>
-                <Text style={styles.cancelText}>Cancelar</Text>
+                <Text style={styles.cancelText}>{t('cancel')}</Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
