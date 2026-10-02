@@ -22,6 +22,8 @@ import ReviewsScreen from "../screens/ReviewsScreen";
 import AdminScreen from "../screens/AdminScreen";
 import AdminReportsScreen from "../screens/AdminReportsScreen";
 import LanguageScreen from "../screens/LanguageScreen";
+import VerificationScreen from "../screens/VerificationScreen";
+import AdminVerificationsScreen from "../screens/AdminVerificationsScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -115,6 +117,16 @@ export default function AppNavigator() {
               name="Language"
               component={LanguageScreen}
               options={{ headerShown: true, title: t("language") }}
+            />
+            <Stack.Screen
+              name="Verification"
+              component={VerificationScreen}
+              options={{ headerShown: true, title: t("verification") }}
+            />
+            <Stack.Screen
+              name="AdminVerifications"
+              component={AdminVerificationsScreen}
+              options={{ headerShown: true, title: t("verifications") }}
             />
           </>
         ) : (
