@@ -59,6 +59,14 @@ export const translations: Record<Lang, Dict> = {
     reasonPrice: "Preço abusivo",
     reasonContent: "Conteúdo impróprio",
     reasonOther: "Outro motivo",
+
+    chatPlaceholder: "Escreva uma mensagem...",
+    send: "Enviar",
+    noMessages: "Nenhuma mensagem ainda.",
+    sendError: "Não foi possível enviar a mensagem.",
+    noConversations: "Nenhuma conversa ainda",
+    conversationsError: "Não foi possível carregar as conversas.",
+    defaultUser: "Usuário",
   },
   crl: {
     welcome: "Bon bindu",
@@ -110,6 +118,14 @@ export const translations: Record<Lang, Dict> = {
     reasonPrice: "Presu abusivu",
     reasonContent: "Konteúdu inapropriadu",
     reasonOther: "Otru motivu",
+
+    chatPlaceholder: "Skrebi un mensaji...",
+    send: "Manda",
+    noMessages: "Ainda ka ten mensaji.",
+    sendError: "Ka konsigi manda mensaji.",
+    noConversations: "Ainda ka ten konbersa",
+    conversationsError: "Ka konsigi karga konbersas.",
+    defaultUser: "Usuáriu",
   },
   fr: {
     welcome: "Bienvenue",
@@ -161,5 +177,13 @@ export const translations: Record<Lang, Dict> = {
     reasonPrice: "Prix abusif",
     reasonContent: "Contenu inapproprié",
     reasonOther: "Autre motif",
+
+    chatPlaceholder: "Écrivez un message...",
+    send: "Envoyer",
+    noMessages: "Aucun message pour le moment.",
+    sendError: "Impossible d'envoyer le message.",
+    noConversations: "Aucune conversation pour le moment",
+    conversationsError: "Impossible de charger les conversations.",
+    defaultUser: "Utilisateur",
   },
 };
