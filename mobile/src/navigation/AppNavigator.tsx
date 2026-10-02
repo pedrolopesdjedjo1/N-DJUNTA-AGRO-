@@ -24,6 +24,7 @@ import AdminReportsScreen from "../screens/AdminReportsScreen";
 import LanguageScreen from "../screens/LanguageScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import AdminVerificationsScreen from "../screens/AdminVerificationsScreen";
+import DashboardScreen from "../screens/DashboardScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -127,6 +128,11 @@ export default function AppNavigator() {
               name="AdminVerifications"
               component={AdminVerificationsScreen}
               options={{ headerShown: true, title: t("verifications") }}
+            />
+            <Stack.Screen
+              name="Dashboard"
+              component={DashboardScreen}
+              options={{ headerShown: true, title: t("dashboard") }}
             />
           </>
         ) : (
