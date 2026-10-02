@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Keyboard
 import { useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { colors } from "../theme/colors";
 import { getMessages, sendMessage } from "../api/messages";
 
@@ -18,6 +19,7 @@ export default function ChatScreen() {
   const route = useRoute<any>();
   const { userId } = route.params;
   const { user } = useAuth();
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<Message>>(null);
 
@@ -50,7 +52,7 @@ export default function ChatScreen() {
       loadMessages();
     } catch (err: any) {
       setText(content);
-      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || "Não foi possível enviar a mensagem.");
+      setError(err?.response?.data?.error || err?.response?.data?.message || t("sendError"));
     }
   }
 
@@ -62,7 +64,7 @@ export default function ChatScreen() {
         keyExtractor={(item, index) => String(item.id ?? index)}
         contentContainerStyle={{ padding: 12 }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-        ListEmptyComponent={<Text style={s.empty}>Nenhuma mensagem ainda.</Text>}
+        ListEmptyComponent={<Text style={s.empty}>{t("noMessages")}</Text>}
         renderItem={({ item }) => {
           const isMine = String(item.senderId) === String(user?.id);
           return (
@@ -76,9 +78,9 @@ export default function ChatScreen() {
       {error ? <Text style={s.error}>{error}</Text> : null}
 
       <View style={[s.inputRow, { paddingBottom: 10 + insets.bottom }]}>
-        <TextInput style={s.input} placeholder="Escreva uma mensagem..." value={text} onChangeText={setText} multiline />
+        <TextInput style={s.input} placeholder={t("chatPlaceholder")} value={text} onChangeText={setText} multiline />
         <TouchableOpacity style={s.send} onPress={handleSend}>
-          <Text style={s.sendText}>Enviar</Text>
+          <Text style={s.sendText}>{t("send")}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
