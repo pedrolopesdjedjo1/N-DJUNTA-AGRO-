@@ -55,14 +55,27 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.buttonText}>{t("cooperatives")}</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Verification")}>
+        <Text style={styles.buttonText}>✅ {t("verification")}</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Language")}>
         <Text style={styles.buttonText}>🌐 {t("language")}</Text>
       </TouchableOpacity>
 
       {user?.role === "ADMIN" && (
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Admin")}>
-          <Text style={styles.buttonText}>{t("admin")}</Text>
-        </TouchableOpacity>
+        <>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Admin")}>
+            <Text style={styles.buttonText}>{t("admin")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("AdminVerifications")}
+          >
+            <Text style={styles.buttonText}>{t("verifications")}</Text>
+          </TouchableOpacity>
+        </>
       )}
 
       <TouchableOpacity style={styles.logoutButton} onPress={logout}>
