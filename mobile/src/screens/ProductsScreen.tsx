@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { getFavorites, addFavorite, removeFavorite } from "../api/favorites";
 import ReportButton from "../components/ReportButton";
 
@@ -35,6 +36,7 @@ export default function ProductsScreen({ navigation }: any) {
   const CATEGORIES = ["AGRICOLA", "PESCA", "ARTESANATO", "OUTRO"];
   const [error, setError] = useState("");
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   const loadFavorites = useCallback(async () => {
@@ -67,12 +69,12 @@ export default function ProductsScreen({ navigation }: any) {
       const response = await api.get("/api/products");
       setProducts(response.data.products || response.data || []);
     } catch (err: any) {
-      setError("Não foi possível carregar os produtos.");
+      setError(t("loadError"));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadProducts();
@@ -100,11 +102,11 @@ export default function ProductsScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Produtos</Text>
+      <Text style={styles.title}>{t("productsTitle")}</Text>
 
       <TextInput
         style={styles.searchInput}
-        placeholder="Buscar produto..."
+        placeholder={t("searchProduct")}
         value={search}
         onChangeText={setSearch}
       />
@@ -126,7 +128,7 @@ export default function ProductsScreen({ navigation }: any) {
             }}
           >
             <Text style={{ color: categoryFilter === cat ? "#fff" : "#333", fontSize: 13 }}>
-              {cat}
+              {t(`cat_${cat}`)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -136,7 +138,7 @@ export default function ProductsScreen({ navigation }: any) {
         style={styles.addButton}
         onPress={() => navigation.navigate("AddProduct")}
       >
-        <Text style={styles.addButtonText}>+ Cadastrar Produto</Text>
+        <Text style={styles.addButtonText}>{t("addProduct")}</Text>
       </TouchableOpacity>
 
       <FlatList
@@ -146,7 +148,7 @@ export default function ProductsScreen({ navigation }: any) {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum produto encontrado.</Text>
+          <Text style={styles.emptyText}>{t("noProducts")}</Text>
         }
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card}>
@@ -169,7 +171,11 @@ export default function ProductsScreen({ navigation }: any) {
               {item.price} FCFA {item.unit ? `/ ${item.unit}` : ""}
             </Text>
             {item.category ? (
-              <Text style={styles.productCategory}>{item.category}</Text>
+              <Text style={styles.productCategory}>
+                {CATEGORIES.includes(item.category)
+                  ? t(`cat_${item.category}`)
+                  : item.category}
+              </Text>
             ) : null}
 
             <TouchableOpacity
@@ -177,12 +183,12 @@ export default function ProductsScreen({ navigation }: any) {
               onPress={() =>
                 navigation.navigate("Reviews", {
                   userId: item.ownerId,
-                  userName: item.owner?.name ?? "Vendedor",
+                  userName: item.owner?.name ?? t("seller"),
                   productId: item.id,
                 })
               }
             >
-              <Text style={styles.reviewsButtonText}>Ver avaliações</Text>
+              <Text style={styles.reviewsButtonText}>{t("reviews")}</Text>
             </TouchableOpacity>
 
             {item.ownerId !== user?.id && (
@@ -191,11 +197,11 @@ export default function ProductsScreen({ navigation }: any) {
                 onPress={() =>
                   navigation.navigate("Chat", {
                     userId: item.ownerId,
-                    userName: item.owner?.name ?? "Vendedor",
+                    userName: item.owner?.name ?? t("seller"),
                   })
                 }
               >
-                <Text style={styles.contactButtonText}>Falar com vendedor</Text>
+                <Text style={styles.contactButtonText}>{t("contactSeller")}</Text>
               </TouchableOpacity>
             )}
 
