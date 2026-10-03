@@ -6,20 +6,22 @@ interface User {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
+  isVerified?: boolean;
 }
 
 interface AuthContextData {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 interface RegisterData {
   name: string;
-  email: string;
+  email?: string;
   password: string;
   role: string;
   phone?: string;
@@ -57,8 +59,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadStoredUser();
   }, []);
 
-  async function login(email: string, password: string) {
-    const response = await api.post("/api/auth/login", { email, password });
+  // Aceita número de celular ou e-mail (se tiver @, é e-mail)
+  async function login(identifier: string, password: string) {
+    const value = identifier.trim();
+    const body = value.includes("@")
+      ? { email: value, password }
+      : { phone: value, password };
+
+    const response = await api.post("/api/auth/login", body);
     const { token, user: loggedUser } = response.data;
 
     await AsyncStorage.setItem("@nodjuntaagro:token", token);
