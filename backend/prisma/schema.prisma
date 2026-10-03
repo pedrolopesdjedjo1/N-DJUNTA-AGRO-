@@ -47,6 +47,8 @@ model User {
   purchasesMade Payment[] @relation("Buyer")
   salesReceived Payment[] @relation("Seller")
   isVerified   Boolean               @default(false)
+  failedLoginAttempts Int            @default(0) @map("failedLoginAttemt")
+  lockedUntil  DateTime?
   verifications VerificationRequest[]
   alertsCreated WeatherAlert[]
   cooperativesLed Cooperative[]
