@@ -30,6 +30,7 @@ interface AuthContextData {
 
 const TOKEN_KEY = "@nodjuntaagro:token";
 const USER_KEY = "@nodjuntaagro:user";
+export const LAST_LOGIN_KEY = "@nodjuntaagro:lastLogin";
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
@@ -41,6 +42,12 @@ async function clearStorage() {
 async function saveSession(token: string, user: User) {
   await AsyncStorage.setItem(TOKEN_KEY, token);
   await AsyncStorage.setItem(USER_KEY, JSON.stringify(user));
+  if (user.phone) {
+    await AsyncStorage.setItem(
+      LAST_LOGIN_KEY,
+      JSON.stringify({ phone: user.phone, name: user.name, role: user.role })
+    );
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
