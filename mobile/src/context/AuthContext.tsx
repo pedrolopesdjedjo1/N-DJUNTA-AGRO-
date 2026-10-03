@@ -1,101 +1,118 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { api } from "../api/client";
+import { Lang } from "./translations";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: string;
-  isVerified?: boolean;
-}
+type AuthDict = Record<string, string>;
 
-interface AuthContextData {
-  user: User | null;
-  loading: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
-  logout: () => Promise<void>;
-}
+export const authTexts: Record<Lang, AuthDict> = {
+  pt: {
+    attention: "Atenção",
+    errorTitle: "Erro",
+    loginSubtitle: "Entre na sua conta",
+    phonePlaceholder: "Número de celular",
+    pinPlaceholder: "Senha (4 a 6 números)",
+    passwordPlaceholder: "Senha",
+    emailPlaceholder: "E-mail",
+    login: "Entrar",
+    noAccount: "Não tem conta? Cadastre-se",
+    useEmail: "Entrar com e-mail (administrador)",
+    usePhone: "Entrar com número de celular",
+    fillPhonePin: "Preencha o celular e a senha.",
+    fillEmailPass: "Preencha e-mail e senha.",
+    loginFail: "Não foi possível entrar.",
+    createAccount: "Criar conta",
+    registerSubtitle: "Junte-se ao NôdjuntaAgro GB",
+    fullName: "Nome completo",
+    pinCreate: "Crie uma senha de 4 a 6 números",
+    pinRepeat: "Repita a senha",
+    pinHint: "Escolha uma senha fácil de lembrar e não conte a ninguém.",
+    region: "Região (ex: Bissau) - opcional",
+    iAm: "Eu sou:",
+    clientHint: "Escolha Cliente se você só quer comprar e conversar com vendedores.",
+    role_COMPRADOR: "Cliente",
+    role_AGRICULTOR: "Agricultor",
+    role_PESCADOR: "Pescador",
+    role_COMERCIANTE: "Comerciante",
+    role_TRANSPORTADOR: "Transportador",
+    alreadyAccount: "Já tem conta? Entrar",
+    fillAll: "Preencha nome, celular e senha.",
+    pinInvalid: "A senha deve ter de 4 a 6 números.",
+    pinMismatch: "As senhas não são iguais.",
+    phoneInvalid: "Número de celular inválido.",
+    registerFail: "Não foi possível criar a conta.",
+  },
+  crl: {
+    attention: "Atensaun",
+    errorTitle: "Erru",
+    loginSubtitle: "Entra na bu konta",
+    phonePlaceholder: "Númeru di selular",
+    pinPlaceholder: "Senha (4 a 6 númeru)",
+    passwordPlaceholder: "Senha",
+    emailPlaceholder: "E-mail",
+    login: "Entra",
+    noAccount: "Ka ten konta? Rejista",
+    useEmail: "Entra ku e-mail (administrador)",
+    usePhone: "Entra ku númeru di selular",
+    fillPhonePin: "Prenxi selular i senha.",
+    fillEmailPass: "Prenxi e-mail i senha.",
+    loginFail: "Ka konsigi entra.",
+    createAccount: "Kria konta",
+    registerSubtitle: "Djunta na NôdjuntaAgro GB",
+    fullName: "Nomi kompletu",
+    pinCreate: "Kria un senha di 4 a 6 númeru",
+    pinRepeat: "Ripiti senha",
+    pinHint: "Skodja un senha fásil di lembra i ka konta ningin.",
+    region: "Rejiaun (ex: Bissau) - opsional",
+    iAm: "N é:",
+    clientHint: "Skodja Klienti si bu so misti kompra i papia ku vendedoris.",
+    role_COMPRADOR: "Klienti",
+    role_AGRICULTOR: "Agrikultur",
+    role_PESCADOR: "Pexkador",
+    role_COMERCIANTE: "Komersianti",
+    role_TRANSPORTADOR: "Transportador",
+    alreadyAccount: "Ja ten konta? Entra",
+    fillAll: "Prenxi nomi, selular i senha.",
+    pinInvalid: "Senha ten ki ten di 4 a 6 númeru.",
+    pinMismatch: "Senhas ka ta igual.",
+    phoneInvalid: "Númeru di selular ka válidu.",
+    registerFail: "Ka konsigi kria konta.",
+  },
+  fr: {
+    attention: "Attention",
+    errorTitle: "Erreur",
+    loginSubtitle: "Connectez-vous à votre compte",
+    phonePlaceholder: "Numéro de téléphone",
+    pinPlaceholder: "Code secret (4 à 6 chiffres)",
+    passwordPlaceholder: "Mot de passe",
+    emailPlaceholder: "E-mail",
+    login: "Se connecter",
+    noAccount: "Pas de compte ? Inscrivez-vous",
+    useEmail: "Se connecter avec e-mail (administrateur)",
+    usePhone: "Se connecter avec le téléphone",
+    fillPhonePin: "Remplissez le téléphone et le code.",
+    fillEmailPass: "Remplissez l'e-mail et le mot de passe.",
+    loginFail: "Connexion impossible.",
+    createAccount: "Créer un compte",
+    registerSubtitle: "Rejoignez NôdjuntaAgro GB",
+    fullName: "Nom complet",
+    pinCreate: "Créez un code de 4 à 6 chiffres",
+    pinRepeat: "Répétez le code",
+    pinHint: "Choisissez un code facile à retenir et ne le dites à personne.",
+    region: "Région (ex. Bissau) - facultatif",
+    iAm: "Je suis :",
+    clientHint: "Choisissez Client si vous voulez seulement acheter et discuter avec les vendeurs.",
+    role_COMPRADOR: "Client",
+    role_AGRICULTOR: "Agriculteur",
+    role_PESCADOR: "Pêcheur",
+    role_COMERCIANTE: "Commerçant",
+    role_TRANSPORTADOR: "Transporteur",
+    alreadyAccount: "Déjà un compte ? Se connecter",
+    fillAll: "Remplissez le nom, le téléphone et le code.",
+    pinInvalid: "Le code doit avoir de 4 à 6 chiffres.",
+    pinMismatch: "Les codes ne sont pas identiques.",
+    phoneInvalid: "Numéro de téléphone invalide.",
+    registerFail: "Impossible de créer le compte.",
+  },
+};
 
-interface RegisterData {
-  name: string;
-  email?: string;
-  password: string;
-  role: string;
-  phone?: string;
-  location?: string;
-}
-
-const AuthContext = createContext<AuthContextData>({} as AuthContextData);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Ao abrir o app, verifica se já existe um login salvo
-  useEffect(() => {
-    async function loadStoredUser() {
-      try {
-        const storedUser = await AsyncStorage.getItem("@nodjuntaagro:user");
-        const storedToken = await AsyncStorage.getItem("@nodjuntaagro:token");
-
-        if (storedUser && storedToken) {
-          setUser(JSON.parse(storedUser));
-        } else {
-          // Login incompleto: limpa e volta para a tela de login
-          await AsyncStorage.removeItem("@nodjuntaagro:token");
-          await AsyncStorage.removeItem("@nodjuntaagro:user");
-        }
-      } catch (err) {
-        // Dados salvos corrompidos: limpa e volta para o login
-        await AsyncStorage.removeItem("@nodjuntaagro:token");
-        await AsyncStorage.removeItem("@nodjuntaagro:user");
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadStoredUser();
-  }, []);
-
-  // Aceita número de celular ou e-mail (se tiver @, é e-mail)
-  async function login(identifier: string, password: string) {
-    const value = identifier.trim();
-    const body = value.includes("@")
-      ? { email: value, password }
-      : { phone: value, password };
-
-    const response = await api.post("/api/auth/login", body);
-    const { token, user: loggedUser } = response.data;
-
-    await AsyncStorage.setItem("@nodjuntaagro:token", token);
-    await AsyncStorage.setItem("@nodjuntaagro:user", JSON.stringify(loggedUser));
-    setUser(loggedUser);
-  }
-
-  async function register(data: RegisterData) {
-    const response = await api.post("/api/auth/register", data);
-    const { token, user: newUser } = response.data;
-
-    await AsyncStorage.setItem("@nodjuntaagro:token", token);
-    await AsyncStorage.setItem("@nodjuntaagro:user", JSON.stringify(newUser));
-    setUser(newUser);
-  }
-
-  async function logout() {
-    await AsyncStorage.removeItem("@nodjuntaagro:token");
-    await AsyncStorage.removeItem("@nodjuntaagro:user");
-    setUser(null);
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  return useContext(AuthContext);
+export function authText(lang: Lang, key: string): string {
+  return authTexts[lang]?.[key] ?? authTexts.pt[key] ?? key;
 }
