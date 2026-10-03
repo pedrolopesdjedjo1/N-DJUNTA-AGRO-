@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { send, conversation, myConversations, read } from "../controllers/messageController";
+import { send, conversation, myConversations, read, remove } from "../controllers/messageController";
 
 const router = Router();
 
@@ -11,5 +11,6 @@ router.post("/", send);
 router.get("/", myConversations);
 router.get("/with/:otherUserId", conversation);
 router.patch("/:id/read", read);
+router.delete("/:id", remove);
 
 export default router;
