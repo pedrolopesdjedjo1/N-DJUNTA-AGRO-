@@ -5,6 +5,7 @@ import {
   getConversation,
   listMyConversations,
   markAsRead,
+  deleteMessage,
 } from "../services/messageService";
 
 export async function send(req: AuthRequest, res: Response) {
@@ -58,6 +59,15 @@ export async function read(req: AuthRequest, res: Response) {
   try {
     const message = await markAsRead(req.params.id, req.userId!);
     return res.status(200).json(message);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+}
+
+export async function remove(req: AuthRequest, res: Response) {
+  try {
+    const result = await deleteMessage(req.params.id, req.userId!);
+    return res.status(200).json(result);
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
