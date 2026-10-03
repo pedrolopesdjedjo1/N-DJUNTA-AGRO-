@@ -80,3 +80,20 @@ export async function markAsRead(messageId: string, userId: string) {
     data: { isRead: true },
   });
 }
+
+// Apaga uma mensagem (só quem enviou pode apagar)
+export async function deleteMessage(messageId: string, userId: string) {
+  const message = await prisma.message.findUnique({ where: { id: messageId } });
+
+  if (!message) {
+    throw new Error("Mensagem não encontrada.");
+  }
+
+  if (message.senderId !== userId) {
+    throw new Error("Você só pode apagar as suas próprias mensagens.");
+  }
+
+  await prisma.message.delete({ where: { id: messageId } });
+
+  return { id: messageId, deleted: true };
+}
