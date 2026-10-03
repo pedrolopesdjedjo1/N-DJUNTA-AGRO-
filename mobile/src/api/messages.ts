@@ -20,3 +20,9 @@ export async function sendMessage(receiverId: string, content: string, productId
   });
   return response.data;
 }
+
+// Apaga uma mensagem enviada por você
+export async function deleteMessage(messageId: string) {
+  const response = await api.delete(`/api/messages/${messageId}`);
+  return response.data;
+}
