@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Alert } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { colors } from "../theme/colors";
-import { getMessages, sendMessage } from "../api/messages";
+import { getMessages, sendMessage, deleteMessage } from "../api/messages";
 
 interface Message {
   id: string;
@@ -15,11 +15,18 @@ interface Message {
   createdAt: string;
 }
 
+const extra: Record<string, Record<string, string>> = {
+  pt: { deleteTitle: "Apagar mensagem", deleteAsk: "Apagar esta mensagem para todos?", del: "Apagar", deleteFail: "Não foi possível apagar a mensagem." },
+  crl: { deleteTitle: "Apaga mensaji", deleteAsk: "Apaga e mensaji pa tudu?", del: "Apaga", deleteFail: "Ka konsigi apaga mensaji." },
+  fr: { deleteTitle: "Supprimer le message", deleteAsk: "Supprimer ce message pour tous ?", del: "Supprimer", deleteFail: "Impossible de supprimer le message." },
+};
+
 export default function ChatScreen() {
   const route = useRoute<any>();
   const { userId } = route.params;
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const tr = (key: string) => extra[language]?.[key] ?? key;
   const insets = useSafeAreaInsets();
   const listRef = useRef<FlatList<Message>>(null);
 
@@ -56,6 +63,24 @@ export default function ChatScreen() {
     }
   }
 
+  function askDelete(item: Message) {
+    Alert.alert(tr("deleteTitle"), tr("deleteAsk"), [
+      { text: t("cancel"), style: "cancel" },
+      {
+        text: tr("del"),
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteMessage(item.id);
+            setMessages((prev) => prev.filter((m) => m.id !== item.id));
+          } catch (err: any) {
+            Alert.alert(t("error"), err?.response?.data?.error || tr("deleteFail"));
+          }
+        },
+      },
+    ]);
+  }
+
   return (
     <KeyboardAvoidingView style={s.container} behavior="padding">
       <FlatList
@@ -68,9 +93,13 @@ export default function ChatScreen() {
         renderItem={({ item }) => {
           const isMine = String(item.senderId) === String(user?.id);
           return (
-            <View style={[s.bubble, isMine ? s.mine : s.theirs]}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onLongPress={isMine ? () => askDelete(item) : undefined}
+              style={[s.bubble, isMine ? s.mine : s.theirs]}
+            >
               <Text style={isMine ? s.textMine : s.textTheirs}>{item.content}</Text>
-            </View>
+            </TouchableOpacity>
           );
         }}
       />
