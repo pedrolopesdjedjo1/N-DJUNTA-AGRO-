@@ -74,6 +74,7 @@ model Product {
   quantity    Int
   location    String?
   imageUrl    String?
+  videoUrl    String?
   isAvailable Boolean         @default(true)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
