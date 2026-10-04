@@ -11,6 +11,7 @@ interface CreateProductInput {
   quantity: number;
   location?: string;
   imageUrl?: string;
+  videoUrl?: string;
 }
 
 interface UpdateProductInput {
@@ -20,6 +21,7 @@ interface UpdateProductInput {
   quantity?: number;
   isAvailable?: boolean;
   imageUrl?: string;
+  videoUrl?: string;
 }
 
 export async function createProduct(data: CreateProductInput) {
@@ -34,6 +36,7 @@ export async function createProduct(data: CreateProductInput) {
       quantity: data.quantity,
       location: data.location,
       imageUrl: data.imageUrl,
+      videoUrl: data.videoUrl,
     },
   });
 }
