@@ -38,6 +38,9 @@ import FerramentasScreen from "../screens/FerramentasScreen";
 import BuscaAvancadaScreen from "../screens/BuscaAvancadaScreen";
 import CalculadoraScreen from "../screens/CalculadoraScreen";
 import AparenciaScreen from "../screens/AparenciaScreen";
+import AdminConteudoScreen from "../screens/AdminConteudoScreen";
+import AvisosScreen from "../screens/AvisosScreen";
+import ZonaProtegidaScreen from "../screens/ZonaProtegidaScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -162,6 +165,9 @@ export default function AppNavigator() {
               <Stack.Screen name="BuscaAvancada" component={BuscaAvancadaScreen} />
               <Stack.Screen name="Calculadora" component={CalculadoraScreen} />
               <Stack.Screen name="Aparencia" component={AparenciaScreen} />
+              <Stack.Screen name="AdminConteudo" component={AdminConteudoScreen} />
+              <Stack.Screen name="Avisos" component={AvisosScreen} />
+              <Stack.Screen name="ZonaProtegida" component={ZonaProtegidaScreen} />
             </>
           ) : (
             <>
