@@ -5,7 +5,7 @@ const cfgs: Record<string, Cfg> = {
   // 51 Registar agricultor (guarda o pedido de conta, com a autorização dele)
   registos: {
     t: 'agro_registos_agente', leitura: 'dono', escrita: 'dono', dono: 'agente_id', nome: true,
-    acesso: ['AGENTE'],
+    acesso: ['AGENTE_DIGITAL'],
     campos: { nome: 'text', telefone: 'text', regiao: 'text', autorizado: 'bool', estado: 'text' },
     padrao: { estado: 'pendente' },
     restritos: { estado: ['ADMIN'] },
@@ -14,7 +14,7 @@ const cfgs: Record<string, Cfg> = {
   // 52 Publicar em nome de outro agricultor
   publicacoes: {
     t: 'agro_publicacoes_agente', leitura: 'dono', escrita: 'dono', dono: 'agente_id',
-    acesso: ['AGENTE'],
+    acesso: ['AGENTE_DIGITAL'],
     campos: { agricultor_nome: 'text', agricultor_telefone: 'text', produto: 'text', quantidade: 'text', preco: 'numeric', localizacao: 'text', estado: 'text' },
     padrao: { estado: 'pendente' },
     restritos: { estado: ['ADMIN'] },
@@ -23,7 +23,7 @@ const cfgs: Record<string, Cfg> = {
   // 53 Comissões (a percentagem é definida pelo administrador)
   comissoes: {
     t: 'agro_comissoes', leitura: 'dono', escrita: 'dono', dono: 'agente_id',
-    acesso: ['AGENTE'],
+    acesso: ['AGENTE_DIGITAL'],
     campos: { descricao: 'text', valor_venda: 'numeric', percentual: 'numeric', estado: 'text' },
     padrao: { percentual: 5, estado: 'a receber' },
     restritos: { percentual: ['ADMIN'], estado: ['ADMIN'] },
@@ -37,7 +37,7 @@ const cfgs: Record<string, Cfg> = {
   // 56 Marcar visita
   visitas: {
     t: 'agro_visitas', leitura: 'dono', escrita: 'dono', dono: 'usuario_id',
-    acesso: ['AGENTE'],
+    acesso: ['AGENTE_DIGITAL'],
     campos: { agricultor_nome: 'text', telefone: 'text', data_hora: 'text', local: 'text', estado: 'text' },
     padrao: { estado: 'marcada' },
   },
