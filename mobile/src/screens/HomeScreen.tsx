@@ -5,11 +5,28 @@ import { colors } from "../theme/colors";
 
 const DASHBOARD_ROLES = ["ADMIN", "GOVERNO", "ONG"];
 
+// Área de cada perfil: [perfil, nome da tela, texto do botão]
+const AREAS: [string, string, string][] = [
+  ["AGRICULTOR", "Agricultor", "🌾 Área do Agricultor"],
+  ["PESCADOR", "Pescador", "🎣 Área do Pescador"],
+  ["COMPRADOR", "Comprador", "🛒 Área do Comprador"],
+  ["COMERCIANTE", "Comerciante", "🧺 Área da Comerciante"],
+  ["AGENTE", "Agente", "👨‍💼 Área do Agente Digital"],
+  ["TRANSPORTADOR", "Transportador", "🚚 Área do Transportador"],
+  ["GOVERNO", "Governo", "🏛️ Painel do Governo"],
+  ["ONG", "Ong", "🌍 Painel ONU / ONG"],
+];
+
 export default function HomeScreen({ navigation }: any) {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
 
-  const canSeeDashboard = DASHBOARD_ROLES.includes(String(user?.role ?? ""));
+  const role = String(user?.role ?? "").toUpperCase();
+  const isAdmin = role === "ADMIN";
+  const canSeeDashboard = DASHBOARD_ROLES.includes(role);
+
+  // O ADMIN vê todas as áreas (para testar). Os outros veem só a sua.
+  const minhasAreas = AREAS.filter(([perfil]) => isAdmin || perfil === role);
 
   return (
     <ScrollView
@@ -24,12 +41,31 @@ export default function HomeScreen({ navigation }: any) {
       </Text>
       <Text style={styles.info}>{t("homeInfo")}</Text>
 
+      {minhasAreas.map(([perfil, tela, texto]) => (
+        <TouchableOpacity
+          key={perfil}
+          style={styles.areaButton}
+          onPress={() => navigation.navigate(tela)}
+        >
+          <Text style={styles.buttonText}>{texto}</Text>
+        </TouchableOpacity>
+      ))}
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Products")}
       >
         <Text style={styles.buttonText}>{t("products")}</Text>
       </TouchableOpacity>
+
+      {(role === "COMPRADOR" || role === "COMERCIANTE" || isAdmin) && (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("BuscaAvancada")}
+        >
+          <Text style={styles.buttonText}>🔎 Procurar produtos</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Profile")}>
         <Text style={styles.buttonText}>{t("profile")}</Text>
@@ -59,6 +95,10 @@ export default function HomeScreen({ navigation }: any) {
         <Text style={styles.buttonText}>{t("cooperatives")}</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Ferramentas")}>
+        <Text style={styles.buttonText}>🧰 Ferramentas e emergência</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Verification")}>
         <Text style={styles.buttonText}>✅ {t("verification")}</Text>
       </TouchableOpacity>
@@ -73,7 +113,7 @@ export default function HomeScreen({ navigation }: any) {
         </TouchableOpacity>
       )}
 
-      {user?.role === "ADMIN" && (
+      {isAdmin && (
         <>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Admin")}>
             <Text style={styles.buttonText}>{t("admin")}</Text>
@@ -130,6 +170,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 32,
     marginBottom: 16,
+  },
+  areaButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: colors.black,
   },
   buttonText: {
     color: colors.white,
