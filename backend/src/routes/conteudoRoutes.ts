@@ -1,6 +1,7 @@
 // backend/src/routes/conteudoRoutes.ts
-// Publicação de conteúdo pelo administrador (preços, alertas, vídeos, notícias, cursos, etc.)
-// e avisos dentro do app: ao publicar, os utilizadores certos recebem um aviso na lista "Avisos do app".
+// Publicação de conteúdo pelo administrador (preços, alertas, vídeos, notícias, cursos, etc.).
+// Ao publicar, os utilizadores certos recebem um aviso na tela "Notificações" que já existe no app
+// (tabela notifications do Prisma, tipo SISTEMA).
 import { Router, Request, Response, NextFunction } from 'express';
 import { makeRouter, Cfg } from '../lib/agroEngine';
 import * as prismaModule from '../lib/prisma';
@@ -32,34 +33,44 @@ const cfgs: Record<string, Cfg> = {
     campos: { produto: 'text', preco_desejado: 'numeric', ativo: 'bool' },
     padrao: { ativo: true },
   },
-  // Avisos de cada utilizador (cada pessoa só vê os seus)
-  notificacoes: {
-    t: 'agro_notificacoes', leitura: 'dono', escrita: 'dono', dono: 'usuario_id',
-    campos: { titulo: 'text', texto: 'text', lida: 'bool' },
-    padrao: { lida: false },
-  },
 };
 
 // ---------- envio de avisos ----------
+// Destinatários: todos, ou uma consulta que devolve uma coluna com ids de utilizadores ($1, $2... são os params)
 type Dest = 'todos' | { sql: string; params: any[] };
 
-async function enviar(titulo: string, texto: string, d: Dest) {
-  if (d === 'todos') {
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO agro_notificacoes (usuario_id, titulo, texto, lida)
-       SELECT id::text, $1::text, $2::text, false FROM users`,
-      titulo, texto
-    );
-  } else {
-    await prisma.$executeRawUnsafe(
-      `INSERT INTO agro_notificacoes (usuario_id, titulo, texto, lida)
-       SELECT x.uid, $1::text, $2::text, false FROM (${d.sql}) AS x(uid)`,
-      titulo, texto, ...d.params
-    );
-  }
+async function destinatarios(d: Dest): Promise<string[]> {
+  const rows: any[] =
+    d === 'todos'
+      ? await prisma.$queryRawUnsafe('SELECT id::text AS uid FROM users')
+      : await prisma.$queryRawUnsafe(`SELECT DISTINCT x.uid FROM (${d.sql}) AS x(uid)`, ...d.params);
+  return rows.map((r) => String(r.uid));
 }
 
-const perfil = (role: string): Dest => ({ sql: `SELECT id::text FROM users WHERE role::text = '${role}'`, params: [] });
+async function enviar(titulo: string, texto: string, d: Dest) {
+  const ids = await destinatarios(d);
+  if (!ids.length) return;
+  await prisma.notification.createMany({
+    data: ids.map((userId) => ({ userId, type: 'SISTEMA', title: titulo, message: texto })),
+  });
+}
+
+// Todos os utilizadores de um perfil
+const perfil = (role: string): Dest => ({
+  sql: `SELECT id::text FROM users WHERE role::text = '${role}'`,
+  params: [],
+});
+
+// Utilizadores de um perfil na região do aviso. Quem não tem localização cadastrada recebe também.
+// Região "Todas" avisa todo o perfil.
+const perfilNaRegiao = (role: string, regiao: string): Dest => ({
+  sql: `SELECT id::text FROM users
+         WHERE role::text = '${role}'
+           AND (coalesce(location, '') = ''
+                OR lower($1::text) LIKE 'todas%' OR lower($1::text) LIKE 'todos%'
+                OR location ILIKE '%' || $1::text || '%')`,
+  params: [regiao || ''],
+});
 
 // Variação em % do novo preço contra o preço anterior do mesmo produto e local
 async function variacaoPct(
@@ -87,7 +98,7 @@ const gatilhos: Record<string, (row: any) => Promise<void>> = {
       'O preço chegou ao valor que você definiu.',
       {
         sql: `SELECT usuario_id FROM agro_alertas_preco
-               WHERE ativo = true AND lower(produto) = lower($3::text) AND preco_desejado <= $4::numeric`,
+               WHERE ativo = true AND lower(produto) = lower($1::text) AND preco_desejado <= $2::numeric`,
         params: [row.produto, preco],
       }
     );
@@ -96,26 +107,26 @@ const gatilhos: Record<string, (row: any) => Promise<void>> = {
       await enviar(
         `📈 ${row.produto} mudou ${sinal(v)} em ${row.cidade}`,
         `Novo preço: ${preco}`,
-        { sql: `SELECT usuario_id FROM agro_alertas_preco WHERE ativo = true AND lower(produto) = lower($3::text)`, params: [row.produto] }
+        { sql: `SELECT usuario_id FROM agro_alertas_preco WHERE ativo = true AND lower(produto) = lower($1::text)`, params: [row.produto] }
       );
     }
   },
-  // Clima e praga: avisa os agricultores
+  // Clima e praga: avisa os agricultores da região
   alertas_regiao: async (row) => {
     const praga = row.tipo === 'praga';
     await enviar(
       `${praga ? '🐛 Alerta de praga' : '🌦️ Alerta de clima'}: ${row.titulo}`,
       [row.regiao, row.texto, row.orientacao].filter(Boolean).join('. '),
-      perfil('AGRICULTOR')
+      perfilNaRegiao('AGRICULTOR', row.regiao)
     );
   },
-  // Mar: avisa os pescadores quando é perigo ou atenção
+  // Mar: avisa os pescadores da região quando é perigo ou atenção
   alertas_mar: async (row) => {
     if (row.nivel === 'seguro') return;
     await enviar(
       `${row.nivel === 'perigo' ? '🔴 PERIGO no mar' : '🟠 Atenção no mar'}: ${row.regiao}`,
       row.texto,
-      perfil('PESCADOR')
+      perfilNaRegiao('PESCADOR', row.regiao)
     );
   },
   // Preço do peixe: avisa os pescadores quando muda 10% ou mais
