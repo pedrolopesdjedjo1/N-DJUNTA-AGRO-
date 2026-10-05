@@ -51,6 +51,22 @@ export default function HomeScreen({ navigation }: any) {
         </TouchableOpacity>
       ))}
 
+      {isAdmin && (
+        <TouchableOpacity
+          style={styles.areaButton}
+          onPress={() => navigation.navigate("AdminConteudo")}
+        >
+          <Text style={styles.buttonText}>🛠️ Publicar conteúdo (admin)</Text>
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.navigate("Avisos")}
+      >
+        <Text style={styles.buttonText}>🔔 Avisos do app</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Products")}
@@ -64,6 +80,15 @@ export default function HomeScreen({ navigation }: any) {
           onPress={() => navigation.navigate("BuscaAvancada")}
         >
           <Text style={styles.buttonText}>🔎 Procurar produtos</Text>
+        </TouchableOpacity>
+      )}
+
+      {(role === "PESCADOR" || isAdmin) && (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("ZonaProtegida")}
+        >
+          <Text style={styles.buttonText}>📍 Zonas protegidas perto de mim</Text>
         </TouchableOpacity>
       )}
 
