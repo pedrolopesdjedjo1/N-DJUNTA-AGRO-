@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import { AparenciaProvider } from "../context/AparenciaContext";
 import { colors } from "../theme/colors";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -25,6 +26,18 @@ import LanguageScreen from "../screens/LanguageScreen";
 import VerificationScreen from "../screens/VerificationScreen";
 import AdminVerificationsScreen from "../screens/AdminVerificationsScreen";
 import DashboardScreen from "../screens/DashboardScreen";
+import AgricultorScreen from "../screens/AgricultorScreen";
+import PescadorScreen from "../screens/PescadorScreen";
+import CompradorScreen from "../screens/CompradorScreen";
+import ComercianteScreen from "../screens/ComercianteScreen";
+import AgenteScreen from "../screens/AgenteScreen";
+import TransportadorScreen from "../screens/TransportadorScreen";
+import GovernoScreen from "../screens/GovernoScreen";
+import OngScreen from "../screens/OngScreen";
+import FerramentasScreen from "../screens/FerramentasScreen";
+import BuscaAvancadaScreen from "../screens/BuscaAvancadaScreen";
+import CalculadoraScreen from "../screens/CalculadoraScreen";
+import AparenciaScreen from "../screens/AparenciaScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -41,108 +54,124 @@ export default function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
-          <>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen
-              name="Products"
-              component={ProductsScreen}
-              options={{ headerShown: true, title: "Produtos" }}
-            />
-            <Stack.Screen
-              name="AddProduct"
-              component={AddProductScreen}
-              options={{ headerShown: true, title: "Cadastrar Produto" }}
-            />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{ headerShown: true, title: t("profile") }}
-            />
-            <Stack.Screen
-              name="Conversations"
-              component={ConversationsScreen}
-              options={{ headerShown: true, title: t("messages") }}
-            />
-            <Stack.Screen
-              name="Chat"
-              component={ChatScreen}
-              options={({ route }: any) => ({
-                headerShown: true,
-                title: route.params?.userName ?? "Chat",
-              })}
-            />
-            <Stack.Screen
-              name="Notifications"
-              component={NotificationsScreen}
-              options={{ headerShown: true, title: t("notifications") }}
-            />
-            <Stack.Screen
-              name="MarketPrices"
-              component={MarketPricesScreen}
-              options={{ headerShown: true, title: t("marketPrices") }}
-            />
-            <Stack.Screen
-              name="WeatherAlerts"
-              component={WeatherAlertsScreen}
-              options={{ headerShown: true, title: t("weather") }}
-            />
-            <Stack.Screen
-              name="Transport"
-              component={TransportScreen}
-              options={{ headerShown: true, title: t("transport") }}
-            />
-            <Stack.Screen
-              name="Cooperatives"
-              component={CooperativesScreen}
-              options={{ headerShown: true, title: t("cooperatives") }}
-            />
-            <Stack.Screen
-              name="Reviews"
-              component={ReviewsScreen}
-              options={{ headerShown: true, title: "Avaliações" }}
-            />
-            <Stack.Screen
-              name="Admin"
-              component={AdminScreen}
-              options={{ headerShown: true, title: t("admin") }}
-            />
-            <Stack.Screen
-              name="AdminReports"
-              component={AdminReportsScreen}
-              options={{ headerShown: true, title: "Denúncias" }}
-            />
-            <Stack.Screen
-              name="Language"
-              component={LanguageScreen}
-              options={{ headerShown: true, title: t("language") }}
-            />
-            <Stack.Screen
-              name="Verification"
-              component={VerificationScreen}
-              options={{ headerShown: true, title: t("verification") }}
-            />
-            <Stack.Screen
-              name="AdminVerifications"
-              component={AdminVerificationsScreen}
-              options={{ headerShown: true, title: t("verifications") }}
-            />
-            <Stack.Screen
-              name="Dashboard"
-              component={DashboardScreen}
-              options={{ headerShown: true, title: t("dashboard") }}
-            />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AparenciaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {user ? (
+            <>
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen
+                name="Products"
+                component={ProductsScreen}
+                options={{ headerShown: true, title: "Produtos" }}
+              />
+              <Stack.Screen
+                name="AddProduct"
+                component={AddProductScreen}
+                options={{ headerShown: true, title: "Cadastrar Produto" }}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{ headerShown: true, title: t("profile") }}
+              />
+              <Stack.Screen
+                name="Conversations"
+                component={ConversationsScreen}
+                options={{ headerShown: true, title: t("messages") }}
+              />
+              <Stack.Screen
+                name="Chat"
+                component={ChatScreen}
+                options={({ route }: any) => ({
+                  headerShown: true,
+                  title: route.params?.userName ?? "Chat",
+                })}
+              />
+              <Stack.Screen
+                name="Notifications"
+                component={NotificationsScreen}
+                options={{ headerShown: true, title: t("notifications") }}
+              />
+              <Stack.Screen
+                name="MarketPrices"
+                component={MarketPricesScreen}
+                options={{ headerShown: true, title: t("marketPrices") }}
+              />
+              <Stack.Screen
+                name="WeatherAlerts"
+                component={WeatherAlertsScreen}
+                options={{ headerShown: true, title: t("weather") }}
+              />
+              <Stack.Screen
+                name="Transport"
+                component={TransportScreen}
+                options={{ headerShown: true, title: t("transport") }}
+              />
+              <Stack.Screen
+                name="Cooperatives"
+                component={CooperativesScreen}
+                options={{ headerShown: true, title: t("cooperatives") }}
+              />
+              <Stack.Screen
+                name="Reviews"
+                component={ReviewsScreen}
+                options={{ headerShown: true, title: "Avaliações" }}
+              />
+              <Stack.Screen
+                name="Admin"
+                component={AdminScreen}
+                options={{ headerShown: true, title: t("admin") }}
+              />
+              <Stack.Screen
+                name="AdminReports"
+                component={AdminReportsScreen}
+                options={{ headerShown: true, title: "Denúncias" }}
+              />
+              <Stack.Screen
+                name="Language"
+                component={LanguageScreen}
+                options={{ headerShown: true, title: t("language") }}
+              />
+              <Stack.Screen
+                name="Verification"
+                component={VerificationScreen}
+                options={{ headerShown: true, title: t("verification") }}
+              />
+              <Stack.Screen
+                name="AdminVerifications"
+                component={AdminVerificationsScreen}
+                options={{ headerShown: true, title: t("verifications") }}
+              />
+              <Stack.Screen
+                name="Dashboard"
+                component={DashboardScreen}
+                options={{ headerShown: true, title: t("dashboard") }}
+              />
+
+              {/* Áreas por perfil (cada uma já tem o seu próprio cabeçalho) */}
+              <Stack.Screen name="Agricultor" component={AgricultorScreen} />
+              <Stack.Screen name="Pescador" component={PescadorScreen} />
+              <Stack.Screen name="Comprador" component={CompradorScreen} />
+              <Stack.Screen name="Comerciante" component={ComercianteScreen} />
+              <Stack.Screen name="Agente" component={AgenteScreen} />
+              <Stack.Screen name="Transportador" component={TransportadorScreen} />
+              <Stack.Screen name="Governo" component={GovernoScreen} />
+              <Stack.Screen name="Ong" component={OngScreen} />
+              <Stack.Screen name="Ferramentas" component={FerramentasScreen} />
+              <Stack.Screen name="BuscaAvancada" component={BuscaAvancadaScreen} />
+              <Stack.Screen name="Calculadora" component={CalculadoraScreen} />
+              <Stack.Screen name="Aparencia" component={AparenciaScreen} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+            </>
+          )}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </AparenciaProvider>
   );
 }
 
