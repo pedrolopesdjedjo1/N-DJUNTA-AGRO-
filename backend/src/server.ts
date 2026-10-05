@@ -29,6 +29,7 @@ import transportadorRoutes from "./routes/transportadorRoutes";
 import governoRoutes from "./routes/governoRoutes";
 import ongRoutes from "./routes/ongRoutes";
 import comunsRoutes from "./routes/comunsRoutes";
+import conteudoRoutes from "./routes/conteudoRoutes";
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.use("/api/transportador", transportadorRoutes);
 app.use("/api/governo", governoRoutes);
 app.use("/api/ong", ongRoutes);
 app.use("/api/comuns", comunsRoutes);
+app.use("/api/conteudo", conteudoRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
