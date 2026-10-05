@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { verify } from "jsonwebtoken";
 import { AuthRequest } from "../middleware/auth";
 import {
   createProduct,
@@ -17,6 +18,26 @@ function isValidVideoUrl(url: any): boolean {
   );
 }
 
+// A lista de produtos é pública (sem authMiddleware), então aqui só conferimos
+// se veio um token válido. O telefone do vendedor só vai para quem tem login.
+function temLogin(req: AuthRequest): boolean {
+  try {
+    const h = String(req.headers.authorization || "");
+    const token = h.startsWith("Bearer ") ? h.slice(7) : "";
+    if (!token) return false;
+    const p: any = verify(token, process.env.JWT_SECRET as string);
+    return !!(p.userId ?? p.id ?? p.sub);
+  } catch (e) {
+    return false;
+  }
+}
+
+// Tira o telefone do vendedor do produto (usado quando não há login)
+function semTelefone(product: any): any {
+  if (!product || !product.owner) return product;
+  return { ...product, owner: { ...product.owner, phone: undefined } };
+}
+
 export async function create(req: AuthRequest, res: Response) {
   try {
     const { title, description, category, price, unit, quantity, location, imageUrl, videoUrl } = req.body;
@@ -25,6 +46,15 @@ export async function create(req: AuthRequest, res: Response) {
       return res.status(400).json({
         error: "Preencha título, categoria, preço, unidade e quantidade.",
       });
+    }
+
+    const precoNum = Number(String(price).replace(",", "."));
+    const quantidadeNum = Number(quantity);
+    if (!Number.isFinite(precoNum) || precoNum <= 0) {
+      return res.status(400).json({ error: "O preço precisa ser um número maior que zero." });
+    }
+    if (!Number.isFinite(quantidadeNum) || quantidadeNum <= 0) {
+      return res.status(400).json({ error: "A quantidade precisa ser um número maior que zero." });
     }
 
     if (videoUrl && !isValidVideoUrl(videoUrl)) {
@@ -59,7 +89,10 @@ export async function list(req: AuthRequest, res: Response) {
       location: location as string | undefined,
     });
 
-    return res.status(200).json(products);
+    if (temLogin(req)) {
+      return res.status(200).json(products);
+    }
+    return res.status(200).json(products.map(semTelefone));
   } catch (error: any) {
     return res.status(400).json({ error: error.message });
   }
@@ -68,7 +101,7 @@ export async function list(req: AuthRequest, res: Response) {
 export async function getOne(req: AuthRequest, res: Response) {
   try {
     const product = await getProductById(req.params.id);
-    return res.status(200).json(product);
+    return res.status(200).json(temLogin(req) ? product : semTelefone(product));
   } catch (error: any) {
     return res.status(404).json({ error: error.message });
   }
