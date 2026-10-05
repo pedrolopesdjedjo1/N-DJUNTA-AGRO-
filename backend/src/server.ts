@@ -20,6 +20,15 @@ import verificationRoutes from "./routes/verificationRoutes";
 import weatherAlertRoutes from "./routes/weatherAlertRoutes";
 import cooperativeRoutes from "./routes/cooperativeRoutes";
 import platformSettingsRoutes from "./routes/platformSettingsRoutes";
+import agricultorRoutes from "./routes/agricultorRoutes";
+import pescadorRoutes from "./routes/pescadorRoutes";
+import compradorRoutes from "./routes/compradorRoutes";
+import comercianteRoutes from "./routes/comercianteRoutes";
+import agenteRoutes from "./routes/agenteRoutes";
+import transportadorRoutes from "./routes/transportadorRoutes";
+import governoRoutes from "./routes/governoRoutes";
+import ongRoutes from "./routes/ongRoutes";
+import comunsRoutes from "./routes/comunsRoutes";
 
 dotenv.config();
 
@@ -46,6 +55,17 @@ app.use("/api/verifications", verificationRoutes);
 app.use("/api/weather-alerts", weatherAlertRoutes);
 app.use("/api/cooperatives", cooperativeRoutes);
 app.use("/api/platform-settings", platformSettingsRoutes);
+
+// Módulos por perfil (funcionalidades 1 a 100)
+app.use("/api/agricultor", agricultorRoutes);
+app.use("/api/pescador", pescadorRoutes);
+app.use("/api/comprador", compradorRoutes);
+app.use("/api/comerciante", comercianteRoutes);
+app.use("/api/agente", agenteRoutes);
+app.use("/api/transportador", transportadorRoutes);
+app.use("/api/governo", governoRoutes);
+app.use("/api/ong", ongRoutes);
+app.use("/api/comuns", comunsRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ status: "NôdjuntaAgro GB API rodando" });
