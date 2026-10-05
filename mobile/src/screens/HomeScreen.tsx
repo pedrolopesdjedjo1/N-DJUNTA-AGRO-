@@ -11,7 +11,7 @@ const AREAS: [string, string, string][] = [
   ["PESCADOR", "Pescador", "🎣 Área do Pescador"],
   ["COMPRADOR", "Comprador", "🛒 Área do Comprador"],
   ["COMERCIANTE", "Comerciante", "🧺 Área da Comerciante"],
-  ["AGENTE", "Agente", "👨‍💼 Área do Agente Digital"],
+  ["AGENTE_DIGITAL", "Agente", "👨‍💼 Área do Agente Digital"],
   ["TRANSPORTADOR", "Transportador", "🚚 Área do Transportador"],
   ["GOVERNO", "Governo", "🏛️ Painel do Governo"],
   ["ONG", "Ong", "🌍 Painel ONU / ONG"],
@@ -59,13 +59,6 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={styles.buttonText}>🛠️ Publicar conteúdo (admin)</Text>
         </TouchableOpacity>
       )}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate("Avisos")}
-      >
-        <Text style={styles.buttonText}>🔔 Avisos do app</Text>
-      </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.button}
