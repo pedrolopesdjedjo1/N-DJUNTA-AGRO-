@@ -1,10 +1,10 @@
 // backend/src/lib/agroEngine.ts
-// Motor comum dos módulos (Pescador, Comprador, Comerciante, Agente, Transportador, Governo, ONG, Comuns).
+// Motor comum dos módulos (Agricultor, Pescador, Comprador, Comerciante, Agente, Transportador, Governo, ONG, Comuns).
 // - Cria e ajusta as tabelas (prefixo agro_) sozinho, sem SQL no Supabase.
-// - Confere o token do login (JWT_SECRET) e o perfil (role) do usuário.
+// - Confere o token do login com o mesmo verifyToken do app e o perfil (role) do usuário.
 // - Entrega listar, criar, atualizar e apagar para cada tabela configurada, e "resumos" (consultas prontas).
 import { Router, Request, Response, NextFunction } from 'express';
-import { verify } from 'jsonwebtoken';
+import { verifyToken } from '../utils/jwt';
 import * as prismaModule from './prisma';
 
 const prisma: any = (prismaModule as any).prisma ?? (prismaModule as any).default;
@@ -157,25 +157,34 @@ async function nomeDoUsuario(id: string): Promise<string | null> {
   }
 }
 
+// Mesma regra do cadastro: só números, sem o 245 do país. O número pode estar salvo em vários formatos.
+function candidatosTelefone(raw: string): string[] {
+  let d = String(raw ?? '').replace(/\D/g, '');
+  if (d.startsWith('00')) d = d.slice(2);
+  if (d.startsWith('245') && d.length > 9) d = d.slice(3);
+  const lista = [d, `245${d}`, `+245${d}`, String(raw ?? '').trim()];
+  return Array.from(new Set(lista.filter(Boolean)));
+}
+
 async function resolverCelulares(c: Cfg, body: any) {
   for (const { de, para } of c.resolver || []) {
     if (!body[de]) continue;
     const r: any[] = await prisma.$queryRawUnsafe(
-      `SELECT id::text AS id FROM users
-        WHERE regexp_replace(coalesce(phone,''), '[^0-9]', '', 'g') = regexp_replace($1, '[^0-9]', '', 'g') LIMIT 1`,
-      String(body[de])
+      'SELECT id::text AS id FROM users WHERE phone = ANY($1::text[]) LIMIT 1',
+      candidatosTelefone(String(body[de]))
     );
     if (!r.length) throw new ErroHttp(400, 'Esse celular não está registado no app.');
     body[para] = r[0].id;
   }
 }
 
-function auth(req: Request, res: Response, next: NextFunction) {
+// Confere o token com o mesmo verifyToken do resto do app e guarda quem é o usuário (req.agro)
+export function auth(req: Request, res: Response, next: NextFunction) {
   const h = String(req.headers.authorization || '');
   const token = h.startsWith('Bearer ') ? h.slice(7) : '';
   try {
-    const p: any = verify(token, process.env.JWT_SECRET as string);
-    const id = p.id ?? p.userId ?? p.sub;
+    const p: any = verifyToken(token);
+    const id = p.userId ?? p.id ?? p.sub;
     if (!id) return res.status(401).json({ erro: 'Token sem id de usuário' });
     (req as any).agro = { id: String(id), role: String(p.role || '').toUpperCase() };
     next();
