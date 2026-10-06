@@ -105,7 +105,14 @@ function garantirTabelas(): Promise<void> {
         if (adds.length) await prisma.$executeRawUnsafe(`ALTER TABLE ${t} ${adds.join(', ')}`);
         await prisma.$executeRawUnsafe(`ALTER TABLE ${t} ENABLE ROW LEVEL SECURITY`);
       }
-      for (const q of DEPOIS) await prisma.$executeRawUnsafe(q);
+      // Preparações extras (índices, avisos automáticos): se uma falhar, só vai para o log
+      for (const q of DEPOIS) {
+        try {
+          await prisma.$executeRawUnsafe(q);
+        } catch (e: any) {
+          console.error('agro: aviso ao preparar extras:', String(e?.message || e).slice(0, 300));
+        }
+      }
     })().catch((e) => {
       pronto = null;
       throw e;
