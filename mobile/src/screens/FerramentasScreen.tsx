@@ -80,6 +80,17 @@ const SECOES: Secao[] = [
     titulo: (i) => i.nome, linhas: (i) => [i.telefone, i.nota || ''],
   },
   {
+    id: 'avaliar_transportador', icone: '⭐', nome: 'Avaliar transportador', rota: 'avaliacoes_transportador', modulo: 'transportador', dono: 'autor_id',
+    desc: 'Usou um transportador? Escreva o celular dele e dê de 1 a 5 estrelas.', botaoNovo: '+ Avaliar transportador',
+    campos: [
+      { k: 'transportador_telefone', r: 'Celular do transportador' },
+      { k: 'estrelas', r: 'Estrelas (1 a 5)', tipo: 'numero' },
+      { k: 'comentario', r: 'Comentário (opcional)', tipo: 'longo', obrig: false },
+    ],
+    titulo: (i) => `${'★'.repeat(Number(i.estrelas) || 0)}${'☆'.repeat(5 - (Number(i.estrelas) || 0))}`,
+    linhas: (i) => [i.comentario || '', i.transportador_telefone || ''],
+  },
+  {
     id: 'historico', icone: '🕘', nome: 'Histórico completo', rota: 'resumo/historico',
     desc: 'Vendas, colheitas, ofertas, pagamentos e transportes por data.', campos: [], compartilhar: true,
     titulo: (i) => i.rotulo, linhas: (i) => [new Date(i.criado_em).toLocaleString()],
