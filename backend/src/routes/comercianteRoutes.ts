@@ -1,5 +1,6 @@
 // backend/src/routes/comercianteRoutes.ts  (funcionalidades 44 a 50)
 import { makeRouter, Cfg, Resumo, COMUNS } from '../lib/agroEngine';
+import { FUNCAO_NOTIFICAR, gatilho } from '../lib/avisosSql';
 
 const cfgs: Record<string, Cfg> = {
   // 44 e 47 Banca: frutas/legumes e venda a retalho
@@ -40,4 +41,20 @@ const resumos: Record<string, Resumo> = {
   },
 };
 
-export default makeRouter(cfgs, { resumos });
+// ---------- avisos automáticos do empréstimo ----------
+const TRIGGERS = [
+  FUNCAO_NOTIFICAR,
+  // Pedido novo: avisa os administradores
+  ...gatilho('agro_emprestimos', 'emprestimo_novo', 'INSERT', `
+    PERFORM agro_notificar(u.id, '🏦 Novo pedido de empréstimo',
+      coalesce(NEW.usuario_nome, 'Comerciante') || ': ' || coalesce(NEW.valor::text, '?'))
+      FROM users u WHERE u.role::text = 'ADMIN';`),
+  // Resposta ou estado mudou: avisa quem pediu
+  ...gatilho('agro_emprestimos', 'emprestimo_mudou', 'UPDATE', `
+    IF NEW.estado IS DISTINCT FROM OLD.estado OR NEW.resposta IS DISTINCT FROM OLD.resposta THEN
+      PERFORM agro_notificar(NEW.usuario_id, '🏦 Pedido de empréstimo',
+        'Estado: ' || coalesce(NEW.estado, '') || coalesce('. ' || NEW.resposta, ''));
+    END IF;`),
+];
+
+export default makeRouter(cfgs, { resumos, depois: TRIGGERS });
