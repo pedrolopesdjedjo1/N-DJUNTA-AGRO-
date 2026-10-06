@@ -1,5 +1,6 @@
 // backend/src/routes/pescadorRoutes.ts  (funcionalidades 21 a 28)
 import { makeRouter, Cfg } from '../lib/agroEngine';
+import { FUNCAO_NOTIFICAR, gatilho } from '../lib/avisosSql';
 
 const cfgs: Record<string, Cfg> = {
   // 21 Publicar peixe fresco
@@ -52,4 +53,19 @@ const cfgs: Record<string, Cfg> = {
   },
 };
 
-export default makeRouter(cfgs);
+// ---------- avisos automáticos das entregas rápidas ----------
+const TRIGGERS = [
+  FUNCAO_NOTIFICAR,
+  // Entrega combinada: avisa a outra pessoa
+  ...gatilho('agro_entregas', 'entrega_peixe_nova', 'INSERT', `
+    PERFORM agro_notificar(NEW.outro_id, '🛵 Nova entrega combinada',
+      coalesce(NEW.peixe, 'Peixe') || ' às ' || coalesce(NEW.hora, '?') || ' em ' || coalesce(NEW.local, '?'));`),
+  // Estado mudou: avisa as duas pessoas
+  ...gatilho('agro_entregas', 'entrega_peixe_mudou', 'UPDATE', `
+    IF NEW.estado IS DISTINCT FROM OLD.estado THEN
+      PERFORM agro_notificar(NEW.outro_id, '🛵 ' || coalesce(NEW.peixe, 'Entrega'), 'Estado da entrega: ' || coalesce(NEW.estado, ''));
+      PERFORM agro_notificar(NEW.usuario_id, '🛵 ' || coalesce(NEW.peixe, 'Entrega'), 'Estado da entrega: ' || coalesce(NEW.estado, ''));
+    END IF;`),
+];
+
+export default makeRouter(cfgs, { depois: TRIGGERS });
