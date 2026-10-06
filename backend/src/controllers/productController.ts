@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { verify } from "jsonwebtoken";
 import { AuthRequest } from "../middleware/auth";
+import { verifyToken } from "../utils/jwt";
 import {
   createProduct,
   listProducts,
@@ -25,7 +25,7 @@ function temLogin(req: AuthRequest): boolean {
     const h = String(req.headers.authorization || "");
     const token = h.startsWith("Bearer ") ? h.slice(7) : "";
     if (!token) return false;
-    const p: any = verify(token, process.env.JWT_SECRET as string);
+    const p: any = verifyToken(token);
     return !!(p.userId ?? p.id ?? p.sub);
   } catch (e) {
     return false;
