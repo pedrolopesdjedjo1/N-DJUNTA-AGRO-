@@ -1,5 +1,10 @@
-// backend/src/routes/compradorRoutes.ts  (funcionalidades 34 a 43; 29 a 32 estão na BuscaAvancadaScreen)
+// backend/src/routes/compradorRoutes.ts  (funcionalidades 33 a 43; 29 a 32 estão na BuscaAvancadaScreen)
+import { Router, Request, Response } from 'express';
 import { makeRouter, Cfg, Resumo, COMUNS, CAMPOS_TRANSPORTE } from '../lib/agroEngine';
+import { FUNCAO_NOTIFICAR, gatilho } from '../lib/avisosSql';
+import * as prismaModule from '../lib/prisma';
+
+const prisma: any = (prismaModule as any).prisma ?? (prismaModule as any).default;
 
 const cfgs: Record<string, Cfg> = {
   precos: COMUNS.precos, // 35 Comparar preços (atuais e históricos)
@@ -92,4 +97,78 @@ const resumos: Record<string, Resumo> = {
   },
 };
 
-export default makeRouter(cfgs, { resumos });
+// ---------- avisos automáticos ----------
+const TRIGGERS = [
+  FUNCAO_NOTIFICAR,
+  // Oferta nova: avisa o vendedor
+  ...gatilho('agro_ofertas', 'oferta_nova', 'INSERT', `
+    PERFORM agro_notificar(NEW.vendedor_id, '🤝 Nova oferta',
+      coalesce(NEW.produto_titulo, 'Produto') || ': ' || coalesce(NEW.preco_oferta::text, '') || ' (' || coalesce(NEW.quantidade, '') || ')');`),
+  // Oferta mudou de estado: avisa a outra parte
+  ...gatilho('agro_ofertas', 'oferta_mudou', 'UPDATE', `
+    IF NEW.estado IS DISTINCT FROM OLD.estado THEN
+      IF NEW.estado = 'aceita' AND OLD.estado = 'contraoferta' THEN
+        PERFORM agro_notificar(NEW.vendedor_id, '🤝 ' || coalesce(NEW.produto_titulo, 'Oferta'), 'O comprador aceitou a sua contraoferta.');
+      ELSIF NEW.estado = 'aceita' THEN
+        PERFORM agro_notificar(NEW.comprador_id, '🤝 ' || coalesce(NEW.produto_titulo, 'Oferta'), 'O vendedor aceitou a sua oferta.');
+      ELSIF NEW.estado = 'recusada' THEN
+        PERFORM agro_notificar(NEW.comprador_id, '🤝 ' || coalesce(NEW.produto_titulo, 'Oferta'), 'O vendedor recusou a sua oferta.');
+      ELSIF NEW.estado = 'contraoferta' THEN
+        PERFORM agro_notificar(NEW.comprador_id, '🤝 ' || coalesce(NEW.produto_titulo, 'Oferta'),
+          'O vendedor fez uma contraoferta de ' || coalesce(NEW.contraoferta::text, '?') || '.');
+      ELSIF NEW.estado = 'cancelada' THEN
+        PERFORM agro_notificar(NEW.vendedor_id, '🤝 ' || coalesce(NEW.produto_titulo, 'Oferta'), 'O comprador cancelou a oferta.');
+      END IF;
+    END IF;`),
+  // Pagamento seguro: avisa o vendedor
+  ...gatilho('agro_pagamentos', 'pagamento_novo', 'INSERT', `
+    PERFORM agro_notificar(NEW.vendedor_id, '🔒 Pagamento reservado',
+      coalesce(NEW.descricao, 'Compra') || ': ' || coalesce(NEW.valor::text, '?'));`),
+  ...gatilho('agro_pagamentos', 'pagamento_mudou', 'UPDATE', `
+    IF NEW.estado IS DISTINCT FROM OLD.estado THEN
+      IF NEW.estado = 'liberado' THEN
+        PERFORM agro_notificar(NEW.vendedor_id, '💰 Pagamento liberado', coalesce(NEW.descricao, 'Compra') || ': o comprador confirmou a entrega.');
+      ELSIF NEW.estado = 'disputa' THEN
+        PERFORM agro_notificar(NEW.vendedor_id, '⚠️ Disputa aberta', coalesce(NEW.descricao, 'Compra') || ': o comprador abriu uma disputa.');
+      END IF;
+    END IF;`),
+  // Leilão: avisa quem pediu quando chega uma proposta
+  ...gatilho('agro_propostas', 'proposta_nova', 'INSERT', `
+    PERFORM agro_notificar((SELECT usuario_id FROM agro_leiloes WHERE id = NEW.leilao_id), '📨 Nova proposta no seu leilão',
+      'Preço ' || coalesce(NEW.preco::text, '?') || ' • ' || coalesce(NEW.quantidade, ''));`),
+];
+
+const router = Router();
+router.use(makeRouter(cfgs, { resumos, depois: TRIGGERS }));
+
+// 33 Perfil do vendedor: dados públicos, avaliação e anúncios ativos
+router.get('/vendedor/:id', async (req: Request, res: Response) => {
+  try {
+    const id = String(req.params.id);
+    const u: any[] = await prisma.$queryRawUnsafe(
+      `SELECT id::text AS id, name, role::text AS role, location, "isVerified" AS verificado,
+              "createdAt" AS desde, phone
+         FROM users WHERE id::text = $1 LIMIT 1`,
+      id
+    );
+    if (!u.length) return res.status(404).json({ erro: 'Vendedor não encontrado.' });
+    const a: any[] = await prisma.$queryRawUnsafe(
+      `SELECT coalesce(round(avg(rating)::numeric, 1)::text, '') AS media, count(*)::text AS total
+         FROM reviews WHERE "targetId" = $1`,
+      id
+    );
+    const p: any[] = await prisma.$queryRawUnsafe(
+      `SELECT id::text AS id, title, price::text AS price, unit, quantity::text AS quantity,
+              location, "imageUrl" AS "imageUrl"
+         FROM products WHERE "ownerId" = $1 AND "isAvailable" = true
+        ORDER BY "createdAt" DESC LIMIT 30`,
+      id
+    );
+    return res.json({ vendedor: u[0], avaliacao: a[0], produtos: p });
+  } catch (e: any) {
+    console.error('comprador vendedor:', String(e?.message || e));
+    return res.status(500).json({ erro: 'Não foi possível carregar o perfil do vendedor.' });
+  }
+});
+
+export default router;
