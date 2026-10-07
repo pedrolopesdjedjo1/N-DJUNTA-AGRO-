@@ -21,7 +21,7 @@ export type Acao = {
   post?: string; // ou chama um caminho do servidor (POST). ":id" vira o id do item
   se?: (i: any, meu: boolean) => boolean; // só mostra o botão quando for verdadeiro
   confirmar?: string; // pergunta antes de executar
-  pedir?: { rotulo: string; numero?: boolean }; // pede um valor antes (enviado como "valor")
+  pedir?: { rotulo: string; numero?: boolean; campo?: string }; // pede um valor antes (enviado em "campo", padrão "valor")
 };
 // Item fixo (sem servidor): atalho, ligação, localização ou texto informativo
 export type Fixo = {
@@ -29,6 +29,8 @@ export type Fixo = {
   especial?: 'enviar_localizacao' | 'abrir_mapa_aqui' | 'abrir_definicoes';
   msg?: string; botao?: string;
 };
+// Id de outro utilizador: nome de um campo do item, ou uma função (útil quando depende de quem está a ver)
+export type IdSpec = string | ((i: any, meu: boolean) => string | undefined);
 export type Secao = {
   id: string; icone: string; nome: string; desc: string; rota: string; modulo?: string;
   campos: Campo[]; filtros?: string[]; fixo?: any; dono?: string;
@@ -36,15 +38,28 @@ export type Secao = {
   tel?: string; url?: string; mapa?: boolean; acoes?: Acao[]; botaoNovo?: string;
   rotaMapa?: { de: string; ate: string };
   rotaAcao?: string; // caminho usado nos botões de alterar e apagar (padrão: o mesmo de rota)
+  rotaNova?: string; // caminho usado para criar (padrão: o mesmo de rota)
   compartilhar?: boolean;
   whatsapp?: (i: any) => string;
-  chat?: { id: string; nome?: string }; // botão de mensagem para o utilizador do campo "id"
+  chat?: { id: IdSpec; nome?: string }; // botão de mensagem
+  perfil?: { id: IdSpec; nome?: string }; // botão para ver o perfil da pessoa
   filho?: { sec: Secao; pai: string; rotulo: string };
   verificar?: { rota: string; rotulo: string; vazio: string };
   grupo?: string; // título do grupo no menu
   tela?: string; params?: any; // no menu, abre outra tela do app
   perfis?: string[]; // só aparece para estes perfis (ADMIN vê tudo)
   fixos?: Fixo[]; // lista fixa em vez de buscar no servidor
+};
+
+// Atalho no menu para uma tela que o app já tem
+export const linkTela = (
+  grupo: string, id: string, icone: string, nome: string, desc: string, tela: string, params?: any
+): Secao => ({ id, icone, nome, desc, grupo, tela, params, rota: '', campos: [], titulo: () => '', linhas: () => [] });
+
+const resolverId = (spec: IdSpec | undefined, item: any, meu: boolean): string | undefined => {
+  if (!spec) return undefined;
+  const v = typeof spec === 'function' ? spec(item, meu) : item[spec];
+  return v ? String(v) : undefined;
 };
 
 async function chamar(modulo: string, caminho: string, metodo = 'GET', corpo?: any) {
@@ -219,16 +234,18 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
       return;
     }
     const corpo = { ...form, ...fixoTotal };
+    const caminho = cfg.rotaNova || cfg.rota;
     try {
-      await chamar(modulo, cfg.rota, 'POST', corpo);
+      const r = await chamar(modulo, caminho, 'POST', corpo);
       setNovo(false);
       setForm({});
+      if (r && r.mensagem) Alert.alert('Pronto', r.mensagem);
       carregar();
     } catch (e: any) {
       if (e.http) {
         Alert.alert('Erro', e.message);
       } else {
-        await guardarNaFila(modulo, cfg.rota, corpo);
+        await guardarNaFila(modulo, caminho, corpo);
         Alert.alert('Sem internet', 'Guardado no aparelho. Será enviado quando a conexão voltar.');
         setNovo(false);
         setForm({});
@@ -276,11 +293,13 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
 
   async function executarAcao(i: any, a: Acao, extra?: any) {
     try {
+      let r: any;
       if (a.post) {
-        await chamar(modulo, a.post.replace(':id', String(i.id)), 'POST', extra || {});
+        r = await chamar(modulo, a.post.replace(':id', String(i.id)), 'POST', extra || {});
       } else {
-        await chamar(modulo, `${cfg.rotaAcao || cfg.rota}/${i.id}`, 'PATCH', { ...(a.patch || {}), ...(extra || {}) });
+        r = await chamar(modulo, `${cfg.rotaAcao || cfg.rota}/${i.id}`, 'PATCH', { ...(a.patch || {}), ...(extra || {}) });
       }
+      if (r && r.mensagem) Alert.alert('Pronto', r.mensagem);
       carregar();
     } catch (e: any) {
       Alert.alert('Erro', e.http ? e.message : 'Sem internet. Tente de novo.');
@@ -311,7 +330,7 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
       return;
     }
     setPedido(null);
-    executarAcao(item, a, { valor: entrada.trim() });
+    executarAcao(item, a, { [a.pedir?.campo || 'valor']: entrada.trim() });
   }
 
   function apagar(i: any) {
@@ -330,8 +349,10 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
     if (!cfg.verificar) return;
     try {
       const d = await chamar(modulo, cfg.verificar.rota);
+      const linha = (x: any) =>
+        x.rotulo !== undefined ? `${x.rotulo}: ${x.valor}` : `${x.produto}: ${Number(x.preco)} em ${x.cidade}`;
       if (!d.length) Alert.alert(cfg.verificar.rotulo, cfg.verificar.vazio);
-      else Alert.alert(cfg.verificar.rotulo, d.map((x: any) => `${x.rotulo}: ${x.valor}`).join('\n'));
+      else Alert.alert(cfg.verificar.rotulo, d.map(linha).join('\n'));
     } catch (e: any) {
       Alert.alert('Erro', e.http ? e.message : 'Sem internet.');
     }
@@ -468,6 +489,8 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
             const meu = !!cfg.dono && String(item[cfg.dono]) === userId;
             const tel = cfg.tel ? item[cfg.tel] : null;
             const linhas = cfg.linhas(item).filter(Boolean);
+            const chatId = resolverId(cfg.chat?.id, item, meu);
+            const perfilId = resolverId(cfg.perfil?.id, item, meu);
             return (
               <TouchableOpacity
                 activeOpacity={leituraVoz ? 0.6 : 1}
@@ -478,15 +501,26 @@ function TelaSecao({ modulo: moduloPadrao, cfg, userId, voltar, extraFixo, navig
                   {linhas.map((l, n) => <Text key={n} style={s.linha}>{l}</Text>)}
                   <View style={s.acoes}>
                     {tel ? <TouchableOpacity style={s.btnPeq} onPress={() => ligar(tel)}><Text style={s.btnTxt}>📞 Ligar</Text></TouchableOpacity> : null}
-                    {cfg.chat && item[cfg.chat.id] ? (
+                    {chatId && chatId !== userId ? (
                       <TouchableOpacity
                         style={s.btnPeq}
                         onPress={() => navigation?.navigate('Chat', {
-                          userId: item[cfg.chat!.id],
-                          userName: cfg.chat!.nome ? item[cfg.chat!.nome] || 'Chat' : 'Chat',
+                          userId: chatId,
+                          userName: cfg.chat?.nome ? item[cfg.chat.nome] || 'Chat' : 'Chat',
                         })}
                       >
                         <Text style={s.btnTxt}>💬 Mensagem</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    {perfilId && perfilId !== userId ? (
+                      <TouchableOpacity
+                        style={s.btnPeq}
+                        onPress={() => navigation?.navigate('PerfilVendedor', {
+                          userId: perfilId,
+                          userName: cfg.perfil?.nome ? item[cfg.perfil.nome] || '' : '',
+                        })}
+                      >
+                        <Text style={s.btnTxt}>👤 Perfil</Text>
                       </TouchableOpacity>
                     ) : null}
                     {cfg.mapa && item.lat && item.lng ? (
