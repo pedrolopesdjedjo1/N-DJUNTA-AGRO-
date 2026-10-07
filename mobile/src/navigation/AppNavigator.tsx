@@ -39,8 +39,8 @@ import BuscaAvancadaScreen from "../screens/BuscaAvancadaScreen";
 import CalculadoraScreen from "../screens/CalculadoraScreen";
 import AparenciaScreen from "../screens/AparenciaScreen";
 import AdminConteudoScreen from "../screens/AdminConteudoScreen";
-import AvisosScreen from "../screens/AvisosScreen";
 import ZonaProtegidaScreen from "../screens/ZonaProtegidaScreen";
+import PerfilVendedorScreen from "../screens/PerfilVendedorScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -151,6 +151,14 @@ export default function AppNavigator() {
                 component={DashboardScreen}
                 options={{ headerShown: true, title: t("dashboard") }}
               />
+              <Stack.Screen
+                name="PerfilVendedor"
+                component={PerfilVendedorScreen}
+                options={({ route }: any) => ({
+                  headerShown: true,
+                  title: route.params?.userName || "Perfil",
+                })}
+              />
 
               {/* Áreas por perfil (cada uma já tem o seu próprio cabeçalho) */}
               <Stack.Screen name="Agricultor" component={AgricultorScreen} />
@@ -166,7 +174,6 @@ export default function AppNavigator() {
               <Stack.Screen name="Calculadora" component={CalculadoraScreen} />
               <Stack.Screen name="Aparencia" component={AparenciaScreen} />
               <Stack.Screen name="AdminConteudo" component={AdminConteudoScreen} />
-              <Stack.Screen name="Avisos" component={AvisosScreen} />
               <Stack.Screen name="ZonaProtegida" component={ZonaProtegidaScreen} />
             </>
           ) : (
