@@ -1,5 +1,6 @@
 // backend/src/routes/comunsRoutes.ts  (funcionalidades para todos: 83, 85, 87 a 99)
 import { makeRouter, Cfg, Resumo, COMUNS } from '../lib/agroEngine';
+import { FUNCAO_NOTIFICAR, gatilho } from '../lib/avisosSql';
 
 const cfgs: Record<string, Cfg> = {
   // 87 Guardar contactos
@@ -89,8 +90,35 @@ const resumos: Record<string, Resumo> = {
   },
 };
 
-export default makeRouter(cfgs, {
-  resumos,
+// ---------- avisos automáticos ----------
+const TRIGGERS = [
   // um voto por pessoa em cada enquete
-  depois: ['CREATE UNIQUE INDEX IF NOT EXISTS agro_votos_unico ON agro_votos (enquete_id, usuario_id)'],
-});
+  'CREATE UNIQUE INDEX IF NOT EXISTS agro_votos_unico ON agro_votos (enquete_id, usuario_id)',
+  FUNCAO_NOTIFICAR,
+  // Resposta no fórum ou num pedido de sementes: avisa quem publicou
+  ...gatilho('agro_forum_respostas', 'forum_resposta', 'INSERT', `
+    PERFORM agro_notificar(p.usuario_id, '💬 Nova resposta na sua publicação',
+      coalesce(NEW.usuario_nome, 'Alguém') || ' respondeu: ' || left(coalesce(NEW.texto, ''), 80))
+      FROM agro_forum_posts p
+     WHERE p.id = NEW.post_id AND p.usuario_id IS DISTINCT FROM NEW.usuario_id;`),
+  // Enquete nova: avisa todos
+  ...gatilho('agro_enquetes', 'enquete_nova', 'INSERT', `
+    PERFORM agro_notificar(u.id, '🗳️ Nova enquete', coalesce(NEW.pergunta, ''))
+      FROM users u WHERE u.id IS DISTINCT FROM NEW.usuario_id;`),
+  // Recompensa: avisa quem recebeu os pontos
+  ...gatilho('agro_recompensas', 'recompensa_nova', 'INSERT', `
+    PERFORM agro_notificar(NEW.usuario_id, '🎁 Você ganhou ' || coalesce(NEW.pontos::text, '?') || ' pontos',
+      coalesce(NEW.motivo, ''));`),
+  // Suporte: avisa os administradores e depois quem pediu
+  ...gatilho('agro_suporte', 'suporte_novo', 'INSERT', `
+    PERFORM agro_notificar(u.id, '🛟 Novo pedido de suporte',
+      coalesce(NEW.usuario_nome, 'Utilizador') || ': ' || coalesce(NEW.assunto, ''))
+      FROM users u WHERE u.role::text = 'ADMIN';`),
+  ...gatilho('agro_suporte', 'suporte_resposta', 'UPDATE', `
+    IF NEW.resposta IS DISTINCT FROM OLD.resposta OR NEW.estado IS DISTINCT FROM OLD.estado THEN
+      PERFORM agro_notificar(NEW.usuario_id, '🛟 Suporte: ' || coalesce(NEW.assunto, ''),
+        coalesce(NEW.resposta, 'Estado: ' || coalesce(NEW.estado, '')));
+    END IF;`),
+];
+
+export default makeRouter(cfgs, { resumos, depois: TRIGGERS });
