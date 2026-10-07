@@ -1,8 +1,8 @@
 // backend/src/routes/agricultorRoutes.ts  (funcionalidades 1 a 20)
-// Agora usa o motor comum (lib/agroEngine), como os outros módulos.
-// As telas continuam as mesmas: o caminho /api/agricultor/... não mudou.
+// Usa o motor comum (lib/agroEngine), como os outros módulos.
 import { Router, Request, Response } from 'express';
 import { makeRouter, auth, Cfg, COMUNS, CAMPOS_TRANSPORTE } from '../lib/agroEngine';
+import { FUNCAO_NOTIFICAR, gatilho } from '../lib/avisosSql';
 import * as prismaModule from '../lib/prisma';
 
 const prisma: any = (prismaModule as any).prisma ?? (prismaModule as any).default;
@@ -15,10 +15,15 @@ const cfgs: Record<string, Cfg> = {
     padrao: { ativo: true },
   },
   alertas_regiao: COMUNS.alertas_regiao,
+  // 7 Marcar encontro: a outra pessoa (se tiver conta, pelo celular) também vê e recebe aviso
   encontros: {
-    t: 'agro_encontros', leitura: 'dono', escrita: 'dono', dono: 'criado_por',
-    campos: { outro_nome: 'text', outro_telefone: 'text', data_hora: 'text', local: 'text', estado: 'text' },
+    t: 'agro_encontros', leitura: 'dono', escrita: 'dono', dono: 'criado_por', tambem: 'outro_id',
+    campos: {
+      outro_nome: 'text', outro_telefone: 'text', outro_id: 'text',
+      data_hora: 'text', local: 'text', estado: 'text',
+    },
     padrao: { estado: 'marcado' },
+    resolver: [{ de: 'outro_telefone', para: 'outro_id' }],
   },
   // Pedidos de transporte: os transportadores veem os pedidos em aberto
   transportes: {
@@ -49,6 +54,21 @@ const cfgs: Record<string, Cfg> = {
   },
 };
 
+// ---------- avisos automáticos dos encontros ----------
+const TRIGGERS = [
+  FUNCAO_NOTIFICAR,
+  ...gatilho('agro_encontros', 'encontro_novo', 'INSERT', `
+    PERFORM agro_notificar(NEW.outro_id, '📅 Novo encontro marcado',
+      coalesce(NEW.data_hora, '') || ' em ' || coalesce(NEW.local, ''));`),
+  ...gatilho('agro_encontros', 'encontro_mudou', 'UPDATE', `
+    IF NEW.estado IS DISTINCT FROM OLD.estado THEN
+      PERFORM agro_notificar(NEW.criado_por, '📅 Encontro: ' || coalesce(NEW.estado, ''),
+        coalesce(NEW.data_hora, '') || ' em ' || coalesce(NEW.local, ''));
+      PERFORM agro_notificar(NEW.outro_id, '📅 Encontro: ' || coalesce(NEW.estado, ''),
+        coalesce(NEW.data_hora, '') || ' em ' || coalesce(NEW.local, ''));
+    END IF;`),
+];
+
 const router = Router();
 
 // Alertas de preço que já foram atingidos pelos preços do mercado
@@ -71,6 +91,6 @@ router.get('/atingidos', auth, async (req: Request, res: Response) => {
   }
 });
 
-router.use(makeRouter(cfgs));
+router.use(makeRouter(cfgs, { depois: TRIGGERS }));
 
 export default router;
