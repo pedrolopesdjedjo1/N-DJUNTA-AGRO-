@@ -65,7 +65,7 @@ const cfgs: Record<string, Cfg> = {
 };
 
 const resumos: Record<string, Resumo> = {
-  // 36 Quando surge um produto igual ao desejado
+  // 36 Quando surge um produto igual ao desejado (consulta manual; o aviso automático também existe)
   correspondencias: {
     sql: `SELECT p.title AS rotulo,
                  p.price::text || ' • ' || coalesce(p.location,'-') || ' (procurava: ' || d.produto || ')' AS valor
@@ -136,6 +136,21 @@ const TRIGGERS = [
   ...gatilho('agro_propostas', 'proposta_nova', 'INSERT', `
     PERFORM agro_notificar((SELECT usuario_id FROM agro_leiloes WHERE id = NEW.leilao_id), '📨 Nova proposta no seu leilão',
       'Preço ' || coalesce(NEW.preco::text, '?') || ' • ' || coalesce(NEW.quantidade, ''));`),
+  // Produto novo publicado: avisa quem tem esse produto na lista de desejos ou num alerta de nova colheita
+  ...gatilho('products', 'produto_novo', 'INSERT', `
+    PERFORM agro_notificar(d.usuario_id, '📝 Apareceu o que você procura',
+      NEW.title || ': ' || NEW.price::text || ' em ' || coalesce(NEW.location, '-'))
+      FROM agro_desejos d
+     WHERE d.ativo = true
+       AND NEW.title ILIKE '%' || d.produto || '%'
+       AND (d.preco_max IS NULL OR NEW.price <= d.preco_max)
+       AND d.usuario_id IS DISTINCT FROM NEW."ownerId";
+    PERFORM agro_notificar(a.usuario_id, '🌾 Nova colheita disponível',
+      NEW.title || ' em ' || coalesce(NEW.location, '-'))
+      FROM agro_alertas_colheita a
+     WHERE NEW.title ILIKE '%' || a.produto || '%'
+       AND (coalesce(a.regiao, '') = '' OR NEW.location ILIKE '%' || a.regiao || '%')
+       AND a.usuario_id IS DISTINCT FROM NEW."ownerId";`),
 ];
 
 const router = Router();
