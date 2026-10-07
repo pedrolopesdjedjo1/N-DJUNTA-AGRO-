@@ -25,12 +25,22 @@ const resumos: Record<string, Resumo> = {
   painel: {
     papeis: PAINEL,
     sql: `SELECT 'Utilizadores' AS rotulo, count(*)::text AS valor FROM users
+          UNION ALL SELECT 'Contas verificadas', count(*)::text FROM users WHERE "isVerified" = true
           UNION ALL SELECT 'Anúncios publicados', count(*)::text FROM products
-          UNION ALL SELECT 'Contas verificadas', count(*)::text FROM users WHERE "isVerified" = true`,
+          UNION ALL SELECT 'Vendas registadas', count(*)::text FROM agro_vendas
+          UNION ALL SELECT 'Valor das vendas registadas', coalesce(sum(preco), 0)::text FROM agro_vendas
+          UNION ALL SELECT 'Entregas concluídas', count(*)::text FROM agro_transportes WHERE estado = 'concluida'
+          UNION ALL SELECT 'Colheitas registadas', count(*)::text FROM agro_colheitas`,
   },
   perfis: {
     papeis: PAINEL,
     sql: `SELECT role::text AS rotulo, count(*)::text AS valor FROM users GROUP BY role ORDER BY count(*) DESC`,
+  },
+  // Alcance por região (dados agregados, sem nomes)
+  regioes: {
+    papeis: PAINEL,
+    sql: `SELECT coalesce(nullif(location, ''), '(sem região)') AS rotulo, count(*)::text || ' utilizadores' AS valor
+            FROM users GROUP BY 1 ORDER BY count(*) DESC LIMIT 30`,
   },
 };
 
