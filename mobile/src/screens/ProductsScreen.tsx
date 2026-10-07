@@ -223,6 +223,7 @@ export default function ProductsScreen({ navigation }: any) {
                 {item.price} FCFA {item.unit ? `/ ${item.unit}` : ""}
               </Text>
               {details ? <Text style={styles.productDetails}>{details}</Text> : null}
+              {item.owner?.name ? <Text style={styles.productDetails}>Vendedor: {item.owner.name}</Text> : null}
               {item.category ? (
                 <Text style={styles.productCategory}>
                   {CATEGORIES.includes(item.category)
@@ -242,6 +243,19 @@ export default function ProductsScreen({ navigation }: any) {
                 {phone && !isMine ? (
                   <TouchableOpacity style={styles.smallButton} onPress={() => ligar(phone)}>
                     <Text style={styles.smallButtonText}>📞 Ligar</Text>
+                  </TouchableOpacity>
+                ) : null}
+                {!isMine ? (
+                  <TouchableOpacity
+                    style={styles.smallButton}
+                    onPress={() =>
+                      navigation.navigate("PerfilVendedor", {
+                        userId: item.ownerId,
+                        userName: item.owner?.name ?? t("seller"),
+                      })
+                    }
+                  >
+                    <Text style={styles.smallButtonText}>👤 Vendedor</Text>
                   </TouchableOpacity>
                 ) : null}
                 <TouchableOpacity style={styles.smallButton} onPress={() => partilharProduto(item)}>
