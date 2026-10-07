@@ -3,26 +3,26 @@ import React from 'react';
 import ModuloAgro, { Secao } from '../components/ModuloAgro';
 
 const lista = (i: any) => [i.valor];
+const dataBr = (d: any) => (d ? new Date(d).toLocaleDateString() : '');
+
+const G_DADOS = '📊 DADOS E ALERTAS';
+const G_MENSAGENS = '📣 COMUNICAÇÃO';
+const G_ADMIN = '🛡️ ADMINISTRAÇÃO';
+
+const resumo = (id: string, icone: string, nome: string, rota: string, desc: string): Secao => ({
+  id, grupo: G_DADOS, icone, nome, rota, desc, campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista,
+});
 
 const SECOES: Secao[] = [
-  { id: 'producao', icone: '🗺️', nome: 'Produção por região', rota: 'resumo/producao', desc: 'Anúncios e volume registados em cada região.', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
-  { id: 'colheitas', icone: '🌾', nome: 'Colheitas registadas', rota: 'resumo/colheitas_registadas', desc: 'Colheitas que os agricultores autorizaram para estatísticas.', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
-  { id: 'preco_medio', icone: '📈', nome: 'Preço médio nacional', rota: 'resumo/preco_medio', desc: 'Média, mínimo e máximo por produto.', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
-  { id: 'escassez', icone: '⚠️', nome: 'Alerta de escassez', rota: 'resumo/escassez', desc: 'Produtos com pouca quantidade disponível.', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
-  { id: 'abusivo', icone: '🚩', nome: 'Alerta de preço abusivo', rota: 'resumo/preco_abusivo', desc: 'Preços muito acima da média. Precisam de verificação humana.', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
-  { id: 'emprego', icone: '👥', nome: 'Emprego rural', rota: 'resumo/emprego', desc: 'Utilizadores por perfil (dados agregados).', campos: [], compartilhar: true, titulo: (i) => i.rotulo, linhas: lista },
+  resumo('producao', '🗺️', 'Produção por região', 'resumo/producao', 'Anúncios e volume registados em cada região.'),
+  resumo('colheitas', '🌾', 'Colheitas registadas', 'resumo/colheitas_registadas', 'Colheitas que os agricultores autorizaram para estatísticas.'),
+  resumo('preco_medio', '📈', 'Preço médio nacional', 'resumo/preco_medio', 'Média, mínimo e máximo por produto.'),
+  resumo('escassez', '⚠️', 'Alerta de escassez', 'resumo/escassez', 'Produtos com pouca quantidade disponível.'),
+  resumo('abusivo', '🚩', 'Alerta de preço abusivo', 'resumo/preco_abusivo', 'Preços muito acima da média. Precisam de verificação humana.'),
+  resumo('emprego', '👥', 'Emprego rural', 'resumo/emprego', 'Utilizadores por perfil (dados agregados).'),
   {
-    id: 'avisos', icone: '📣', nome: 'Enviar mensagem oficial', rota: 'avisos', dono: 'usuario_id',
-    desc: 'Avisos para uma região ou grupo. Todos os utilizadores podem ler.',
-    campos: [
-      { k: 'regiao', r: 'Região (ou Todas)' }, { k: 'publico', r: 'Para quem (ex.: agricultores)' },
-      { k: 'titulo', r: 'Título' }, { k: 'texto', r: 'Mensagem', tipo: 'longo' },
-    ],
-    titulo: (i) => i.titulo, linhas: (i) => [i.regiao, i.publico || '', i.texto],
-  },
-  {
-    id: 'impacto', icone: '🎯', nome: 'Impacto de projetos', rota: 'impacto', dono: 'usuario_id', compartilhar: true,
-    desc: 'Compare um indicador antes e depois de um projeto.',
+    id: 'impacto', grupo: G_DADOS, icone: '🎯', nome: 'Impacto de projetos', rota: 'impacto', dono: 'usuario_id', compartilhar: true,
+    desc: 'Compare um indicador antes e depois de um projeto.', botaoNovo: '+ Registar impacto',
     campos: [
       { k: 'projeto', r: 'Projeto' }, { k: 'indicador', r: 'Indicador' },
       { k: 'antes', r: 'Valor antes', tipo: 'numero' }, { k: 'depois', r: 'Valor depois', tipo: 'numero' },
@@ -36,21 +36,34 @@ const SECOES: Secao[] = [
     },
   },
   {
-    id: 'emprestimos', icone: '🏦', nome: 'Pedidos de empréstimo (admin)', rota: 'emprestimos',
-    desc: 'Só o administrador vê todos e responde.',
-    campos: [],
-    acoes: [
-      { r: 'Aprovar', patch: { estado: 'aprovado' } }, { r: 'Recusar', patch: { estado: 'recusado' } },
-      { r: 'Pedir documentos', patch: { estado: 'documentos', resposta: 'Entre em contacto para apresentar documentos.' } },
+    id: 'avisos', grupo: G_MENSAGENS, icone: '📣', nome: 'Enviar mensagem oficial', rota: 'avisos', dono: 'usuario_id',
+    desc: 'Envia um aviso para os utilizadores da região escolhida (escreva Todas para avisar todos). Eles recebem em Notificações.',
+    botaoNovo: '+ Nova mensagem',
+    campos: [
+      { k: 'regiao', r: 'Região', dica: 'ex.: Bafatá ou Todas' }, { k: 'publico', r: 'Para quem (opcional)', obrig: false, dica: 'ex.: agricultores' },
+      { k: 'titulo', r: 'Título' }, { k: 'texto', r: 'Mensagem', tipo: 'longo' },
     ],
-    titulo: (i) => `${i.usuario_nome || 'Comerciante'}: ${Number(i.valor)}`,
-    linhas: (i) => [i.finalidade, `Estado: ${i.estado}`],
+    titulo: (i) => i.titulo, linhas: (i) => [`${i.regiao}${i.publico ? ` • ${i.publico}` : ''}`, i.texto, dataBr(i.criado_em)],
   },
   {
-    id: 'registos', icone: '🧑‍🌾', nome: 'Contas pedidas por agentes (admin)', rota: 'registos',
-    desc: 'Pedidos de conta feitos por agentes. Só o administrador aprova.',
-    campos: [], tel: 'telefone',
-    acoes: [{ r: 'Aprovar', patch: { estado: 'aprovado' } }, { r: 'Recusar', patch: { estado: 'recusado' } }],
+    id: 'emprestimos', grupo: G_ADMIN, icone: '🏦', nome: 'Pedidos de empréstimo', rota: 'emprestimos', perfis: ['ADMIN'],
+    desc: 'Só o administrador vê todos e responde. A comerciante recebe um aviso.', campos: [],
+    acoes: [
+      { r: '✅ Aprovar', patch: { estado: 'aprovado' }, se: (i) => i.estado !== 'aprovado' },
+      { r: '❌ Recusar', patch: { estado: 'recusado' }, se: (i) => i.estado !== 'recusado' },
+      { r: '📄 Pedir documentos', patch: { estado: 'documentos', resposta: 'Entre em contacto para apresentar documentos.' }, se: (i) => i.estado === 'em análise' },
+    ],
+    titulo: (i) => `${i.usuario_nome || 'Comerciante'}: ${Number(i.valor)}`,
+    linhas: (i) => [i.finalidade, `Estado: ${i.estado}${i.resposta ? ` • ${i.resposta}` : ''}`],
+  },
+  {
+    id: 'registos', grupo: G_ADMIN, icone: '🧑‍🌾', nome: 'Contas pedidas por agentes', rota: 'registos', perfis: ['ADMIN'], tel: 'telefone',
+    desc: 'Toque em Criar conta para registar o agricultor. O app mostra o celular e uma senha temporária para entregar a ele.',
+    campos: [],
+    acoes: [
+      { r: '✅ Criar conta', post: 'registos/:id/criar-conta', confirmar: 'Criar a conta deste agricultor agora?', se: (i) => !!i.autorizado && i.estado !== 'conta_criada' && i.estado !== 'recusado' },
+      { r: '❌ Recusar', patch: { estado: 'recusado' }, se: (i) => i.estado === 'pendente' },
+    ],
     titulo: (i) => `${i.nome} (${i.regiao})`,
     linhas: (i) => [i.autorizado ? 'Autorizado ✅' : 'Sem autorização ⚠️', `Por ${i.usuario_nome || 'Agente'} • ${i.estado}`],
   },
