@@ -29,7 +29,20 @@ const CATEGORY_OF: Record<string, ProductCategory> = {
   ARTESANATO: "ARTESANATO",
 };
 
-const DETAIL_KEYS = ["brand", "model", "estado", "color", "size", "deliveryOptions", "saleConditions"];
+const DETAIL_KEYS = [
+  "brand",
+  "model",
+  "estado",
+  "color",
+  "colors",
+  "size",
+  "weight",
+  "materials",
+  "productionTime",
+  "tipo",
+  "deliveryOptions",
+  "saleConditions",
+];
 
 function isValidMediaUrl(url: any): boolean {
   return (
@@ -47,6 +60,7 @@ function cleanDetails(input: any): Record<string, string> | undefined {
     if (typeof value === "string" && value.trim()) out[key] = value.trim().slice(0, 300);
   }
   if (out.estado && !["NOVO", "USADO"].includes(out.estado)) delete out.estado;
+  if (out.tipo && !["PRODUTO", "MATERIAL", "FERRAMENTA"].includes(out.tipo)) delete out.tipo;
   return Object.keys(out).length ? out : undefined;
 }
 
@@ -122,6 +136,7 @@ export async function list(req: AuthRequest, res: Response) {
       minPrice: num(req.query.minPrice),
       maxPrice: num(req.query.maxPrice),
       estado: str(req.query.estado),
+      tipo: str(req.query.tipo),
       minRating: num(req.query.minRating),
       sort: str(req.query.sort),
       ownerId: mine ? req.userId : str(req.query.ownerId),
