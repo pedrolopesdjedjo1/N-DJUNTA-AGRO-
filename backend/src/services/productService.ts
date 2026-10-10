@@ -35,6 +35,7 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   estado?: string;
+  tipo?: string;
   minRating?: number;
   sort?: string;
   ownerId?: string;
@@ -77,6 +78,7 @@ export async function createProduct(data: CreateProductInput) {
 
 export async function listProducts(filters: ProductFilters) {
   const where: Prisma.ProductWhereInput = {};
+  const and: Prisma.ProductWhereInput[] = [];
 
   if (!filters.includeUnavailable) where.isAvailable = true;
   if (filters.ownerId) where.ownerId = filters.ownerId;
@@ -96,9 +98,9 @@ export async function listProducts(filters: ProductFilters) {
     ];
   }
 
-  if (filters.estado) {
-    where.details = { path: ["estado"], equals: filters.estado };
-  }
+  if (filters.estado) and.push({ details: { path: ["estado"], equals: filters.estado } });
+  if (filters.tipo) and.push({ details: { path: ["tipo"], equals: filters.tipo } });
+  if (and.length) where.AND = and;
 
   if (filters.minRating !== undefined) {
     const minRating = filters.minRating;
