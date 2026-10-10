@@ -7,7 +7,8 @@ const include = { items: true, delivery: true };
 const SELLER_FLOW: Record<string, string[]> = {
   NOVO: ["ACEITO", "CANCELADO"],
   ACEITO: ["EM_PREPARACAO", "CANCELADO"],
-  EM_PREPARACAO: ["ENVIADO", "CANCELADO"],
+  EM_PREPARACAO: ["PRONTO", "ENVIADO", "CANCELADO"],
+  PRONTO: ["ENVIADO", "CANCELADO"],
   ENVIADO: ["CONCLUIDO"],
 };
 
@@ -25,7 +26,7 @@ const TRANSPORTER_FLOW: Record<string, string[]> = {
 
 const SELLER_DELIVERY_FLOW: Record<string, string[]> = {
   SOLICITADA: ["CANCELADA"],
-  ACEITA: ["CANCELADA"],
+  ACEITA: ["RECOLHIDA", "CANCELADA"],
   RECOLHIDA: ["ENTREGUE"],
   EM_TRANSITO: ["ENTREGUE"],
 };
@@ -271,7 +272,7 @@ export async function requestDelivery(orderId: string, sellerId: string, input: 
   if (!order || order.sellerId !== sellerId) {
     throw new Error("Pedido não encontrado.");
   }
-  if (!["ACEITO", "EM_PREPARACAO", "ENVIADO"].includes(order.status)) {
+  if (!["ACEITO", "EM_PREPARACAO", "PRONTO", "ENVIADO"].includes(order.status)) {
     throw new Error("Só dá para pedir transporte de um pedido aceite.");
   }
 
@@ -324,7 +325,7 @@ export async function requestDelivery(orderId: string, sellerId: string, input: 
   await notify(
     input.transporterId,
     "Nova entrega",
-    "Um comerciante pediu a sua entrega. Abra Entregas para responder.",
+    "Um vendedor pediu a sua entrega. Abra Entregas para responder.",
     delivery.id
   );
 
