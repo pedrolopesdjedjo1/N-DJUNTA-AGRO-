@@ -2,9 +2,16 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
 
-export const MERCHANT_TABS = [
+export interface TabDef {
+  key: string;
+  icon: string;
+  label: string;
+}
+
+export const MERCHANT_TABS: TabDef[] = [
   { key: "MerchantHome", icon: "🏠", label: "Início" },
   { key: "MerchantProducts", icon: "📦", label: "Produtos" },
   { key: "MerchantOrders", icon: "🛒", label: "Pedidos" },
@@ -12,13 +19,21 @@ export const MERCHANT_TABS = [
   { key: "StoreProfile", icon: "👤", label: "Perfil" },
 ];
 
-export default function MerchantTabs({ active }: { active: string }) {
+export const ARTISAN_TABS: TabDef[] = [
+  { key: "ArtisanHome", icon: "🏠", label: "Início" },
+  { key: "ArtisanProducts", icon: "🧺", label: "Artesanatos" },
+  { key: "ArtisanSell", icon: "🛍️", label: "Vender" },
+  { key: "ArtisanOrders", icon: "📦", label: "Pedidos" },
+  { key: "ArtisanProfile", icon: "👤", label: "Perfil" },
+];
+
+export function RoleTabs({ active, tabs }: { active: string; tabs: TabDef[] }) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
 
   return (
     <View style={[s.bar, { paddingBottom: 6 + insets.bottom }]}>
-      {MERCHANT_TABS.map((tab) => {
+      {tabs.map((tab) => {
         const isActive = tab.key === active;
         return (
           <TouchableOpacity key={tab.key} style={s.tab} onPress={() => !isActive && navigation.navigate(tab.key)}>
@@ -31,12 +46,35 @@ export default function MerchantTabs({ active }: { active: string }) {
   );
 }
 
-export function MerchantLayout({ active, children }: { active: string; children: React.ReactNode }) {
+export default function MerchantTabs({ active }: { active: string }) {
+  return <RoleTabs active={active} tabs={MERCHANT_TABS} />;
+}
+
+function Layout({ active, tabs, children }: { active: string; tabs: TabDef[]; children: React.ReactNode }) {
   return (
     <View style={s.layout}>
       <View style={s.content}>{children}</View>
-      <MerchantTabs active={active} />
+      <RoleTabs active={active} tabs={tabs} />
     </View>
+  );
+}
+
+// As telas de vendas funcionam para Comerciante e Artesão: a barra muda conforme o perfil
+export function MerchantLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  const { user } = useAuth();
+  const tabs = user?.role === "ARTESAO" ? ARTISAN_TABS : MERCHANT_TABS;
+  return (
+    <Layout active={active} tabs={tabs}>
+      {children}
+    </Layout>
+  );
+}
+
+export function ArtisanLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  return (
+    <Layout active={active} tabs={ARTISAN_TABS}>
+      {children}
+    </Layout>
   );
 }
 
