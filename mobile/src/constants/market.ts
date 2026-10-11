@@ -32,10 +32,17 @@ export const ESTADOS = [
   { value: "USADO", label: "Usado" },
 ];
 
+export const TIPOS = [
+  { value: "PRODUTO", label: "Produto" },
+  { value: "MATERIAL", label: "Material" },
+  { value: "FERRAMENTA", label: "Ferramenta" },
+];
+
 export const ORDER_STATUS: Record<string, { label: string; color: string }> = {
   NOVO: { label: "Novo", color: "#F9A825" },
   ACEITO: { label: "Aceite", color: "#1565C0" },
   EM_PREPARACAO: { label: "Em preparação", color: "#6A1B9A" },
+  PRONTO: { label: "Pronto", color: "#EF6C00" },
   ENVIADO: { label: "Enviado", color: "#00838F" },
   CONCLUIDO: { label: "Concluído", color: "#2E7D32" },
   CANCELADO: { label: "Cancelado", color: "#C62828" },
@@ -57,6 +64,60 @@ export const PROMOTION_KINDS = [
   { value: "CAMPANHA", label: "Campanha" },
 ];
 
+export const EVENT_KINDS = [
+  { value: "FEIRA", label: "Feira" },
+  { value: "EVENTO_CULTURAL", label: "Evento cultural" },
+  { value: "MERCADO_LOCAL", label: "Mercado local" },
+  { value: "EXPOSICAO", label: "Exposição" },
+  { value: "OUTRO", label: "Outro" },
+];
+
+export const LEARNING_CATEGORIES = [
+  { value: "TECNICA", label: "Técnicas" },
+  { value: "CURSO", label: "Cursos" },
+  { value: "TUTORIAL", label: "Tutoriais" },
+  { value: "VIDEO", label: "Vídeos" },
+  { value: "NEGOCIOS", label: "Gestão de negócios" },
+  { value: "FOTOGRAFIA", label: "Fotografia de produtos" },
+  { value: "PRECOS", label: "Como definir preços" },
+  { value: "VENDAS", label: "Como vender melhor" },
+];
+
+export const POST_KINDS = [
+  { value: "CONHECIMENTO", label: "Partilha de conhecimentos" },
+  { value: "VENDA_COLETIVA", label: "Venda coletiva" },
+  { value: "COMPRA_COLETIVA", label: "Compra coletiva" },
+  { value: "EVENTO", label: "Evento da comunidade" },
+  { value: "AVISO", label: "Aviso" },
+];
+
+export const TICKET_KINDS = [
+  { value: "PEDIDO", label: "Problema com pedido" },
+  { value: "PAGAMENTO", label: "Problema com pagamento" },
+  { value: "ENTREGA", label: "Problema com entrega" },
+  { value: "RECLAMACAO", label: "Reclamação" },
+  { value: "SUGESTAO", label: "Sugestão" },
+  { value: "OUTRO", label: "Outro" },
+];
+
+export const TICKET_STATUS: Record<string, { label: string; color: string }> = {
+  ABERTO: { label: "Aberto", color: "#F9A825" },
+  EM_ANALISE: { label: "Em análise", color: "#1565C0" },
+  RESOLVIDO: { label: "Resolvido", color: "#2E7D32" },
+};
+
+export const CRAFT_TYPES = [
+  "Cestaria",
+  "Tecelagem",
+  "Cerâmica",
+  "Escultura em madeira",
+  "Costura e roupa tradicional",
+  "Joias e adornos",
+  "Couro",
+  "Pintura",
+  "Outro",
+];
+
 export const SUPPORT = {
   phones: ["955407156", "965281785"],
   email: "nodjunta.gb@gmail.com",
@@ -74,4 +135,13 @@ export function formatDate(value?: string | Date | null): string {
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+export function formatDateTime(value?: string | Date | null): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "";
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${formatDate(d)} ${hh}:${mi}`;
 }
