@@ -32,7 +32,8 @@ export default function MerchantDeliveriesScreen({ navigation, route }: any) {
 
   const waiting = loader.data.orders.filter(
     (o: any) =>
-      ["ACEITO", "EM_PREPARACAO", "ENVIADO"].includes(o.status) && (!o.delivery || o.delivery.status === "CANCELADA")
+      ["ACEITO", "EM_PREPARACAO", "PRONTO", "ENVIADO"].includes(o.status) &&
+      (!o.delivery || o.delivery.status === "CANCELADA")
   );
 
   async function openRequest(id: string) {
@@ -100,7 +101,7 @@ export default function MerchantDeliveriesScreen({ navigation, route }: any) {
   return (
     <>
       <Page loader={loader}>
-        <Title>🚚 Entregas</Title>
+        <Title>🚚 Entrega</Title>
 
         <SubTitle>Pedidos à espera de transporte</SubTitle>
         {waiting.length === 0 ? (
@@ -113,12 +114,12 @@ export default function MerchantDeliveriesScreen({ navigation, route }: any) {
                 {o.buyer?.name ?? "Cliente"} · {money(o.total)}
               </Text>
               {o.deliveryAddress ? <Text style={u.muted}>Endereço: {o.deliveryAddress}</Text> : null}
-              <Btn small label="Solicitar transportador" onPress={() => openRequest(o.id)} />
+              <Btn small label="Encontrar transportadores" onPress={() => openRequest(o.id)} />
             </Card>
           ))
         )}
 
-        <SubTitle>Entregas</SubTitle>
+        <SubTitle>Acompanhar e histórico de entregas</SubTitle>
         {loader.data.deliveries.length === 0 ? (
           <Empty text="Ainda não há entregas." />
         ) : (
@@ -137,6 +138,9 @@ export default function MerchantDeliveriesScreen({ navigation, route }: any) {
                 {d.pickupAt ? <Text style={u.muted}>Recolha: {formatDate(d.pickupAt)}</Text> : null}
 
                 <View style={u.row}>
+                  {d.status === "ACEITA" && (
+                    <Btn small label="Confirmar recolha" onPress={() => changeStatus(d, "RECOLHIDA")} />
+                  )}
                   {["RECOLHIDA", "EM_TRANSITO"].includes(d.status) && (
                     <Btn small label="Confirmar entrega" onPress={() => changeStatus(d, "ENTREGUE")} />
                   )}
