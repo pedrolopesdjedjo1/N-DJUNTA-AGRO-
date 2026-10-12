@@ -17,6 +17,7 @@ export interface ProductFilters {
   minPrice?: number | string;
   maxPrice?: number | string;
   estado?: string;
+  tipo?: string;
   minRating?: number | string;
   sort?: string;
   ownerId?: string;
