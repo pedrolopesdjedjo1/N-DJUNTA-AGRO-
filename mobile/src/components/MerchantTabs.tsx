@@ -27,6 +27,14 @@ export const ARTISAN_TABS: TabDef[] = [
   { key: "ArtisanProfile", icon: "👤", label: "Perfil" },
 ];
 
+export const FARMER_TABS: TabDef[] = [
+  { key: "FarmerHome", icon: "🏠", label: "Início" },
+  { key: "FarmerProduction", icon: "🌱", label: "Produção" },
+  { key: "FarmerSell", icon: "🛒", label: "Vender" },
+  { key: "FarmerOrders", icon: "📦", label: "Pedidos" },
+  { key: "FarmerProfile", icon: "👤", label: "Perfil" },
+];
+
 export function RoleTabs({ active, tabs }: { active: string; tabs: TabDef[] }) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
@@ -59,10 +67,11 @@ function Layout({ active, tabs, children }: { active: string; tabs: TabDef[]; ch
   );
 }
 
-// As telas de vendas funcionam para Comerciante e Artesão: a barra muda conforme o perfil
+// As telas de vendas funcionam para Comerciante, Artesão e Agricultor: a barra muda conforme o perfil
 export function MerchantLayout({ active, children }: { active: string; children: React.ReactNode }) {
   const { user } = useAuth();
-  const tabs = user?.role === "ARTESAO" ? ARTISAN_TABS : MERCHANT_TABS;
+  const role = user?.role as string | undefined;
+  const tabs = role === "ARTESAO" ? ARTISAN_TABS : role === "AGRICULTOR" ? FARMER_TABS : MERCHANT_TABS;
   return (
     <Layout active={active} tabs={tabs}>
       {children}
@@ -73,6 +82,14 @@ export function MerchantLayout({ active, children }: { active: string; children:
 export function ArtisanLayout({ active, children }: { active: string; children: React.ReactNode }) {
   return (
     <Layout active={active} tabs={ARTISAN_TABS}>
+      {children}
+    </Layout>
+  );
+}
+
+export function FarmerLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  return (
+    <Layout active={active} tabs={FARMER_TABS}>
       {children}
     </Layout>
   );
