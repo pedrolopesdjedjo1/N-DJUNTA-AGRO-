@@ -40,9 +40,13 @@ const DETAIL_KEYS = [
   "materials",
   "productionTime",
   "tipo",
+  "harvestDate",
+  "estadoProduto",
   "deliveryOptions",
   "saleConditions",
 ];
+
+const ESTADOS_PRODUTO = ["FRESCO", "SECO", "MADURO", "VERDE", "PROCESSADO", "CONGELADO"];
 
 function isValidMediaUrl(url: any): boolean {
   return (
@@ -61,6 +65,8 @@ function cleanDetails(input: any): Record<string, string> | undefined {
   }
   if (out.estado && !["NOVO", "USADO"].includes(out.estado)) delete out.estado;
   if (out.tipo && !["PRODUTO", "MATERIAL", "FERRAMENTA"].includes(out.tipo)) delete out.tipo;
+  if (out.estadoProduto && !ESTADOS_PRODUTO.includes(out.estadoProduto)) delete out.estadoProduto;
+  if (out.harvestDate && !/^\d{4}-\d{2}-\d{2}$/.test(out.harvestDate)) delete out.harvestDate;
   return Object.keys(out).length ? out : undefined;
 }
 
