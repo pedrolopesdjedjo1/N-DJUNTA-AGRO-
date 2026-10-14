@@ -12,7 +12,7 @@ export const DEPARTMENTS: Department[] = [
   { value: "CONSTRUCAO", label: "Construção", icon: "🧱", subcategories: ["Cimento", "Ferro", "Tijolos", "Areia", "Tinta", "Telhas", "Canalização", "Ferramentas", "Materiais elétricos"] },
   { value: "TECNOLOGIA", label: "Tecnologia", icon: "📱", subcategories: ["Telefones", "Computadores", "Televisores", "Acessórios", "Equipamentos eletrónicos"] },
   { value: "VEICULOS", label: "Veículos", icon: "🚗", subcategories: ["Carros", "Motos", "Motocicletas", "Peças", "Pneus", "Acessórios", "Máquinas e equipamentos"] },
-  { value: "AGRICULTURA", label: "Agricultura", icon: "🌱", subcategories: ["Sementes", "Fertilizantes", "Ferramentas", "Máquinas agrícolas", "Equipamentos"] },
+  { value: "AGRICULTURA", label: "Agricultura", icon: "🌱", subcategories: ["Legumes", "Hortaliças", "Frutas", "Caju", "Cereais", "Arroz", "Feijão", "Raízes e tubérculos", "Sementes", "Fertilizantes", "Ferramentas", "Máquinas agrícolas", "Equipamentos"] },
   { value: "PESCA", label: "Pesca", icon: "🎣", subcategories: ["Redes", "Anzóis", "Motores", "Barcos", "Equipamentos de pesca"] },
   { value: "ARTESANATO", label: "Artesanato", icon: "🧺", subcategories: ["Produtos artesanais", "Decoração", "Produtos tradicionais", "Roupas tradicionais"] },
   { value: "OUTROS", label: "Outros", icon: "📦", subcategories: [] },
@@ -32,10 +32,32 @@ export const ESTADOS = [
   { value: "USADO", label: "Usado" },
 ];
 
+export const ESTADOS_PRODUTO = [
+  { value: "FRESCO", label: "Fresco" },
+  { value: "MADURO", label: "Maduro" },
+  { value: "VERDE", label: "Verde" },
+  { value: "SECO", label: "Seco" },
+  { value: "PROCESSADO", label: "Processado" },
+  { value: "CONGELADO", label: "Congelado" },
+];
+
 export const TIPOS = [
   { value: "PRODUTO", label: "Produto" },
   { value: "MATERIAL", label: "Material" },
   { value: "FERRAMENTA", label: "Ferramenta" },
+];
+
+export const FARM_UNITS = ["kg", "saco", "litro", "cacho", "caixa", "unidade", "tonelada"];
+
+export const FARM_TYPES = [
+  "Agricultor familiar",
+  "Pequeno produtor",
+  "Horticultor",
+  "Produtor de arroz",
+  "Produtor de caju",
+  "Fruticultor",
+  "Pecuarista",
+  "Outro",
 ];
 
 export const ORDER_STATUS: Record<string, { label: string; color: string }> = {
@@ -73,6 +95,12 @@ export const EVENT_KINDS = [
 ];
 
 export const LEARNING_CATEGORIES = [
+  { value: "GUIA", label: "Guias agrícolas" },
+  { value: "CULTIVO", label: "Técnicas de cultivo" },
+  { value: "COLHEITA", label: "Técnicas de colheita" },
+  { value: "CONSERVACAO", label: "Conservação" },
+  { value: "PRAGAS", label: "Combate a pragas" },
+  { value: "CONSELHOS", label: "Conselhos" },
   { value: "TECNICA", label: "Técnicas" },
   { value: "CURSO", label: "Cursos" },
   { value: "TUTORIAL", label: "Tutoriais" },
@@ -92,6 +120,7 @@ export const POST_KINDS = [
 ];
 
 export const TICKET_KINDS = [
+  { value: "EMERGENCIA", label: "Emergência agrícola" },
   { value: "PEDIDO", label: "Problema com pedido" },
   { value: "PAGAMENTO", label: "Problema com pagamento" },
   { value: "ENTREGA", label: "Problema com entrega" },
@@ -105,6 +134,15 @@ export const TICKET_STATUS: Record<string, { label: string; color: string }> = {
   EM_ANALISE: { label: "Em análise", color: "#1565C0" },
   RESOLVIDO: { label: "Resolvido", color: "#2E7D32" },
 };
+
+export const CONTACT_KINDS = [
+  { value: "GERAL", label: "Geral" },
+  { value: "AGRICOLA", label: "Agricultura" },
+  { value: "VETERINARIO", label: "Veterinário" },
+  { value: "SAUDE", label: "Saúde" },
+  { value: "SEGURANCA", label: "Segurança" },
+  { value: "MAR", label: "Mar e pesca" },
+];
 
 export const CRAFT_TYPES = [
   "Cestaria",
