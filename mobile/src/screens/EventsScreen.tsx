@@ -14,10 +14,16 @@ const AREAS = [
   { value: "PESCA", label: "Pesca" },
 ];
 
+const ROLE_AREA: Record<string, string> = {
+  ARTESAO: "ARTESANATO",
+  AGRICULTOR: "AGRICULTURA",
+  PESCADOR: "PESCA",
+};
+
 export default function EventsScreen() {
   const { user } = useAuth();
   const canCreate = MANAGERS.includes(user?.role ?? "");
-  const area = user?.role === "ARTESAO" ? "ARTESANATO" : undefined;
+  const area = ROLE_AREA[user?.role ?? ""];
 
   const [tab, setTab] = useState<"all" | "mine">("all");
   const [kind, setKind] = useState("");
