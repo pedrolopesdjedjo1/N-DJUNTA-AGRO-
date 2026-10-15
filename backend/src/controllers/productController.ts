@@ -46,7 +46,17 @@ const DETAIL_KEYS = [
   "saleConditions",
 ];
 
-const ESTADOS_PRODUTO = ["FRESCO", "SECO", "MADURO", "VERDE", "PROCESSADO", "CONGELADO"];
+const ESTADOS_PRODUTO = [
+  "FRESCO",
+  "SECO",
+  "MADURO",
+  "VERDE",
+  "PROCESSADO",
+  "CONGELADO",
+  "REFRIGERADO",
+  "SALGADO",
+  "DEFUMADO",
+];
 
 function isValidMediaUrl(url: any): boolean {
   return (
