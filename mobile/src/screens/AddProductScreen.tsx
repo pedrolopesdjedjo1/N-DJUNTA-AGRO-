@@ -1,20 +1,38 @@
 import React, { useState } from "react";
 import { View, Text, Image, Alert } from "react-native";
 import { Page, Title, Field, Chip, Btn, u } from "../components/ui";
-import { DEPARTMENTS, departmentOf, ESTADOS, ESTADOS_PRODUTO, FARM_UNITS, TIPOS } from "../constants/market";
+import {
+  DEPARTMENTS,
+  departmentOf,
+  ESTADOS,
+  ESTADOS_PRODUTO,
+  FARM_UNITS,
+  FISH_UNITS,
+  TIPOS,
+} from "../constants/market";
 import { pickImage, uploadImageBase64, pickVideo, uploadVideo, PickedVideo } from "../utils/storage";
 import { createProduct, updateProduct } from "../api/products";
 import { getApiErrorMessage } from "../api/errorMessage";
 import { colors } from "../theme/colors";
 
+function today() {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
 export default function AddProductScreen({ navigation, route }: any) {
   const editing = route?.params?.product;
   const d = editing?.details ?? {};
+  const startDepartment: string = editing?.department ?? route?.params?.department ?? "";
+  const startTipo: string = d.tipo ?? route?.params?.tipo ?? "PRODUTO";
 
   const [title, setTitle] = useState(editing?.title ?? "");
-  const [department, setDepartment] = useState<string>(editing?.department ?? route?.params?.department ?? "");
-  const [subcategory, setSubcategory] = useState(editing?.subcategory ?? "");
-  const [tipo, setTipo] = useState(d.tipo ?? "PRODUTO");
+  const [department, setDepartment] = useState<string>(startDepartment);
+  const [subcategory, setSubcategory] = useState(
+    editing?.subcategory ?? (startDepartment === "PESCA" && startTipo === "PRODUTO" ? "Pescado" : "")
+  );
+  const [tipo, setTipo] = useState(startTipo);
   const [description, setDescription] = useState(editing?.description ?? "");
   const [price, setPrice] = useState(editing ? String(editing.price) : "");
   const [quantity, setQuantity] = useState(editing ? String(editing.quantity) : "");
@@ -28,7 +46,7 @@ export default function AddProductScreen({ navigation, route }: any) {
   const [weight, setWeight] = useState(d.weight ?? "");
   const [materials, setMaterials] = useState(d.materials ?? "");
   const [productionTime, setProductionTime] = useState(d.productionTime ?? "");
-  const [harvestDate, setHarvestDate] = useState(d.harvestDate ?? "");
+  const [harvestDate, setHarvestDate] = useState(d.harvestDate ?? (startDepartment === "PESCA" ? today() : ""));
   const [estadoProduto, setEstadoProduto] = useState(d.estadoProduto ?? "");
   const [location, setLocation] = useState(editing?.location ?? "");
   const [deliveryOptions, setDeliveryOptions] = useState(d.deliveryOptions ?? "");
@@ -40,6 +58,7 @@ export default function AddProductScreen({ navigation, route }: any) {
 
   const artisan = department === "ARTESANATO";
   const farm = department === "AGRICULTURA" && tipo === "PRODUTO";
+  const fish = department === "PESCA" && tipo === "PRODUTO";
   const subcategories = departmentOf(department)?.subcategories ?? [];
 
   async function takeImage(fromCamera: boolean) {
@@ -66,10 +85,13 @@ export default function AddProductScreen({ navigation, route }: any) {
       Alert.alert("Atenção", "Preço e quantidade devem ser números válidos.");
       return;
     }
-    if (farm && harvestDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(harvestDate.trim())) {
-      Alert.alert("Atenção", "Escreva a data de colheita assim: AAAA-MM-DD (ex: 2026-10-14).");
+    if ((farm || fish) && harvestDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(harvestDate.trim())) {
+      Alert.alert("Atenção", "Escreva a data assim: AAAA-MM-DD (ex: 2026-10-14).");
       return;
     }
+
+    let weightText = weight.trim();
+    if (fish && /^\d+([.,]\d+)?$/.test(weightText)) weightText = `${weightText.replace(",", ".")} kg`;
 
     setLoading(true);
     try {
@@ -84,11 +106,11 @@ export default function AddProductScreen({ navigation, route }: any) {
         color,
         colors: colors2,
         size,
-        weight,
+        weight: fish ? weightText : weight,
         materials,
         productionTime,
-        harvestDate: farm ? harvestDate.trim() : "",
-        estadoProduto: farm ? estadoProduto : "",
+        harvestDate: farm || fish ? harvestDate.trim() : "",
+        estadoProduto: farm || fish ? estadoProduto : "",
         deliveryOptions,
         saleConditions,
       };
@@ -112,7 +134,7 @@ export default function AddProductScreen({ navigation, route }: any) {
         Alert.alert("Pronto", "Produto atualizado!");
       } else {
         await createProduct({ ...body, unit: unit.trim() });
-        Alert.alert("Pronto", farm ? "Produção cadastrada!" : "Produto publicado!");
+        Alert.alert("Pronto", farm ? "Produção cadastrada!" : fish ? "Pescado publicado!" : "Produto publicado!");
       }
       navigation.goBack();
     } catch (e) {
@@ -128,7 +150,11 @@ export default function AddProductScreen({ navigation, route }: any) {
     ? "🧵 Cadastrar artesanato"
     : farm
     ? "🌱 Cadastrar produção"
+    : fish
+    ? "🐟 Publicar pescado"
     : "➕ Publicar produto";
+
+  const titleHint = farm ? "Ex: Tomate" : fish ? "Ex: Bagre, Tainha" : "Ex: Cesto de palha";
 
   return (
     <Page>
@@ -157,7 +183,7 @@ export default function AddProductScreen({ navigation, route }: any) {
         {video ? <Btn small kind="danger" label="Remover" onPress={() => setVideo(null)} /> : null}
       </View>
 
-      <Field label="Nome do produto" value={title} onChangeText={setTitle} placeholder={farm ? "Ex: Tomate" : "Ex: Cesto de palha"} />
+      <Field label={fish ? "Espécie" : "Nome do produto"} value={title} onChangeText={setTitle} placeholder={titleHint} />
 
       <Text style={u.label}>Departamento</Text>
       <View style={u.row}>
@@ -199,9 +225,9 @@ export default function AddProductScreen({ navigation, route }: any) {
       {!editing && (
         <>
           <Field label="Unidade de medida" value={unit} onChangeText={setUnit} placeholder="Ex: unidade, kg, saco" />
-          {farm ? (
+          {farm || fish ? (
             <View style={u.row}>
-              {FARM_UNITS.map((x) => (
+              {(fish ? FISH_UNITS : FARM_UNITS).map((x) => (
                 <Chip key={x} label={x} active={unit === x} onPress={() => setUnit(x)} />
               ))}
             </View>
@@ -217,12 +243,20 @@ export default function AddProductScreen({ navigation, route }: any) {
           <Field label="Peso" value={weight} onChangeText={setWeight} placeholder="Ex: 500 g" />
           <Field label="Tempo necessário para produzir" value={productionTime} onChangeText={setProductionTime} placeholder="Ex: 3 dias" />
         </>
-      ) : farm ? (
+      ) : farm || fish ? (
         <>
-          <Field label="Data de colheita (AAAA-MM-DD)" value={harvestDate} onChangeText={setHarvestDate} placeholder="2026-10-14" />
-          <Text style={u.label}>Estado do produto</Text>
+          {fish ? <Field label="Peso total (kg)" value={weight} onChangeText={setWeight} keyboardType="numeric" placeholder="Ex: 25" /> : null}
+          <Field
+            label={fish ? "Data da pesca (AAAA-MM-DD)" : "Data de colheita (AAAA-MM-DD)"}
+            value={harvestDate}
+            onChangeText={setHarvestDate}
+            placeholder="2026-10-14"
+          />
+          <Text style={u.label}>{fish ? "Estado e frescura do pescado" : "Estado do produto"}</Text>
           <View style={u.row}>
-            {ESTADOS_PRODUTO.map((e) => (
+            {ESTADOS_PRODUTO.filter((e) =>
+              fish ? ["FRESCO", "REFRIGERADO", "CONGELADO", "SALGADO", "SECO", "DEFUMADO"].includes(e.value) : ["FRESCO", "MADURO", "VERDE", "SECO", "PROCESSADO", "CONGELADO"].includes(e.value)
+            ).map((e) => (
               <Chip
                 key={e.value}
                 label={e.label}
@@ -247,11 +281,20 @@ export default function AddProductScreen({ navigation, route }: any) {
         </>
       )}
 
-      <Field label={farm ? "Localização da produção" : "Localização"} value={location} onChangeText={setLocation} placeholder="Ex: Bafatá" />
-      <Field label="Opções de entrega" value={deliveryOptions} onChangeText={setDeliveryOptions} placeholder="Ex: entrego em Bissau / recolha na machamba" />
+      <Field
+        label={farm ? "Localização da produção" : fish ? "Local de venda ou da pesca" : "Localização"}
+        value={location}
+        onChangeText={setLocation}
+        placeholder="Ex: Bubaque"
+      />
+      <Field label="Opções de entrega" value={deliveryOptions} onChangeText={setDeliveryOptions} placeholder="Ex: entrego em Bissau / recolha na praia" />
       <Field label="Condições de venda" value={saleConditions} onChangeText={setSaleConditions} multiline placeholder="Ex: pagamento na entrega" />
 
-      <Btn label={loading ? "A guardar..." : editing ? "Guardar alterações" : farm ? "Cadastrar produção" : "Publicar"} onPress={submit} disabled={loading} />
+      <Btn
+        label={loading ? "A guardar..." : editing ? "Guardar alterações" : farm ? "Cadastrar produção" : fish ? "Publicar pescado" : "Publicar"}
+        onPress={submit}
+        disabled={loading}
+      />
     </Page>
   );
 }
