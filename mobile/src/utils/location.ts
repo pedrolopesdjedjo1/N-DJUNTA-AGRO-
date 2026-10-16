@@ -28,6 +28,23 @@ export async function getPosition(): Promise<Coords | null> {
   }
 }
 
+// Tenta descobrir a rua e a cidade a partir das coordenadas. Devolve null se não conseguir.
+export async function reverseGeocode(lat: number, lng: number): Promise<{ address: string; region: string } | null> {
+  try {
+    const results = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+    const r: any = results && results[0];
+    if (!r) return null;
+
+    const street = [r.street ?? r.name, r.streetNumber].filter(Boolean).join(" ");
+    const address = [street, r.district].filter(Boolean).join(", ") || [r.city, r.region].filter(Boolean).join(", ");
+    const region = r.city ?? r.subregion ?? r.region ?? r.district ?? "";
+
+    return { address, region };
+  } catch (e) {
+    return null;
+  }
+}
+
 export function mapsLink(lat: number, lng: number): string {
   return `https://www.google.com/maps?q=${lat},${lng}`;
 }
