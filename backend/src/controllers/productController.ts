@@ -9,6 +9,7 @@ import {
   deleteProduct,
   ProductInput,
 } from "../services/productService";
+import { notifyFollowers } from "../services/followService";
 
 export const DEPARTMENTS = [
   "ALIMENTACAO",
@@ -128,6 +129,11 @@ export async function create(req: AuthRequest, res: Response) {
       videoUrl: videoUrl || undefined,
       details: cleanDetails(details),
     });
+
+    // Avisa os seguidores do vendedor, sem atrasar a resposta
+    notifyFollowers(req.userId!, { id: (product as any).id, title: (product as any).title }).catch((e) =>
+      console.error("Aviso aos seguidores falhou:", e?.message)
+    );
 
     return res.status(201).json(product);
   } catch (error: any) {
