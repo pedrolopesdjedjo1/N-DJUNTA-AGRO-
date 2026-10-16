@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
+import { getBadges } from "../api/shop";
 import { colors } from "../theme/colors";
 
 export interface TabDef {
@@ -43,7 +44,23 @@ export const FISHER_TABS: TabDef[] = [
   { key: "FisherProfile", icon: "👤", label: "Perfil" },
 ];
 
-export function RoleTabs({ active, tabs }: { active: string; tabs: TabDef[] }) {
+export const CLIENT_TABS: TabDef[] = [
+  { key: "ClientHome", icon: "🏠", label: "Início" },
+  { key: "ClientExplore", icon: "🔎", label: "Explorar" },
+  { key: "ClientCart", icon: "🛒", label: "Carrinho" },
+  { key: "ClientOrders", icon: "📦", label: "Encomendas" },
+  { key: "ClientProfile", icon: "👤", label: "Perfil" },
+];
+
+export function RoleTabs({
+  active,
+  tabs,
+  badges,
+}: {
+  active: string;
+  tabs: TabDef[];
+  badges?: Record<string, number>;
+}) {
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
 
@@ -51,9 +68,17 @@ export function RoleTabs({ active, tabs }: { active: string; tabs: TabDef[] }) {
     <View style={[s.bar, { paddingBottom: 6 + insets.bottom }]}>
       {tabs.map((tab) => {
         const isActive = tab.key === active;
+        const count = badges?.[tab.key] ?? 0;
         return (
           <TouchableOpacity key={tab.key} style={s.tab} onPress={() => !isActive && navigation.navigate(tab.key)}>
-            <Text style={[s.icon, !isActive && s.dim]}>{tab.icon}</Text>
+            <View>
+              <Text style={[s.icon, !isActive && s.dim]}>{tab.icon}</Text>
+              {count > 0 ? (
+                <View style={s.badge}>
+                  <Text style={s.badgeText}>{count > 99 ? "99+" : count}</Text>
+                </View>
+              ) : null}
+            </View>
             <Text style={[s.label, isActive && s.labelActive]}>{tab.label}</Text>
           </TouchableOpacity>
         );
@@ -66,11 +91,21 @@ export default function MerchantTabs({ active }: { active: string }) {
   return <RoleTabs active={active} tabs={MERCHANT_TABS} />;
 }
 
-function Layout({ active, tabs, children }: { active: string; tabs: TabDef[]; children: React.ReactNode }) {
+function Layout({
+  active,
+  tabs,
+  badges,
+  children,
+}: {
+  active: string;
+  tabs: TabDef[];
+  badges?: Record<string, number>;
+  children: React.ReactNode;
+}) {
   return (
     <View style={s.layout}>
       <View style={s.content}>{children}</View>
-      <RoleTabs active={active} tabs={tabs} />
+      <RoleTabs active={active} tabs={tabs} badges={badges} />
     </View>
   );
 }
@@ -118,6 +153,37 @@ export function FisherLayout({ active, children }: { active: string; children: R
   );
 }
 
+// Barra do cliente, com o número de produtos no carrinho e de encomendas em curso
+export function ClientLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  const [badges, setBadges] = useState<Record<string, number>>({});
+
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      getBadges()
+        .then((b: any) => {
+          if (alive) {
+            setBadges({
+              ClientCart: b.cart ?? 0,
+              ClientOrders: b.currentOrders ?? 0,
+              ClientProfile: b.unreadNotifications ?? 0,
+            });
+          }
+        })
+        .catch(() => {});
+      return () => {
+        alive = false;
+      };
+    }, [])
+  );
+
+  return (
+    <Layout active={active} tabs={CLIENT_TABS} badges={badges}>
+      {children}
+    </Layout>
+  );
+}
+
 const s = StyleSheet.create({
   layout: { flex: 1, backgroundColor: colors.background },
   content: { flex: 1 },
@@ -127,4 +193,17 @@ const s = StyleSheet.create({
   dim: { opacity: 0.55 },
   label: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
   labelActive: { color: colors.primary, fontWeight: "bold" },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -10,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#C62828",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  badgeText: { color: "#FFFFFF", fontSize: 10, fontWeight: "bold" },
 });
