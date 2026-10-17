@@ -52,6 +52,14 @@ export const CLIENT_TABS: TabDef[] = [
   { key: "ClientProfile", icon: "👤", label: "Perfil" },
 ];
 
+export const NGO_TABS: TabDef[] = [
+  { key: "NgoHome", icon: "🏠", label: "Início" },
+  { key: "NgoProjects", icon: "📋", label: "Projetos" },
+  { key: "NgoCommunities", icon: "🤝", label: "Comunidades" },
+  { key: "NgoOpportunities", icon: "📢", label: "Oportunidades" },
+  { key: "NgoProfile", icon: "🏢", label: "Perfil" },
+];
+
 export function RoleTabs({
   active,
   tabs,
@@ -148,6 +156,14 @@ export function FarmerLayout({ active, children }: { active: string; children: R
 export function FisherLayout({ active, children }: { active: string; children: React.ReactNode }) {
   return (
     <Layout active={active} tabs={FISHER_TABS}>
+      {children}
+    </Layout>
+  );
+}
+
+export function NgoLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  return (
+    <Layout active={active} tabs={NGO_TABS}>
       {children}
     </Layout>
   );
