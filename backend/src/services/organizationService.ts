@@ -1,14 +1,23 @@
 import { prisma } from "../lib/prisma";
-import { AREAS, values } from "../lib/ngoCatalog";
-import { DOCUMENT_KINDS } from "../lib/ngoCatalog";
+import { AREAS, DOCUMENT_KINDS, values } from "../lib/ngoCatalog";
+import { GOV_DOCUMENT_KINDS, INSTITUTION_TYPES } from "../lib/govCatalog";
 
 const AREA_VALUES = values(AREAS);
 const DOCUMENT_VALUES = values(DOCUMENT_KINDS);
+const GOV_DOCUMENT_VALUES = values(GOV_DOCUMENT_KINDS);
+const INSTITUTION_VALUES = values(INSTITUTION_TYPES);
 const MAX_DOCUMENTS = 15;
 
+// Organizações (ONG), instituições do governo e equipa do app usam as mesmas áreas de trabalho
 export function assertNgo(role?: string) {
-  if (role !== "ONG" && role !== "ADMIN") {
-    throw new Error("Esta área é reservada às organizações (ONG).");
+  if (role !== "ONG" && role !== "GOVERNO" && role !== "ADMIN") {
+    throw new Error("Esta área é reservada às organizações e às instituições públicas.");
+  }
+}
+
+export function assertGov(role?: string) {
+  if (role !== "GOVERNO" && role !== "ADMIN") {
+    throw new Error("Esta área é reservada às instituições públicas.");
   }
 }
 
@@ -82,13 +91,22 @@ export async function ensureOrganization(userId: string) {
   });
 }
 
-function checklist(org: any, documents: any[]) {
+function checklist(org: any, documents: any[], gov: boolean) {
   const items = [
-    { key: "name", label: "Nome da organização", done: !!org.name && org.name.length >= 2 },
-    { key: "registration", label: "Número do registo oficial", done: !!org.registrationNumber },
+    { key: "name", label: gov ? "Nome da instituição" : "Nome da organização", done: !!org.name && org.name.length >= 2 },
+    ...(gov ? [{ key: "institution", label: "Tipo de instituição", done: !!org.institutionType }] : []),
+    {
+      key: "registration",
+      label: gov ? "Número do diploma, despacho ou registo oficial" : "Número do registo oficial",
+      done: !!org.registrationNumber,
+    },
     { key: "responsible", label: "Nome e telefone do responsável", done: !!org.responsibleName && !!org.responsiblePhone },
-    { key: "contacts", label: "Telefone ou e-mail da organização", done: !!org.phone || !!org.email },
-    { key: "document", label: "Documento do registo oficial", done: documents.some((d) => d.kind === "REGISTO_OFICIAL") },
+    { key: "contacts", label: gov ? "Telefone ou e-mail da instituição" : "Telefone ou e-mail da organização", done: !!org.phone || !!org.email },
+    {
+      key: "document",
+      label: gov ? "Diploma ou despacho de criação (ou registo oficial)" : "Documento do registo oficial",
+      done: documents.some((d) => d.kind === "REGISTO_OFICIAL" || (gov && d.kind === "DIPLOMA_CRIACAO")),
+    },
   ];
   return { items, canSubmit: items.every((i) => i.done), missing: items.filter((i) => !i.done).map((i) => i.label) };
 }
@@ -108,7 +126,7 @@ export async function getOrganization(userId: string, role?: string) {
     documents,
     projectsCount,
     isVerified: !!user?.isVerified,
-    verification: { status: org.verificationStatus, note: org.verificationNote, ...checklist(org, documents) },
+    verification: { status: org.verificationStatus, note: org.verificationNote, ...checklist(org, documents, role === "GOVERNO") },
   };
 }
 
@@ -120,7 +138,7 @@ export async function saveOrganization(userId: string, role: string | undefined,
   if (input?.name !== undefined) {
     const name = clean(input.name, 120);
     if (!name || name.length < 2) {
-      throw new Error("Escreva o nome da organização.");
+      throw new Error("Escreva o nome.");
     }
     data.name = name;
   }
@@ -160,6 +178,18 @@ export async function saveOrganization(userId: string, role: string | undefined,
   if (input?.responsiblePhone !== undefined) data.responsiblePhone = readPhone(input.responsiblePhone);
   if (input?.responsibleEmail !== undefined) data.responsibleEmail = readEmail(input.responsibleEmail);
 
+  // Só as instituições públicas indicam o tipo e a instituição de tutela
+  if (role === "GOVERNO") {
+    if (input?.institutionType !== undefined) {
+      const type = input.institutionType ? String(input.institutionType) : null;
+      if (type && !INSTITUTION_VALUES.includes(type)) {
+        throw new Error("Tipo de instituição inválido.");
+      }
+      data.institutionType = type;
+    }
+    if (input?.parentInstitution !== undefined) data.parentInstitution = clean(input.parentInstitution, 150);
+  }
+
   // Mudar o registo oficial depois de verificada exige nova verificação
   const registrationChanged =
     data.registrationNumber !== undefined &&
@@ -188,8 +218,9 @@ export async function addDocument(userId: string, role: string | undefined, inpu
   assertNgo(role);
   const org = await ensureOrganization(userId);
 
+  const allowed = role === "GOVERNO" ? [...DOCUMENT_VALUES, ...GOV_DOCUMENT_VALUES] : DOCUMENT_VALUES;
   const kind = String(input?.kind ?? "");
-  if (!DOCUMENT_VALUES.includes(kind)) {
+  if (!allowed.includes(kind)) {
     throw new Error("Escolha o tipo de documento.");
   }
   const name = clean(input?.name, 100);
@@ -225,16 +256,17 @@ export async function deleteDocument(userId: string, role: string | undefined, i
 export async function submitVerification(userId: string, role: string | undefined) {
   assertNgo(role);
   const org = await ensureOrganization(userId);
+  const gov = role === "GOVERNO";
 
   if (org.verificationStatus === "PENDENTE") {
     throw new Error("A verificação já foi enviada e está a ser analisada.");
   }
   if (org.verificationStatus === "APROVADO") {
-    throw new Error("A organização já está verificada.");
+    throw new Error(gov ? "A instituição já está verificada." : "A organização já está verificada.");
   }
 
   const documents = await prisma.organizationDocument.findMany({ where: { organizationId: org.id } });
-  const check = checklist(org, documents);
+  const check = checklist(org, documents, gov);
   if (!check.canSubmit) {
     throw new Error(`Complete antes de enviar: ${check.missing.join(", ")}.`);
   }
@@ -244,7 +276,11 @@ export async function submitVerification(userId: string, role: string | undefine
     data: { verificationStatus: "PENDENTE", verificationSubmittedAt: new Date(), verificationNote: null },
   });
 
-  await notifyAdmins("Verificação de ONG pendente", `${org.name} enviou os documentos para verificação.`, org.id);
+  await notifyAdmins(
+    gov ? "Verificação de instituição pendente" : "Verificação de ONG pendente",
+    `${org.name} enviou os documentos para verificação.`,
+    org.id
+  );
   return getOrganization(userId, role);
 }
 
@@ -264,7 +300,7 @@ export async function listPendingVerifications(role?: string) {
     prisma.organizationDocument.findMany({ where: { organizationId: { in: orgs.map((o) => o.id) } } }),
     prisma.user.findMany({
       where: { id: { in: orgs.map((o) => o.ownerId) } },
-      select: { id: true, name: true, phone: true },
+      select: { id: true, name: true, phone: true, role: true },
     }),
   ]);
   const userMap = new Map(users.map((u) => [u.id, u]));
@@ -286,13 +322,16 @@ export async function reviewVerification(role: string | undefined, ownerId: stri
     throw new Error("Organização não encontrada.");
   }
   if (org.verificationStatus !== "PENDENTE") {
-    throw new Error("Esta organização não tem verificação pendente.");
+    throw new Error("Este pedido não tem verificação pendente.");
   }
 
   const text = clean(note, 500);
   if (!approve && !text) {
     throw new Error("Explique o motivo da recusa.");
   }
+
+  const owner = await prisma.user.findUnique({ where: { id: ownerId }, select: { role: true } });
+  const gov = String(owner?.role) === "GOVERNO";
 
   await prisma.organization.update({
     where: { id: org.id },
@@ -308,9 +347,11 @@ export async function reviewVerification(role: string | undefined, ownerId: stri
     data: {
       userId: ownerId,
       type: "SISTEMA",
-      title: approve ? "ONG verificada ✅" : "Verificação recusada",
+      title: approve ? (gov ? "Instituição verificada ✅" : "ONG verificada ✅") : "Verificação recusada",
       message: approve
-        ? "A sua organização foi verificada."
+        ? gov
+          ? "A sua instituição foi verificada."
+          : "A sua organização foi verificada."
         : `A verificação foi recusada: ${text}. Corrija e envie de novo.`,
       relatedId: org.id,
     },
@@ -327,7 +368,7 @@ export async function getPublicOrganization(ownerId: string) {
   }
 
   const [user, projects] = await Promise.all([
-    prisma.user.findUnique({ where: { id: ownerId }, select: { isVerified: true } }),
+    prisma.user.findUnique({ where: { id: ownerId }, select: { isVerified: true, role: true } }),
     prisma.ngoProject.findMany({
       where: { ownerId, isPublic: true },
       select: { id: true, name: true, area: true, status: true, region: true, coverUrl: true },
@@ -345,6 +386,7 @@ export async function getPublicOrganization(ownerId: string) {
       description: org.description,
       areas: org.areas,
       region: org.region,
+      address: org.address,
       phone: org.phone,
       email: org.email,
       website: org.website,
@@ -353,7 +395,10 @@ export async function getPublicOrganization(ownerId: string) {
       whatsapp: org.whatsapp,
       logoUrl: org.logoUrl,
       foundedYear: org.foundedYear,
+      institutionType: org.institutionType,
+      parentInstitution: org.parentInstitution,
     },
+    kind: String(user?.role) === "GOVERNO" ? "GOVERNO" : "ONG",
     isVerified: !!user?.isVerified,
     projects,
   };
