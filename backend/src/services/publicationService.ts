@@ -1,11 +1,18 @@
 import { prisma } from "../lib/prisma";
 import { PUBLICATION_KINDS, values } from "../lib/ngoCatalog";
+import { GOV_PUBLICATION_KINDS } from "../lib/govCatalog";
 import { orgInfo } from "../lib/ngoOrgInfo";
+import { findRegion } from "../lib/ngoRegions";
+import { notifyMany, usersInRegions } from "../lib/regionAudience";
 import { assertNgo } from "./organizationService";
 
-const KIND_VALUES = values(PUBLICATION_KINDS);
+const BASE_KINDS = values(PUBLICATION_KINDS);
+const GOV_KINDS = values(GOV_PUBLICATION_KINDS);
+const ALL_KINDS = [...BASE_KINDS, ...GOV_KINDS];
 const MAX_IMAGES = 10;
 const PAGE_SIZE = 20;
+const MAX_REGION_BROADCASTS_PER_DAY = 3;
+const MAX_REGION_AUDIENCE = 3000;
 
 function clean(value: any, max: number): string | null {
   return typeof value === "string" && value.trim() ? value.trim().slice(0, max) : null;
@@ -19,13 +26,18 @@ function validStorageUrl(url: any): boolean {
   );
 }
 
-async function readPublication(userId: string, input: any, existing?: any) {
+function isGovRole(role?: string): boolean {
+  return role === "GOVERNO" || role === "ADMIN";
+}
+
+async function readPublication(userId: string, role: string | undefined, input: any, existing?: any) {
   const data: any = {};
+  const allowedKinds = isGovRole(role) ? ALL_KINDS : BASE_KINDS;
 
   if (!existing || input?.kind !== undefined) {
     const kind = String(input?.kind ?? "");
-    if (!KIND_VALUES.includes(kind)) {
-      throw new Error("Escolha o tipo de publicação.");
+    if (!allowedKinds.includes(kind)) {
+      throw new Error(GOV_KINDS.includes(kind) ? "Este tipo de publicação é só para instituições públicas." : "Escolha o tipo de publicação.");
     }
     data.kind = kind;
   }
@@ -106,6 +118,7 @@ async function shape(items: any[], viewerId: string) {
   return items.map((p) => ({
     ...p,
     organization: orgs.get(p.ownerId) ?? null,
+    isOfficial: orgs.get(p.ownerId)?.role === "GOVERNO",
     projectName: p.projectId ? projectNames.get(p.projectId) ?? null : null,
     isMine: p.ownerId === viewerId,
   }));
@@ -113,7 +126,7 @@ async function shape(items: any[], viewerId: string) {
 
 // Avisa quem segue a organização e os beneficiários do projeto ligado
 async function notifyAudience(publication: any) {
-  const [followers, linked, org] = await Promise.all([
+  const [followers, linked, orgs] = await Promise.all([
     prisma.favoriteSeller.findMany({
       where: { sellerId: publication.ownerId, notify: true },
       select: { userId: true },
@@ -135,29 +148,78 @@ async function notifyAudience(publication: any) {
   targets.delete(publication.ownerId);
   if (targets.size === 0) return;
 
-  const name = orgs(org, publication.ownerId);
-  await prisma.notification.createMany({
-    data: Array.from(targets).map((target) => ({
-      userId: target,
-      type: "SISTEMA" as const,
-      title: `Novidade de ${name}`,
-      message: publication.title,
-      relatedId: publication.id,
-    })),
+  const name = orgs.get(publication.ownerId)?.name ?? "uma organização";
+  await notifyMany(Array.from(targets), {
+    title: `Novidade de ${name}`,
+    message: publication.title,
+    relatedId: publication.id,
   });
 }
 
-function orgs(map: Map<string, { name: string }>, id: string) {
-  return map.get(id)?.name ?? "uma organização";
+// Prepara o aviso a toda a população de uma região (só instituições públicas)
+async function prepareRegionBroadcast(
+  userId: string,
+  role: string | undefined,
+  wanted: any,
+  region: string | null,
+  alreadyDone: boolean
+): Promise<string | null> {
+  if (wanted !== true || alreadyDone) return null;
+
+  if (!isGovRole(role)) {
+    throw new Error("Só as instituições públicas podem avisar toda a população de uma região.");
+  }
+
+  const key = findRegion(region)?.key ?? null;
+  if (!key) {
+    throw new Error("Escolha uma região reconhecida (ex: Bafatá) para avisar a população dessa região.");
+  }
+
+  const today = await prisma.publication.count({
+    where: { ownerId: userId, notifiedRegion: true, updatedAt: { gte: new Date(Date.now() - 86400000) } },
+  });
+  if (today >= MAX_REGION_BROADCASTS_PER_DAY) {
+    throw new Error(`Já avisou a população ${MAX_REGION_BROADCASTS_PER_DAY} vezes nas últimas 24 horas.`);
+  }
+
+  return key;
+}
+
+async function broadcastRegion(publication: any, regionKey: string): Promise<number> {
+  const [ids, orgs] = await Promise.all([
+    usersInRegions([regionKey], { excludeId: publication.ownerId, limit: MAX_REGION_AUDIENCE }),
+    orgInfo([publication.ownerId]),
+  ]);
+
+  const kindLabel =
+    publication.kind === "AVISO"
+      ? "📣 Aviso oficial"
+      : publication.kind === "COMUNICADO"
+      ? "📣 Comunicado oficial"
+      : publication.kind === "INFORMACAO"
+      ? "ℹ️ Informação importante"
+      : "📰 Novidade";
+  const name = orgs.get(publication.ownerId)?.name ?? "Instituição";
+  const text = publication.body ? String(publication.body).slice(0, 180) : publication.title;
+
+  const sent = await notifyMany(ids, {
+    title: `${kindLabel}: ${publication.title}`,
+    message: `${name}. ${text}`,
+    relatedId: publication.id,
+  });
+
+  await prisma.publication.update({ where: { id: publication.id }, data: { notifiedRegion: true } });
+  return sent;
 }
 
 // ---------- Ver publicações (qualquer pessoa) ----------
 export async function listPublications(
   userId: string,
-  filters: { kind?: string; region?: string; ownerId?: string; projectId?: string; q?: string; page?: number }
+  filters: { kind?: string; region?: string; ownerId?: string; projectId?: string; q?: string; page?: number; official?: boolean }
 ) {
   const where: any = { isPublished: true };
-  if (filters.kind && KIND_VALUES.includes(filters.kind)) where.kind = filters.kind;
+  if (filters.kind && ALL_KINDS.includes(filters.kind)) where.kind = filters.kind;
+  if (filters.official) where.kind = { in: GOV_KINDS };
   if (filters.region) where.region = { contains: filters.region, mode: "insensitive" };
   if (filters.ownerId) where.ownerId = filters.ownerId;
   if (filters.projectId) where.projectId = filters.projectId;
@@ -191,12 +253,12 @@ export async function getPublication(userId: string, id: string) {
   return item;
 }
 
-// ---------- Publicar e gerir (ONG) ----------
+// ---------- Publicar e gerir (ONG e instituições públicas) ----------
 export async function myPublications(userId: string, role: string | undefined, filters: { kind?: string; draft?: boolean }) {
   assertNgo(role);
 
   const where: any = { ownerId: userId };
-  if (filters.kind && KIND_VALUES.includes(filters.kind)) where.kind = filters.kind;
+  if (filters.kind && ALL_KINDS.includes(filters.kind)) where.kind = filters.kind;
   if (filters.draft) where.isPublished = false;
 
   const items = await prisma.publication.findMany({ where, orderBy: { createdAt: "desc" }, take: 200 });
@@ -206,17 +268,24 @@ export async function myPublications(userId: string, role: string | undefined, f
 export async function createPublication(userId: string, role: string | undefined, input: any) {
   assertNgo(role);
 
-  const data = await readPublication(userId, input);
-  const created = await prisma.publication.create({
-    data: { ownerId: userId, ...data, isPublished: data.isPublished ?? true },
-  });
+  const data = await readPublication(userId, role, input);
+  const isPublished = data.isPublished ?? true;
 
+  const regionKey = isPublished
+    ? await prepareRegionBroadcast(userId, role, input?.notifyRegion, data.region ?? null, false)
+    : null;
+
+  const created = await prisma.publication.create({ data: { ownerId: userId, ...data, isPublished } });
+
+  let notifiedRegion = 0;
   if (created.isPublished) {
     await notifyAudience(created);
+    if (regionKey) notifiedRegion = await broadcastRegion(created, regionKey);
   }
 
-  const [item] = await shape([created], userId);
-  return item;
+  const fresh = await prisma.publication.findUnique({ where: { id: created.id } });
+  const [item] = await shape([fresh], userId);
+  return { ...item, notifiedRegion };
 }
 
 export async function updatePublication(userId: string, role: string | undefined, id: string, input: any) {
@@ -227,19 +296,31 @@ export async function updatePublication(userId: string, role: string | undefined
     throw new Error("Publicação não encontrada.");
   }
 
-  const data = await readPublication(userId, input, found);
-  if (Object.keys(data).length === 0) {
+  const data = await readPublication(userId, role, input, found);
+  const finalPublished: boolean = data.isPublished !== undefined ? data.isPublished : found.isPublished;
+  const finalRegion: string | null = data.region !== undefined ? data.region : found.region;
+
+  const regionKey = finalPublished
+    ? await prepareRegionBroadcast(userId, role, input?.notifyRegion, finalRegion, found.notifiedRegion)
+    : null;
+
+  if (Object.keys(data).length === 0 && !regionKey) {
     throw new Error("Nada para atualizar.");
   }
 
-  const updated = await prisma.publication.update({ where: { id }, data });
+  const updated = Object.keys(data).length ? await prisma.publication.update({ where: { id }, data }) : found;
 
+  let notifiedRegion = 0;
   if (!found.isPublished && updated.isPublished) {
     await notifyAudience(updated);
   }
+  if (regionKey) {
+    notifiedRegion = await broadcastRegion(updated, regionKey);
+  }
 
-  const [item] = await shape([updated], userId);
-  return item;
+  const fresh = await prisma.publication.findUnique({ where: { id } });
+  const [item] = await shape([fresh], userId);
+  return { ...item, notifiedRegion };
 }
 
 export async function deletePublication(userId: string, role: string | undefined, id: string) {
