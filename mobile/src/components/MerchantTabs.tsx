@@ -60,6 +60,23 @@ export const NGO_TABS: TabDef[] = [
   { key: "NgoProfile", icon: "🏢", label: "Perfil" },
 ];
 
+export const GOV_TABS: TabDef[] = [
+  { key: "GovHome", icon: "🏠", label: "Início" },
+  { key: "GovProjects", icon: "📋", label: "Projetos" },
+  { key: "GovData", icon: "📊", label: "Dados" },
+  { key: "GovCommunication", icon: "📢", label: "Comunicação" },
+  { key: "GovProfile", icon: "🏛️", label: "Perfil" },
+];
+
+// As telas da ONG que também servem o Governo mostram a barra do Governo
+const NGO_TO_GOV: Record<string, string> = {
+  NgoHome: "GovHome",
+  NgoProjects: "GovProjects",
+  NgoCommunities: "GovProjects",
+  NgoOpportunities: "GovCommunication",
+  NgoProfile: "GovProfile",
+};
+
 export function RoleTabs({
   active,
   tabs,
@@ -161,9 +178,28 @@ export function FisherLayout({ active, children }: { active: string; children: R
   );
 }
 
+// Barra da ONG. Se quem abre é do Governo, mostra a barra do Governo.
 export function NgoLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  const { user } = useAuth();
+
+  if ((user?.role as string | undefined) === "GOVERNO") {
+    return (
+      <Layout active={NGO_TO_GOV[active] ?? active} tabs={GOV_TABS}>
+        {children}
+      </Layout>
+    );
+  }
+
   return (
     <Layout active={active} tabs={NGO_TABS}>
+      {children}
+    </Layout>
+  );
+}
+
+export function GovLayout({ active, children }: { active: string; children: React.ReactNode }) {
+  return (
+    <Layout active={active} tabs={GOV_TABS}>
       {children}
     </Layout>
   );
