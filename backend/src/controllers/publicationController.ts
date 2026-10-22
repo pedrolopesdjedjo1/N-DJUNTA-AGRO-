@@ -31,6 +31,7 @@ export function list(req: AuthRequest, res: Response) {
       projectId: str(req.query.projectId),
       q: str(req.query.q),
       page: page && !isNaN(page) ? page : undefined,
+      official: req.query.official === "true",
     })
   );
 }
