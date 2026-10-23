@@ -19,7 +19,29 @@ export const PUBLICATION_ICON: Record<string, string> = {
   FOTO: "📷",
   VIDEO: "🎬",
   HISTORIA: "🏘️",
+  COMUNICADO: "🏛️",
+  AVISO: "🚨",
+  INFORMACAO: "ℹ️",
 };
+
+// Tipos de publicação só das instituições públicas
+export const OFFICIAL_KINDS = ["COMUNICADO", "AVISO", "INFORMACAO"];
+
+const OFFICIAL_LABEL: Record<string, string> = {
+  COMUNICADO: "Comunicado oficial",
+  AVISO: "Aviso oficial",
+  INFORMACAO: "Informação importante",
+};
+
+export function isOfficialKind(kind?: string | null): boolean {
+  return !!kind && OFFICIAL_KINDS.includes(kind);
+}
+
+// Nome do tipo de publicação, incluindo os tipos oficiais do Governo
+export function publicationKindLabel(catalog: { publicationKinds: { value: string; label: string }[] }, kind?: string | null): string {
+  if (!kind) return "";
+  return catalog.publicationKinds.find((k) => k.value === kind)?.label ?? OFFICIAL_LABEL[kind] ?? kind;
+}
 
 export const AMOUNT_LABEL: Record<string, string> = {
   BOLSA: "Valor da bolsa (FCFA, opcional)",
