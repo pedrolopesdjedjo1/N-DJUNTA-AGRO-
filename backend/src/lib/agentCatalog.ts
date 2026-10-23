@@ -82,6 +82,63 @@ export const ASSIST_REASONS: Option[] = [
 // Estados de encomenda que já não precisam de acompanhamento
 export const ORDER_CLOSED = ["CONCLUIDO", "CANCELADO", "RECUSADO"];
 
+export const TASK_KINDS: Option[] = [
+  { value: "GERAL", label: "Geral" },
+  { value: "CONTACTAR", label: "Contactar" },
+  { value: "VISITAR", label: "Visitar" },
+  { value: "ENCOMENDA", label: "Acompanhar encomenda" },
+  { value: "DADOS", label: "Atualizar dados" },
+  { value: "TRANSPORTE", label: "Transporte" },
+  { value: "OPORTUNIDADE", label: "Oportunidade" },
+  { value: "PROBLEMA", label: "Resolver problema" },
+];
+
+export const TASK_PRIORITY: Option[] = [
+  { value: "NORMAL", label: "Normal" },
+  { value: "ALTA", label: "Alta" },
+];
+
+export const NEED_CATEGORIES: Option[] = [
+  { value: "SEMENTES", label: "Sementes e plantas" },
+  { value: "EQUIPAMENTO", label: "Equipamento e ferramentas" },
+  { value: "FORMACAO", label: "Formação" },
+  { value: "FINANCIAMENTO", label: "Financiamento" },
+  { value: "TRANSPORTE", label: "Transporte" },
+  { value: "ARMAZENAMENTO", label: "Armazenamento e conservação" },
+  { value: "AGUA", label: "Água e irrigação" },
+  { value: "MERCADO", label: "Acesso a mercado" },
+  { value: "INFRAESTRUTURA", label: "Estradas, pontes e infraestruturas" },
+  { value: "SEGURANCA", label: "Segurança (mar ou terra)" },
+  { value: "OUTRO", label: "Outra necessidade" },
+];
+
+export const NEED_PRIORITY: Option[] = [
+  { value: "BAIXA", label: "Baixa" },
+  { value: "MEDIA", label: "Média" },
+  { value: "ALTA", label: "Alta" },
+  { value: "URGENTE", label: "Urgente" },
+];
+
+export const NEED_STATUS: Option[] = [
+  { value: "IDENTIFICADA", label: "Identificada" },
+  { value: "ENCAMINHADA", label: "Encaminhada" },
+  { value: "ATENDIDA", label: "Atendida" },
+];
+
+export const PRODUCER_KINDS: Option[] = [
+  { value: "AGRICULTOR", label: "Agricultores" },
+  { value: "PESCADOR", label: "Pescadores" },
+  { value: "ARTESAO", label: "Artesãos" },
+  { value: "COMERCIANTE", label: "Pequenos comerciantes" },
+  { value: "COOPERATIVA", label: "Cooperativas" },
+];
+
+export const REFERRAL_TYPES: Option[] = [
+  { value: "OPORTUNIDADE", label: "Oportunidade" },
+  { value: "FORMACAO", label: "Formação" },
+  { value: "PROGRAMA", label: "Programa público" },
+];
+
 export function agentCatalog() {
   return {
     agentTypes: AGENT_TYPES,
@@ -93,5 +150,12 @@ export function agentCatalog() {
     activityKinds: ACTIVITY_KINDS,
     manualActivityKinds: ACTIVITY_KINDS.filter((k) => MANUAL_ACTIVITY_KINDS.includes(k.value)),
     assistReasons: ASSIST_REASONS,
+    taskKinds: TASK_KINDS,
+    taskPriority: TASK_PRIORITY,
+    needCategories: NEED_CATEGORIES,
+    needPriority: NEED_PRIORITY,
+    needStatus: NEED_STATUS,
+    producerKinds: PRODUCER_KINDS,
+    referralTypes: REFERRAL_TYPES,
   };
 }
