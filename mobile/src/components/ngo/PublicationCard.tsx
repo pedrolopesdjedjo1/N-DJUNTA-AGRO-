@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Badge, u } from "../ui";
-import { NgoCatalog, labelOf } from "../../utils/ngoCatalog";
-import { PUBLICATION_ICON } from "../../constants/ngoContent";
+import { NgoCatalog } from "../../utils/ngoCatalog";
+import { PUBLICATION_ICON, isOfficialKind, publicationKindLabel } from "../../constants/ngoContent";
 import { formatDate } from "../../constants/market";
 import { colors } from "../../theme/colors";
 
@@ -15,12 +15,21 @@ interface Props {
 export default function PublicationCard({ item: p, catalog, onPress }: Props) {
   const cover = p.imageUrls?.[0];
   const extraPhotos = (p.imageUrls?.length ?? 0) - 1;
+  const official = isOfficialKind(p.kind) || !!p.isOfficial;
 
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
-      style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, overflow: "hidden", marginTop: 12 }}
+      style={{
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderLeftWidth: official ? 5 : 1,
+        borderLeftColor: official ? "#1565C0" : colors.border,
+        borderRadius: 10,
+        overflow: "hidden",
+        marginTop: 12,
+      }}
     >
       {cover ? (
         <View>
@@ -35,7 +44,7 @@ export default function PublicationCard({ item: p, catalog, onPress }: Props) {
 
       <View style={{ padding: 12 }}>
         <View style={u.between}>
-          <Badge label={`${PUBLICATION_ICON[p.kind] ?? "📰"} ${labelOf(catalog.publicationKinds, p.kind)}`} color="#6A1B9A" />
+          <Badge label={`${PUBLICATION_ICON[p.kind] ?? "📰"} ${publicationKindLabel(catalog, p.kind)}`} color={official ? "#1565C0" : "#6A1B9A"} />
           {!p.isPublished ? <Badge label="Rascunho" color="#757575" /> : null}
         </View>
 
@@ -54,6 +63,7 @@ export default function PublicationCard({ item: p, catalog, onPress }: Props) {
         {p.videoUrl ? <Text style={[u.muted, { marginTop: 4 }]}>🎬 Tem vídeo</Text> : null}
         {p.projectName ? <Text style={u.muted}>📋 {p.projectName}</Text> : null}
         {p.communityName || p.region ? <Text style={u.muted}>📍 {[p.communityName, p.region].filter(Boolean).join(", ")}</Text> : null}
+        {p.notifiedRegion ? <Text style={[u.muted, { marginTop: 2 }]}>🔔 A população da região foi avisada</Text> : null}
       </View>
     </TouchableOpacity>
   );
