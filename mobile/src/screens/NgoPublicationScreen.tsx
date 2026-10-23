@@ -4,8 +4,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Page, Title, Card, Badge, Btn, Empty, useLoader, u } from "../components/ui";
 import MediaGallery from "../components/ngo/MediaGallery";
 import { getPublication, updatePublication, deletePublication } from "../api/ngo";
-import { useNgoCatalog, labelOf } from "../utils/ngoCatalog";
-import { PUBLICATION_ICON } from "../constants/ngoContent";
+import { useNgoCatalog } from "../utils/ngoCatalog";
+import { PUBLICATION_ICON, isOfficialKind, publicationKindLabel } from "../constants/ngoContent";
 import { getApiErrorMessage } from "../api/errorMessage";
 import { formatDateTime } from "../constants/market";
 
@@ -34,6 +34,7 @@ export default function NgoPublicationScreen({ navigation, route }: any) {
 
   const org = p.organization;
   const orgName = org?.name ?? "Organização";
+  const official = isOfficialKind(p.kind) || !!p.isOfficial;
   const media = (p.imageUrls ?? []).map((url: string, i: number) => ({ id: `${i}`, kind: "IMAGE", url, caption: "" }));
 
   async function share() {
@@ -75,7 +76,7 @@ export default function NgoPublicationScreen({ navigation, route }: any) {
   return (
     <Page loader={loader}>
       <View style={u.row}>
-        <Badge label={`${PUBLICATION_ICON[p.kind] ?? "📰"} ${labelOf(catalog.publicationKinds, p.kind)}`} color="#6A1B9A" />
+        <Badge label={`${PUBLICATION_ICON[p.kind] ?? "📰"} ${publicationKindLabel(catalog, p.kind)}`} color={official ? "#1565C0" : "#6A1B9A"} />
         {!p.isPublished ? (
           <View style={{ marginLeft: 8 }}>
             <Badge label="Rascunho" color="#757575" />
@@ -95,7 +96,9 @@ export default function NgoPublicationScreen({ navigation, route }: any) {
         </View>
       </View>
 
+      {official ? <Text style={[u.muted, { marginTop: 4 }]}>🏛️ Publicação oficial de uma instituição pública</Text> : null}
       {p.communityName || p.region ? <Text style={[u.muted, { marginTop: 4 }]}>📍 {[p.communityName, p.region].filter(Boolean).join(", ")}</Text> : null}
+      {p.isMine && p.notifiedRegion ? <Text style={u.muted}>🔔 A população da região foi avisada por notificação.</Text> : null}
 
       {p.body ? <Text style={{ marginTop: 10, lineHeight: 22 }}>{p.body}</Text> : null}
 
@@ -120,7 +123,7 @@ export default function NgoPublicationScreen({ navigation, route }: any) {
         <Btn small kind="outline" label="📤 Partilhar" onPress={share} />
         {!p.isMine ? (
           <>
-            <Btn small kind="outline" label="Ver organização" onPress={() => navigation.navigate("NgoPublicOrganization", { id: p.ownerId })} />
+            <Btn small kind="outline" label="Ver instituição" onPress={() => navigation.navigate("NgoPublicOrganization", { id: p.ownerId })} />
             <Btn small kind="outline" label="💬 Contactar" onPress={() => navigation.navigate("Chat", { userId: p.ownerId, userName: orgName })} />
           </>
         ) : null}
