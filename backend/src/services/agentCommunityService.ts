@@ -4,11 +4,10 @@ import { assertAgent, ensureProfile } from "./agentService";
 import { inviteExistingUser } from "./agentClientService";
 
 const PAGE_SIZE = 30;
-const PRODUCER_ROLES = ["AGRICULTOR", "PESCADOR", "ARTESANO", "COMERCIANTE"];
+const PRODUCER_ROLES = ["AGRICULTOR", "PESCADOR", "ARTESAO", "COMERCIANTE"];
 const KIND_FIELD: Record<string, string> = {
   AGRICULTOR: "farmers",
   PESCADOR: "fishers",
-  ARTESANO: "artisans",
   ARTESAO: "artisans",
   COMERCIANTE: "merchants",
 };
