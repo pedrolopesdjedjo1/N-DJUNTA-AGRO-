@@ -62,14 +62,15 @@ export async function assistGuard(req: Request, res: Response, next: NextFunctio
 
   try {
     if (!(await sessionOk(claims))) {
-      return res.status(401).json({ error: "A sessão de ajuda terminou. Volte à área do agente.", code: "ASSIST_ENDED" });
+      // 403 (e não 401) para o app não terminar a sessão do agente
+      return res.status(403).json({ error: "A sessão de ajuda terminou. Volte à área do agente.", code: "ASSIST_ENDED" });
     }
 
     if (SAFE_METHODS.includes(req.method)) return next();
 
     const path = req.originalUrl.split("?")[0];
     if (BLOCKED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`))) {
-      return res.status(403).json({ error: "Esta ação só pode ser feita pela própria pessoa." });
+      return res.status(403).json({ error: "Esta ação só pode ser feita pela própria pessoa.", code: "ASSIST_BLOCKED" });
     }
 
     const label = LABELS.find(([re]) => re.test(`${req.method} ${path}`))?.[1] ?? "Fez uma alteração na conta";
