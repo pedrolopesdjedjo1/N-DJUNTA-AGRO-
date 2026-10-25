@@ -1,0 +1,142 @@
+import React, { useCallback, useState } from "react";
+import { View, Text, TouchableOpacity, Linking } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { AgentLayout } from "../components/AgentTabs";
+import { Page, Title, SubTitle, Card, Badge, Btn, Chip, Empty, Field, useLoader, u } from "../components/ui";
+import ChipGroup from "../components/ChipGroup";
+import { listAgentCases } from "../api/agent";
+import { useAgentCatalog } from "../utils/agentCatalog";
+import { labelOf } from "../utils/ngoCatalog";
+import { CASE_ICON, CASE_STATUS_COLOR } from "../constants/agentSupport";
+import { shortId } from "../constants/agentOps";
+import { SUPPORT, formatDate } from "../constants/market";
+
+const EMPTY = {
+  counts: { ABERTO: 0, EM_CURSO: 0, ESCALADO: 0, RESOLVIDO: 0, total: 0 } as Record<string, number>,
+  items: [] as any[],
+};
+
+type Tab = "" | "ESCALADO" | "RESOLVIDO";
+
+// Suporte: ajudar utilizadores, abrir chamados, passar problemas à equipa e contactar o NÔDJUNTA AGRO
+export default function AgentSupportScreen({ navigation }: any) {
+  const catalog = useAgentCatalog();
+  const [tab, setTab] = useState<Tab>("");
+  const [category, setCategory] = useState("");
+  const [text, setText] = useState("");
+  const [q, setQ] = useState("");
+
+  const loader = useLoader(() => listAgentCases({ status: tab, category, q }), EMPTY, [tab, category, q]);
+  const d: any = loader.data;
+  const c = d.counts;
+
+  useFocusEffect(
+    useCallback(() => {
+      loader.reload();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+  );
+
+  const pending = (c.ABERTO ?? 0) + (c.EM_CURSO ?? 0);
+
+  return (
+    <AgentLayout active="AgentHome">
+      <Page loader={loader}>
+        <Title>🆘 Suporte</Title>
+        <Text style={u.muted}>Ajude os utilizadores a resolver problemas. O que não conseguir resolver, passe à equipa do NÔDJUNTA AGRO.</Text>
+
+        <Btn label="➕ Abrir chamado" onPress={() => navigation.navigate("AgentCaseForm")} />
+
+        <SubTitle>Ajudar utilizadores</SubTitle>
+        <View style={u.row}>
+          <Btn small kind="outline" label="👥 Os meus clientes" onPress={() => navigation.navigate("AgentClients")} />
+          <Btn small kind="outline" label="🤝 Sessões de ajuda" onPress={() => navigation.navigate("AgentSessions")} />
+          <Btn small kind="outline" label="📦 Encomendas" onPress={() => navigation.navigate("AgentOrders", { attention: true })} />
+          <Btn small kind="outline" label="📚 Guias e vídeos" onPress={() => navigation.navigate("Learning")} />
+        </View>
+
+        <View style={u.grid}>
+          {(
+            [
+              ["⏳ Por resolver", pending],
+              ["🏢 Com a equipa", c.ESCALADO ?? 0],
+              ["✅ Resolvidos", c.RESOLVIDO ?? 0],
+            ] as [string, number][]
+          ).map(([label, value]) => (
+            <View key={label} style={u.tile}>
+              <View style={u.tileBox}>
+                <Text style={u.tileValue}>{value}</Text>
+                <Text style={u.tileLabel}>{label}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <SubTitle>Os meus chamados</SubTitle>
+        <View style={u.row}>
+          <Chip label={`Por resolver (${pending})`} active={tab === ""} onPress={() => setTab("")} />
+          <Chip label={`Com a equipa (${c.ESCALADO ?? 0})`} active={tab === "ESCALADO"} onPress={() => setTab("ESCALADO")} />
+          <Chip label={`Resolvidos (${c.RESOLVIDO ?? 0})`} active={tab === "RESOLVIDO"} onPress={() => setTab("RESOLVIDO")} />
+        </View>
+
+        <Field
+          placeholder="Procurar chamado"
+          value={text}
+          onChangeText={setText}
+          onSubmitEditing={() => setQ(text.trim())}
+          returnKeyType="search"
+        />
+        <ChipGroup
+          label="Tipo de problema"
+          options={catalog.caseCategories.map((k) => ({ ...k, icon: CASE_ICON[k.value] }))}
+          value={category}
+          onChange={setCategory}
+          allowEmpty
+          scroll
+        />
+
+        {d.items.length === 0 && !loader.loading ? (
+          <Empty text={tab === "" ? "Não tem chamados por resolver." : tab === "ESCALADO" ? "Não tem chamados com a equipa." : "Ainda não resolveu chamados."} />
+        ) : (
+          d.items.map((x: any) => (
+            <TouchableOpacity key={x.id} activeOpacity={0.85} onPress={() => navigation.navigate("AgentCase", { id: x.id })}>
+              <Card>
+                <View style={u.between}>
+                  <Text style={[u.strong, { flex: 1, marginRight: 8 }]}>
+                    {CASE_ICON[x.category] ?? "⚠️"} {x.title}
+                  </Text>
+                  <Badge label={labelOf(catalog.caseStatus, x.status) || x.status} color={CASE_STATUS_COLOR[x.status] ?? "#757575"} />
+                </View>
+                <Text style={u.muted}>{labelOf(catalog.caseCategories, x.category)}</Text>
+                {x.clientName ? <Text style={u.muted}>👤 {x.clientName}</Text> : null}
+                {x.orderId ? <Text style={u.muted}>📦 Encomenda {shortId(x.orderId)}</Text> : null}
+                <Text style={u.muted}>
+                  Aberto em {formatDate(x.createdAt)} · atualizado em {formatDate(x.updatedAt)}
+                </Text>
+              </Card>
+            </TouchableOpacity>
+          ))
+        )}
+
+        <SubTitle>Contactar o NÔDJUNTA AGRO</SubTitle>
+        {SUPPORT.phones.map((phone: string) => (
+          <Card key={phone}>
+            <Text style={u.strong}>📞 {phone}</Text>
+            <View style={u.row}>
+              <Btn small label="Ligar" onPress={() => Linking.openURL(`tel:${phone}`)} />
+              <Btn small kind="outline" label="💬 WhatsApp" onPress={() => Linking.openURL(`https://wa.me/245${phone}`)} />
+            </View>
+          </Card>
+        ))}
+        <Card>
+          <Text style={u.strong}>📧 {SUPPORT.email}</Text>
+          <Btn small label="Enviar e-mail" onPress={() => Linking.openURL(`mailto:${SUPPORT.email}`)} />
+        </Card>
+        <View style={u.row}>
+          <Btn small kind="outline" label="🆘 Pedido de ajuda para mim" onPress={() => navigation.navigate("Help")} />
+          <Btn small kind="outline" label="🛡️ Denunciar um problema" onPress={() => navigation.navigate("AgentSecurity")} />
+        </View>
+      </Page>
+    </AgentLayout>
+  );
+}
