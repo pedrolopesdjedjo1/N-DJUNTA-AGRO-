@@ -4,11 +4,10 @@ import { clientScope } from "../lib/agentScope";
 import { assertAgent, ensureProfile } from "./agentService";
 
 const BOUNDS = { minLat: 10.85, maxLat: 12.75, minLng: -16.85, maxLng: -13.55 };
-const MAP_ROLES = ["AGRICULTOR", "PESCADOR", "ARTESANO", "COMERCIANTE", "TRANSPORTADOR"];
+const MAP_ROLES = ["AGRICULTOR", "PESCADOR", "ARTESAO", "COMERCIANTE", "TRANSPORTADOR"];
 const ROLE_FIELD: Record<string, string> = {
   AGRICULTOR: "farmers",
   PESCADOR: "fishers",
-  ARTESANO: "artisans",
   ARTESAO: "artisans",
   COMERCIANTE: "merchants",
   TRANSPORTADOR: "transporters",
@@ -167,7 +166,7 @@ export async function getAgentMap(agentId: string, role: string | undefined, fil
   }
 
   // Pontos de atendimento: os dos agentes aprovados e o meu (mesmo antes de aprovado)
-  if (wanted.has("agents")) {
+  {
     const list = [...agentProfiles];
     if (!list.some((a) => a.userId === agentId)) {
       list.push({
@@ -181,13 +180,13 @@ export async function getAgentMap(agentId: string, role: string | undefined, fil
       });
     }
 
-    const meUser = list.some((a) => a.userId === agentId) && !agentMap.has(agentId)
-      ? await prisma.user.findUnique({ where: { id: agentId }, select: { id: true, name: true, photoUrl: true, isVerified: true } })
-      : null;
-    if (meUser) agentMap.set(agentId, meUser);
+    if (!agentMap.has(agentId)) {
+      const me = await prisma.user.findUnique({ where: { id: agentId }, select: { id: true, name: true, photoUrl: true, isVerified: true } });
+      if (me) agentMap.set(agentId, me);
+    }
 
     list.forEach((a) => {
-      const hasPoint = a.serviceLat !== null || a.serviceAddress;
+      const hasPoint = a.serviceLat !== null || !!a.serviceAddress;
       if (!hasPoint) return;
 
       const s = spot(a.serviceLat, a.serviceLng, a.serviceAddress ?? REGIONS.find((r) => a.regions.includes(r.key))?.name);
@@ -195,9 +194,10 @@ export async function getAgentMap(agentId: string, role: string | undefined, fil
         unplaced += 1;
         return;
       }
-      const u = agentMap.get(a.userId);
       bump(s.region, "agents");
+
       if (wanted.has("agents")) {
+        const u = agentMap.get(a.userId);
         points.push({
           layer: "agents",
           id: a.userId,
