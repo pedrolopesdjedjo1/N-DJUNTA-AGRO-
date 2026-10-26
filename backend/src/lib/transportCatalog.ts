@@ -51,6 +51,21 @@ export const DELIVERY_SORTS: Option[] = [
   { value: "PERTO", label: "Mais perto" },
 ];
 
+export const TRANSPORTER_DOCUMENT_KINDS: Option[] = [
+  { value: "IDENTIFICACAO", label: "Bilhete de identidade ou passaporte" },
+  { value: "CARTA_CONDUCAO", label: "Carta de condução ou licença" },
+  { value: "REGISTO_VEICULO", label: "Registo ou livrete do veículo" },
+  { value: "SEGURO", label: "Seguro do veículo" },
+  { value: "OUTRO", label: "Outro documento" },
+];
+
+export const VERIFICATION_STATUS: Option[] = [
+  { value: "RASCUNHO", label: "Por enviar" },
+  { value: "PENDENTE", label: "Em análise" },
+  { value: "APROVADO", label: "Aprovado" },
+  { value: "RECUSADO", label: "Recusado" },
+];
+
 // Estados que o servidor grava. CONFIRMAR na ligação com o schema.prisma:
 // se um nome não existir no enum, o npx tsc --noEmit aponta a linha.
 export const DELIVERY_WRITE = {
@@ -126,5 +141,7 @@ export function transportCatalog() {
     releaseReasons: RELEASE_REASONS,
     eventKinds: EVENT_KINDS,
     deliverySorts: DELIVERY_SORTS,
+    documentKinds: TRANSPORTER_DOCUMENT_KINDS,
+    verificationStatus: VERIFICATION_STATUS,
   };
 }
