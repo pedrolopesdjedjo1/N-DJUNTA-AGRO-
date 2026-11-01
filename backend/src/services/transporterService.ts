@@ -1,12 +1,16 @@
 import { prisma } from "../lib/prisma";
-import { VEHICLE_TYPES } from "../lib/transportCatalog";
+import { CARGO_TYPES, TRANSPORTER_KINDS, VEHICLE_DOCUMENT_KINDS, VEHICLE_STATUS, VEHICLE_TYPES } from "../lib/transportCatalog";
 import { values } from "../lib/ngoCatalog";
 import { REGIONS } from "../lib/ngoRegions";
 import { clean, safe } from "../lib/agentScope";
 
 const VEHICLE_VALUES = values(VEHICLE_TYPES);
+const STATUS_VALUES = values(VEHICLE_STATUS);
+const KIND_VALUES = values(TRANSPORTER_KINDS);
+const CARGO_VALUES = values(CARGO_TYPES);
 const REGION_KEYS = REGIONS.map((r) => r.key);
 const DAY = 86400000;
+const MAX_PHOTOS = 6;
 
 function validStorageUrl(url: any): boolean {
   return (
@@ -34,6 +38,7 @@ export function shapeDocuments(documents: any[]) {
     const expires = d.expiresAt ? new Date(d.expiresAt).getTime() : null;
     return {
       ...d,
+      forVehicle: VEHICLE_DOCUMENT_KINDS.includes(d.kind),
       expired: expires !== null && expires < now,
       expiringSoon: expires !== null && expires >= now && expires - now <= 30 * DAY,
     };
@@ -48,6 +53,8 @@ export function checklist(profile: any, user: any, documents: any[]) {
     { key: "phone", label: "Telefone", done: !!user.phone },
     { key: "vehicle", label: "Tipo de veículo", done: !!profile.vehicleType },
     ...(needsPlate ? [{ key: "plate", label: "Matrícula do veículo", done: !!profile.plate }] : []),
+    { key: "capacity", label: "Capacidade de carga do veículo", done: !!profile.capacityKg },
+    { key: "vehiclePhoto", label: "Foto do veículo", done: (profile.vehiclePhotos ?? []).length > 0 },
     { key: "regions", label: "Pelo menos uma região onde trabalha", done: profile.regions.length > 0 },
     { key: "identification", label: "Documento de identificação", done: documents.some((d) => d.kind === "IDENTIFICACAO") },
     {
@@ -68,6 +75,11 @@ async function ratingOf(userId: string) {
     },
     { average: null as number | null, count: 0 }
   );
+}
+
+// O veículo está pronto para aceitar entregas?
+export function vehicleReady(profile: any): boolean {
+  return !!profile.vehicleType && !!profile.capacityKg && profile.vehicleStatus === "OPERACIONAL";
 }
 
 // =====================================================================
@@ -92,15 +104,18 @@ export async function getProfile(userId: string, role?: string) {
 
   // Quem já estava verificado antes desta função continua aprovado
   const status = user.isVerified && profile.verificationStatus === "RASCUNHO" ? "APROVADO" : profile.verificationStatus;
+  const shaped = shapeDocuments(documents);
 
   return {
     profile: { ...profile, verificationStatus: status },
     user,
-    documents: shapeDocuments(documents),
+    documents: shaped,
+    vehicleDocuments: shaped.filter((d) => d.forVehicle),
     checklist: checklist(profile, user, documents),
     rating,
     stats: { delivered },
-    complete: !!profile.vehicleType && profile.regions.length > 0,
+    vehicleReady: vehicleReady(profile),
+    complete: !!profile.vehicleType && !!profile.capacityKg && profile.regions.length > 0,
   };
 }
 
@@ -116,6 +131,14 @@ export async function saveProfile(userId: string, role: string | undefined, inpu
       throw new Error("Escolha o tipo de veículo.");
     }
     data.vehicleType = type;
+  }
+
+  if (input?.transporterKind !== undefined) {
+    const kind = String(input.transporterKind || "INDEPENDENTE");
+    if (!KIND_VALUES.includes(kind)) {
+      throw new Error("Escolha o tipo de transportador.");
+    }
+    data.transporterKind = kind;
   }
 
   if (input?.vehicleBrand !== undefined) data.vehicleBrand = clean(input.vehicleBrand, 40);
@@ -150,6 +173,32 @@ export async function saveProfile(userId: string, role: string | undefined, inpu
     }
   }
 
+  if (Array.isArray(input?.vehiclePhotos)) {
+    const list = (Array.from(new Set(input.vehiclePhotos.map(String))) as string[]).slice(0, MAX_PHOTOS);
+    if (!list.every(validStorageUrl)) {
+      throw new Error("Foto do veículo inválida. Envie as fotos pelo app.");
+    }
+    data.vehiclePhotos = list;
+  }
+
+  if (Array.isArray(input?.cargoTypes)) {
+    const list = Array.from(new Set(input.cargoTypes.map(String))) as string[];
+    if (!list.every((c) => CARGO_VALUES.includes(c))) {
+      throw new Error("Tipo de produto inválido.");
+    }
+    data.cargoTypes = list;
+  }
+
+  if (input?.vehicleStatus !== undefined) {
+    const status = String(input.vehicleStatus);
+    if (!STATUS_VALUES.includes(status)) {
+      throw new Error("Estado do veículo inválido.");
+    }
+    data.vehicleStatus = status;
+    data.vehicleStatusNote = status === "OPERACIONAL" ? null : clean(input?.vehicleStatusNote, 200);
+    if (status !== "OPERACIONAL") data.isAvailable = false;
+  }
+
   if (Array.isArray(input?.regions)) {
     const wanted = Array.from(new Set(input.regions.map(String))) as string[];
     if (!wanted.every((r) => REGION_KEYS.includes(r))) {
@@ -159,7 +208,16 @@ export async function saveProfile(userId: string, role: string | undefined, inpu
   }
 
   if (input?.bio !== undefined) data.bio = clean(input.bio, 500);
-  if (input?.isAvailable !== undefined) data.isAvailable = Boolean(input.isAvailable);
+  if (input?.isAvailable !== undefined) {
+    const wantsOn = Boolean(input.isAvailable);
+    const status = data.vehicleStatus ?? before.vehicleStatus;
+    if (wantsOn && status !== "OPERACIONAL") {
+      throw new Error("O veículo está em manutenção ou avariado. Ponha-o operacional antes de ficar disponível.");
+    }
+    data.isAvailable = wantsOn;
+  }
+  if (input?.shareLocation !== undefined) data.shareLocation = Boolean(input.shareLocation);
+  if (input?.notifyNewLoads !== undefined) data.notifyNewLoads = Boolean(input.notifyNewLoads);
 
   const userData: any = {};
   if (input?.name !== undefined) {
@@ -195,11 +253,38 @@ export async function saveProfile(userId: string, role: string | undefined, inpu
   return getProfile(userId, role);
 }
 
-export async function setAvailability(userId: string, role: string | undefined, isAvailable: any) {
+// Mudar só o estado do veículo (operacional, em manutenção ou avariado)
+export async function setVehicleStatus(userId: string, role: string | undefined, statusInput: any, noteInput: any) {
   assertTransporter(role);
   await ensureProfile(userId);
 
-  await prisma.transporterProfile.update({ where: { userId }, data: { isAvailable: Boolean(isAvailable) } });
+  const status = String(statusInput ?? "");
+  if (!STATUS_VALUES.includes(status)) {
+    throw new Error("Escolha o estado do veículo.");
+  }
+
+  const note = status === "OPERACIONAL" ? null : clean(noteInput, 200);
+  if (status !== "OPERACIONAL" && (!note || note.length < 3)) {
+    throw new Error("Explique em poucas palavras o que se passa com o veículo.");
+  }
+
+  await prisma.transporterProfile.update({
+    where: { userId },
+    data: { vehicleStatus: status, vehicleStatusNote: note, ...(status !== "OPERACIONAL" ? { isAvailable: false } : {}) },
+  });
+  return getProfile(userId, role);
+}
+
+export async function setAvailability(userId: string, role: string | undefined, isAvailable: any) {
+  assertTransporter(role);
+  const profile = await ensureProfile(userId);
+
+  const on = Boolean(isAvailable);
+  if (on && profile.vehicleStatus !== "OPERACIONAL") {
+    throw new Error("O veículo está em manutenção ou avariado. Ponha-o operacional antes de ficar disponível.");
+  }
+
+  await prisma.transporterProfile.update({ where: { userId }, data: { isAvailable: on } });
   return getProfile(userId, role);
 }
 
@@ -234,11 +319,14 @@ export async function getPublicTransporter(viewerId: string, transporterId: stri
       location: user.location,
       isVerified: user.isVerified,
       isMe: viewerId === transporterId,
-      isAvailable: profile.isAvailable,
+      isAvailable: profile.isAvailable && profile.vehicleStatus === "OPERACIONAL",
+      transporterKind: profile.transporterKind,
       vehicleType: profile.vehicleType,
       vehicleBrand: profile.vehicleBrand,
       vehicleModel: profile.vehicleModel,
       vehicleYear: profile.vehicleYear,
+      vehiclePhotos: profile.vehiclePhotos,
+      cargoTypes: profile.cargoTypes,
       capacityKg: profile.capacityKg,
       regions: profile.regions.map((k) => REGIONS.find((r) => r.key === k)?.name ?? k),
       bio: profile.bio,
