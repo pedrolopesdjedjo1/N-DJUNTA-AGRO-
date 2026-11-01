@@ -50,7 +50,7 @@ export function ratings(req: AuthRequest, res: Response) {
   return run(res, () => getRatings(req.userId!, req.userRole));
 }
 
-// ---------- Perfil ----------
+// ---------- Perfil e veículo ----------
 export function profile(req: AuthRequest, res: Response) {
   return run(res, () => getProfile(req.userId!, req.userRole));
 }
@@ -70,9 +70,13 @@ export function available(req: AuthRequest, res: Response) {
       scope: str(req.query.scope),
       region: str(req.query.region),
       fit: str(req.query.fit),
+      cargo: str(req.query.cargo),
+      compatible: str(req.query.compatible),
       q: str(req.query.q),
       sort: str(req.query.sort),
       page: num(req.query.page),
+      lat: num(req.query.lat),
+      lng: num(req.query.lng),
     })
   );
 }
