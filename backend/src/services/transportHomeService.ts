@@ -1,10 +1,10 @@
 import { prisma } from "../lib/prisma";
 import { REGIONS } from "../lib/ngoRegions";
 import { safe } from "../lib/agentScope";
-import { assertTransporter, ensureProfile, vehicleReady } from "./transporterService";
+import { assertTransporter, ensureProfile, shapeDocuments, vehicleReady } from "./transporterService";
 import { loadAvailableCards, loadMineCards } from "./transportDeliveryService";
-import { getEarningsSummary, startOfDay, startOfMonthOf } from "./transportMoneyService";
-import { getReputation } from "./transportReputationService";
+import { getFinance } from "./transportFinanceService";
+import { getReputation, listToRate } from "./transportReputationService";
 
 const DAY = 86400000;
 const LEVEL_ORDER: Record<string, number> = { ALTA: 0, MEDIA: 1, INFO: 2 };
@@ -12,20 +12,25 @@ const SEVERITY_ORDER: Record<string, number> = { EMERGENCIA: 0, ALERTA: 1, ATENC
 const ROAD_ALERTS = ["CHUVA", "TEMPESTADE", "INUNDACAO", "EMERGENCIA", "OUTRO"];
 const STALE_LOCATION_MIN = 30;
 
-// =====================================================================
-// Avaliações e reputação
-// =====================================================================
-export async function getRatings(userId: string, role: string | undefined) {
-  assertTransporter(role);
-  return getReputation(userId);
+function startOfDay(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function startOfMonth(d: Date) {
+  const x = startOfDay(d);
+  x.setDate(1);
+  return x;
 }
 
-// =====================================================================
-// Ganhos
-// =====================================================================
+// Avaliações recebidas e reputação
+export async function getRatings(userId: string, role: string | undefined) {
+  return getReputation(userId, role);
+}
+
+// Ganhos (com o que está por receber)
 export async function getEarnings(userId: string, role: string | undefined) {
-  assertTransporter(role);
-  return getEarningsSummary(userId);
+  return getFinance(userId, role);
 }
 
 // =====================================================================
@@ -35,12 +40,12 @@ export async function getHome(userId: string, role: string | undefined) {
   assertTransporter(role);
   const profile = await ensureProfile(userId);
 
-  const [user, mine, available, reputation, earnings, unread, officialAlerts] = await Promise.all([
+  const [user, mine, available, ratings, earnings, unread, officialAlerts, documents, myOffers] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId }, select: { name: true, photoUrl: true, isVerified: true } }),
     loadMineCards(userId, profile),
     loadAvailableCards(userId, profile),
-    getReputation(userId),
-    getEarningsSummary(userId),
+    getReputation(userId, role),
+    getFinance(userId, role),
     prisma.notification.count({ where: { userId, isRead: false } }),
     safe(
       "alertas oficiais",
@@ -59,7 +64,14 @@ export async function getHome(userId: string, role: string | undefined) {
       },
       [] as any[]
     ),
+    prisma.transporterDocument.findMany({ where: { transporterId: userId } }),
+    prisma.transportOffer.findMany({ where: { transporterId: userId, status: "ATIVA" }, select: { id: true } }),
   ]);
+
+  const pendingRequests = myOffers.length
+    ? await prisma.transportRequest.count({ where: { offerId: { in: myOffers.map((o) => o.id) }, status: "PENDENTE" } })
+    : 0;
+  const overduePayouts = await prisma.transportPayout.count({ where: { transporterId: userId, status: "PENDENTE", createdAt: { lt: new Date(Date.now() - 3 * DAY) } } });
 
   const matching = available.filter((c) => c.matchesMyRegions);
   const compatible = matching.filter((c) => c.compatibility.ok);
@@ -77,7 +89,7 @@ export async function getHome(userId: string, role: string | undefined) {
 
   const now = new Date();
   const dayStart = startOfDay(now).getTime();
-  const monthStart = startOfMonthOf(now).getTime();
+  const monthStart = startOfMonth(now).getTime();
   const ready = vehicleReady(profile);
 
   // ---------- Alertas importantes ----------
@@ -86,7 +98,7 @@ export async function getHome(userId: string, role: string | undefined) {
   inProgress.forEach((c) => {
     const at = c.lastLocationAt ? new Date(c.lastLocationAt).getTime() : null;
     const minutes = at ? Math.floor((Date.now() - at) / 60000) : null;
-    if (profile.shareLocation && (minutes === null || minutes > STALE_LOCATION_MIN)) {
+    if ((minutes === null || minutes > STALE_LOCATION_MIN) && profile.shareLocation) {
       alerts.push({
         key: `location-${c.id}`,
         level: "ALTA",
@@ -101,9 +113,21 @@ export async function getHome(userId: string, role: string | undefined) {
     if (!c.desiredDate) return;
     const due = new Date(c.desiredDate).getTime();
     if (due < dayStart) {
-      alerts.push({ key: `late-${c.id}`, level: "ALTA", title: `Entrega ${c.orderCode} atrasada`, detail: "A data pretendida já passou e ainda não recolheu os produtos.", target: { screen: "delivery", id: c.id } });
+      alerts.push({
+        key: `late-${c.id}`,
+        level: "ALTA",
+        title: `Entrega ${c.orderCode} atrasada`,
+        detail: "A data pretendida já passou e ainda não recolheu os produtos.",
+        target: { screen: "delivery", id: c.id },
+      });
     } else if (due < dayStart + DAY) {
-      alerts.push({ key: `today-${c.id}`, level: "MEDIA", title: `Entrega ${c.orderCode} para hoje`, detail: c.pickup.text ? `Recolha em ${c.pickup.text}.` : "Combine a recolha com o vendedor.", target: { screen: "delivery", id: c.id } });
+      alerts.push({
+        key: `today-${c.id}`,
+        level: "MEDIA",
+        title: `Entrega ${c.orderCode} para hoje`,
+        detail: c.pickup.text ? `Recolha em ${c.pickup.text}.` : "Combine a recolha com o vendedor.",
+        target: { screen: "delivery", id: c.id },
+      });
     }
   });
 
@@ -121,45 +145,97 @@ export async function getHome(userId: string, role: string | undefined) {
     alerts.push({
       key: "vehicle",
       level: "ALTA",
-      title: profile.vehicleStatus !== "OPERACIONAL" ? "O seu veículo não está operacional" : "Complete o registo do veículo",
-      detail:
-        profile.vehicleStatus !== "OPERACIONAL"
-          ? "Enquanto estiver em manutenção ou avariado, não pode aceitar entregas."
-          : "Indique o tipo de veículo e a capacidade de carga para poder aceitar entregas.",
+      title: "O seu veículo não está pronto para aceitar entregas",
+      detail: !profile.vehicleType
+        ? "Registe o seu veículo."
+        : !profile.capacityKg
+        ? "Indique a capacidade de carga em quilos."
+        : "O veículo está em manutenção ou avariado. Volte a pô-lo operacional quando estiver pronto.",
       target: { screen: "vehicle" },
     });
   }
 
-  if (earnings.pending.count > 0 && earnings.pending.oldestAt && Date.now() - new Date(earnings.pending.oldestAt).getTime() > 3 * DAY) {
+  const docs = shapeDocuments(documents).filter((d) => d.forVehicle || d.kind === "CARTA_CONDUCAO");
+  docs
+    .filter((d) => d.expired || d.expiringSoon)
+    .forEach((d) => {
+      alerts.push({
+        key: `doc-${d.id}`,
+        level: d.expired ? "ALTA" : "MEDIA",
+        title: d.expired ? `Documento fora do prazo: ${d.name}` : `Documento a terminar: ${d.name}`,
+        detail: "Renove-o para continuar verificado.",
+        target: { screen: "vehicle" },
+      });
+    });
+
+  if (!profile.isAvailable && ready) {
     alerts.push({
-      key: "payouts",
+      key: "unavailable",
       level: "MEDIA",
-      title: `${earnings.pending.count} pagamento(s) por confirmar`,
-      detail: `${earnings.pending.amount} FCFA de entregas já concluídas. Se já recebeu, confirme em Ganhos.`,
-      target: { screen: "earnings" },
+      title: "Está marcado como indisponível",
+      detail: "Ligue a disponibilidade para voltar a aceitar entregas.",
+      target: { screen: "profile" },
     });
   }
 
-  if (!profile.isAvailable && ready) {
-    alerts.push({ key: "unavailable", level: "MEDIA", title: "Está marcado como indisponível", detail: "Ligue a disponibilidade para voltar a aceitar entregas.", target: { screen: "profile" } });
+  if (!profile.vehicleType || profile.regions.length === 0) {
+    alerts.push({
+      key: "profile",
+      level: "MEDIA",
+      title: "Complete o perfil de transportador",
+      detail: "Indique o veículo e as regiões onde trabalha para ver as entregas certas.",
+      target: { screen: "profile" },
+    });
   }
 
-  if (profile.regions.length === 0) {
-    alerts.push({ key: "profile", level: "MEDIA", title: "Indique as regiões onde trabalha", detail: "Assim vê as cargas certas e recebe avisos de cargas novas.", target: { screen: "profile" } });
+  if (overduePayouts > 0) {
+    alerts.push({
+      key: "payouts",
+      level: "MEDIA",
+      title: `${overduePayouts} pagamento(s) por receber há mais de 3 dias`,
+      detail: "Confirme em Ganhos os que já recebeu, ou reclame os que não chegaram.",
+      target: { screen: "payments" },
+    });
+  }
+
+  if (pendingRequests > 0) {
+    alerts.push({
+      key: "requests",
+      level: "INFO",
+      title: `${pendingRequests} pedido(s) de transporte nas suas ofertas`,
+      detail: "Pessoas querem transportar nas suas viagens. Responda.",
+      target: { screen: "requests" },
+    });
+  }
+
+  if (ratings.toRate > 0) {
+    alerts.push({
+      key: "rate",
+      level: "INFO",
+      title: `${ratings.toRate} entrega(s) por avaliar`,
+      detail: "Avalie os compradores e vendedores das entregas que concluiu.",
+      target: { screen: "rate" },
+    });
   }
 
   if (compatible.length > 0 && profile.isAvailable && ready) {
     alerts.push({
       key: "available",
       level: "INFO",
-      title: `${compatible.length} carga(s) compatível(eis) com o seu veículo`,
+      title: `${compatible.length} carga(s) nova(s) que servem ao seu veículo`,
       detail: "Veja os locais de recolha e entrega e aceite as que lhe servem.",
       target: { screen: "available" },
     });
   }
 
   if (!user?.isVerified) {
-    alerts.push({ key: "verification", level: "INFO", title: "Conta ainda não verificada", detail: "A verificação dá mais confiança a quem encomenda.", target: { screen: "verification" } });
+    alerts.push({
+      key: "verification",
+      level: "INFO",
+      title: "Conta ainda não verificada",
+      detail: "A verificação dá mais confiança a quem encomenda.",
+      target: { screen: "verification" },
+    });
   }
 
   alerts.sort((a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level]);
@@ -173,14 +249,16 @@ export async function getHome(userId: string, role: string | undefined) {
       vehicleType: profile.vehicleType,
       vehicleStatus: profile.vehicleStatus,
       vehicleReady: ready,
+      transporterKind: profile.transporterKind,
       plate: profile.plate,
       capacityKg: profile.capacityKg,
       regions: profile.regions.map((k) => REGIONS.find((r) => r.key === k)?.name ?? k),
-      badge: reputation.badge,
-      rating: { average: reputation.average, count: reputation.count },
+      rating: { average: ratings.average, count: ratings.count },
+      badge: ratings.badge,
     },
     summary: {
-      available: compatible.length,
+      available: matching.length,
+      availableCompatible: compatible.length,
       availableAll: available.length,
       inProgress: inProgress.length,
       upcoming: upcoming.length,
@@ -197,9 +275,9 @@ export async function getHome(userId: string, role: string | undefined) {
       week: earnings.week,
       month: earnings.month,
       pending: earnings.pending,
-      received: earnings.received,
+      profitMonth: earnings.profitMonth,
     },
-    ratings: { average: reputation.average, count: reputation.count, recent: reputation.recent.slice(0, 3) },
+    ratings: { average: ratings.average, count: ratings.count, recent: ratings.recent.slice(0, 3), badge: ratings.badge },
     alerts,
     unreadNotifications: unread,
   };
