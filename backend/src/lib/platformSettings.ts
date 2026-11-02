@@ -22,7 +22,7 @@ export const SETTING_DEFS: SettingDef[] = [
   { key: "support.phones", label: "Telefones do suporte", group: "Suporte", type: "list", default: ["955407156", "965281785"], perm: "settings.manage" },
   { key: "notifications.maxBroadcastRecipients", label: "Máximo de pessoas por aviso geral", group: "Notificações", type: "number", default: 5000, perm: "settings.manage", min: 100, max: 20000 },
   { key: "commissions.platformPercent", label: "Comissão da plataforma (%)", group: "Comissões", type: "number", default: 0, perm: "finance.manage", min: 0, max: 30, hint: "Usada nos relatórios financeiros. O app não cobra dinheiro." },
-  { key: "commissions.transportPercent", label: "Comissão sobre o valor do transporte (%)", group: "Comissões", type: "number", default: 0, perm: "finance.manage", min: 0, max: 30, hint: "Desconta-se do valor que o transportador tem a receber. 0 = sem comissão." },
+  { key: "commissions.transportPercent", label: "Comissão sobre o transporte (%)", group: "Comissões", type: "number", default: 0, perm: "finance.manage", min: 0, max: 30, hint: "Retida sobre o valor do transporte de cada entrega nova. 0 = sem comissão." },
   { key: "finance.suspiciousOrderAmount", label: "Valor a partir do qual uma encomenda é revista (FCFA)", group: "Comissões", type: "number", default: 500000, perm: "finance.manage", min: 0, max: 1000000000 },
   { key: "delivery.stuckDays", label: "Dias parada até a encomenda ser sinalizada", group: "Entregas", type: "number", default: 3, perm: "settings.manage", min: 1, max: 30 },
   { key: "market.newProductReviewHours", label: "Horas em que um produto novo está para revisão", group: "Mercado", type: "number", default: 72, perm: "settings.manage", min: 1, max: 336 },
