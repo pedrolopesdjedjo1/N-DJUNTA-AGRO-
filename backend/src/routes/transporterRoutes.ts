@@ -1,48 +1,30 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import {
-  catalog,
-  home,
-  earnings,
-  ratings,
-  profile,
-  saveMyProfile,
-  availability,
-  available,
-  mine,
-  one,
-  accept,
-  decline,
-  release,
-  collect,
-  deliver,
-  location,
-  problem,
-} from "../controllers/transporterController";
+import * as c from "../controllers/transporterController";
 
 const router = Router();
 
 router.use(authMiddleware);
 
-router.get("/catalog", catalog);
-router.get("/home", home);
-router.get("/earnings", earnings);
-router.get("/ratings", ratings);
+router.get("/catalog", c.catalog);
+router.get("/home", c.home);
+router.get("/earnings", c.earnings);
+router.get("/ratings", c.ratings);
 
-router.get("/profile", profile);
-router.put("/profile", saveMyProfile);
-router.patch("/availability", availability);
+router.get("/profile", c.profile);
+router.put("/profile", c.saveMyProfile);
+router.put("/availability", c.availability);
 
-// Rotas fixas primeiro, antes de /:id
-router.get("/deliveries/available", available);
-router.get("/deliveries/mine", mine);
-router.get("/deliveries/:id", one);
-router.post("/deliveries/:id/accept", accept);
-router.post("/deliveries/:id/decline", decline);
-router.post("/deliveries/:id/release", release);
-router.post("/deliveries/:id/collect", collect);
-router.post("/deliveries/:id/deliver", deliver);
-router.post("/deliveries/:id/location", location);
-router.post("/deliveries/:id/problem", problem);
+// As rotas fixas vêm antes de "/deliveries/:id"
+router.get("/deliveries/available", c.available);
+router.get("/deliveries/mine", c.mine);
+router.get("/deliveries/:id", c.one);
+router.post("/deliveries/:id/accept", c.accept);
+router.post("/deliveries/:id/decline", c.decline);
+router.post("/deliveries/:id/release", c.release);
+router.post("/deliveries/:id/collect", c.collect);
+router.post("/deliveries/:id/deliver", c.deliver);
+router.post("/deliveries/:id/location", c.location);
+router.post("/deliveries/:id/problem", c.problem);
 
 export default router;
