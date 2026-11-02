@@ -7,7 +7,6 @@ import { getTrProfile, setTrAvailability } from "../api/transporterV2";
 import { useTrCatalog } from "../utils/transportCatalogV2";
 import { labelOf } from "../utils/ngoCatalog";
 import {
-  TR_BADGE,
   TR_KIND_ICON,
   TR_VEHICLE_ICON,
   TR_VEHICLE_STATUS_COLOR,
@@ -100,24 +99,21 @@ export default function TrProfileScreen({ navigation }: any) {
             <View style={{ flex: 1, marginRight: 8 }}>
               <Text style={u.strong}>{p.isAvailable ? "🟢 Disponível para entregas" : "🔴 Indisponível"}</Text>
               <Text style={u.muted}>
-                {!vehicleOk && !p.isAvailable ? "Ponha o veículo pronto para ficar disponível." : p.isAvailable ? "Vê e aceita as cargas que servem ao seu veículo." : "Não recebe avisos de cargas novas."}
+                {!vehicleOk && !p.isAvailable
+                  ? "Ponha o veículo pronto para ficar disponível."
+                  : p.isAvailable
+                  ? "Vê e aceita as cargas que servem ao seu veículo."
+                  : "Não recebe avisos de cargas novas."}
               </Text>
             </View>
-            <Switch
-              value={p.isAvailable}
-              onValueChange={toggleAvailability}
-              disabled={busy || (!vehicleOk && !p.isAvailable)}
-              trackColor={{ true: colors.primary, false: "#BDBDBD" }}
-            />
+            <Switch value={p.isAvailable} onValueChange={toggleAvailability} disabled={busy || (!vehicleOk && !p.isAvailable)} trackColor={{ true: colors.primary, false: "#BDBDBD" }} />
           </View>
         </Card>
 
         <Card>
           <Text>📞 {user.phone ?? "Sem telefone"}</Text>
           {user.location ? <Text style={u.muted}>📍 {user.location}</Text> : null}
-          <Text style={u.muted}>
-            🧭 Região de atuação: {p.regions.length > 0 ? p.regions.map((k: string) => k).join(", ") : "ainda não indicou"}
-          </Text>
+          <Text style={u.muted}>🧭 Região de atuação: {p.regions.length > 0 ? p.regions.join(", ") : "ainda não indicou"}</Text>
           {p.bio ? <Text style={[u.muted, { marginTop: 4, lineHeight: 19 }]}>{p.bio}</Text> : null}
           <Btn small kind="outline" label="✏️ Editar o perfil" onPress={() => navigation.navigate("TrProfileEdit")} />
         </Card>
@@ -151,11 +147,9 @@ export default function TrProfileScreen({ navigation }: any) {
           <View style={u.between}>
             <Text style={[u.strong, { flex: 1, marginRight: 8 }]}>Documentos e identidade</Text>
             <Badge label={labelOf(catalog.verificationStatus, p.verificationStatus) || p.verificationStatus} color={TR_VERIFICATION_COLOR[p.verificationStatus] ?? "#757575"} />
-          </Badge>
+          </View>
           {p.verificationNote ? <Text style={[u.muted, { marginTop: 4 }]}>📝 {p.verificationNote}</Text> : null}
-          {missing.length > 0 && p.verificationStatus !== "APROVADO" ? (
-            <Text style={[u.muted, { marginTop: 4 }]}>Falta: {missing.join(", ")}.</Text>
-          ) : null}
+          {missing.length > 0 && p.verificationStatus !== "APROVADO" ? <Text style={[u.muted, { marginTop: 4 }]}>Falta: {missing.join(", ")}.</Text> : null}
           <Btn small kind="outline" label="📄 Documentos e verificação" onPress={() => navigation.navigate("TransporterVerification")} />
         </Card>
 
