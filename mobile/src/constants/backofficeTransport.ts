@@ -1,6 +1,6 @@
 import { EVENT_ICON } from "./transporter";
 
-export const BO_EVENT_ICON: Record<string, string> = { ...EVENT_ICON, TRATADO: "🛡️" };
+export const BO_EVENT_ICON: Record<string, string> = { ...EVENT_ICON, TRATADO: "🛡️", INICIOU: "🚚", CHEGOU: "📍" };
 
 // Quem pode ser avisado quando a equipa trata um problema de entrega
 export const HANDLE_NOTIFY: { value: string; label: string }[] = [
@@ -16,6 +16,9 @@ export const TRANSPORT_MENU: [string, string, string, Record<string, any>?, stri
   ["✅", "Entregas concluídas", "BoDeliveries", { phase: "ENTREGUE" }, ["transport.view"]],
   ["🧭", "Rotas", "BoRoutes", undefined, ["transport.view"]],
   ["⚠️", "Problemas de entrega", "BoDeliveryProblems", undefined, ["transport.view"]],
+  ["🆘", "Ocorrências e SOS", "BoIncidents", undefined, ["transport.view"]],
+  ["💳", "Pagamentos de transporte", "BoPayouts", undefined, ["transport.view"]],
+  ["⛽", "Postos e oficinas", "BoServicePoints", undefined, ["transport.view"]],
   ["📣", "Reclamações", "BoComplaints", undefined, ["transport.view"]],
   ["⭐", "Avaliações", "BoTransportRatings", undefined, ["transport.view"]],
   ["🆔", "Verificar transportadores", "BoTransportVerification", undefined, ["transport.manage"]],
