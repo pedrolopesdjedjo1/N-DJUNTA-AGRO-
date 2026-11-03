@@ -4,9 +4,11 @@ import { useFocusEffect } from "@react-navigation/native";
 import AdminLayout from "../components/admin/AdminLayout";
 import { Page, Title, SubTitle, Card, Badge, useLoader, u } from "../components/ui";
 import { getBoTransportOverview } from "../api/backoffice";
+import { getBoTransportExtra } from "../api/backofficeTransport";
 import { adminCan } from "../utils/adminSession";
 import { TRANSPORT_MENU, hoursText } from "../constants/backofficeTransport";
 import { formatNumber } from "../utils/format";
+import { money } from "../constants/market";
 
 const EMPTY = {
   transporters: { total: 0, available: 0, verified: 0, pending: 0, working: 0 },
@@ -15,13 +17,22 @@ const EMPTY = {
   avgDeliveryHours: null as number | null,
 };
 
+const EXTRA_EMPTY = {
+  incidents: { open: 0, sosOpen: 0 },
+  servicePoints: { pending: 0 },
+  payouts: { contested: 0, contestedValue: 0, overdue: 0, overdueValue: 0 },
+};
+
 export default function BoTransportScreen({ navigation }: any) {
   const loader = useLoader(getBoTransportOverview, EMPTY);
+  const extra = useLoader(getBoTransportExtra, EXTRA_EMPTY);
   const d: any = loader.data;
+  const e: any = extra.data;
 
   useFocusEffect(
     useCallback(() => {
       loader.reload();
+      extra.reload();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
   );
@@ -29,12 +40,17 @@ export default function BoTransportScreen({ navigation }: any) {
   const t = d.transporters;
   const x = d.deliveries;
 
-  const attention: { key: string; level: string; text: string; route: string; params?: Record<string, any>; perms: string[] }[] = [
-    { key: "awaiting", level: "ALTA", text: `${x.awaitingOver24h} entrega(s) sem transportador há mais de 24 horas`, route: "BoDeliveries", params: { phase: "DISPONIVEL" }, perms: ["transport.view"] },
-    { key: "stale", level: "ALTA", text: `${x.staleInTransit} entrega(s) em transporte sem localização há mais de 1 hora`, route: "BoDeliveries", params: { phase: "EM_TRANSPORTE" }, perms: ["transport.view"] },
-    { key: "pending", level: "MEDIA", text: `${t.pending} transportador(es) à espera de verificação`, route: "BoTransportVerification", perms: ["transport.manage"] },
-    { key: "problems", level: "MEDIA", text: `${d.last7Days.problems} problema(s) de entrega comunicado(s) nos últimos 7 dias`, route: "BoDeliveryProblems", perms: ["transport.view"] },
-  ].filter((a) => Number(a.text.split(" ")[0]) > 0 && adminCan(...a.perms));
+  const attention: { key: string; level: string; count: number; text: string; route: string; params?: Record<string, any>; perms: string[] }[] = [
+    { key: "sos", level: "ALTA", count: e.incidents.sosOpen, text: `${e.incidents.sosOpen} SOS de transportadores por atender`, route: "BoIncidents", params: { status: "open" }, perms: ["transport.view"] },
+    { key: "awaiting", level: "ALTA", count: x.awaitingOver24h, text: `${x.awaitingOver24h} entrega(s) sem transportador há mais de 24 horas`, route: "BoDeliveries", params: { phase: "DISPONIVEL" }, perms: ["transport.view"] },
+    { key: "stale", level: "ALTA", count: x.staleInTransit, text: `${x.staleInTransit} entrega(s) em transporte sem localização há mais de 1 hora`, route: "BoDeliveries", params: { phase: "EM_TRANSPORTE" }, perms: ["transport.view"] },
+    { key: "incidents", level: "MEDIA", count: e.incidents.open - e.incidents.sosOpen, text: `${e.incidents.open - e.incidents.sosOpen} ocorrência(s) de transportadores por tratar`, route: "BoIncidents", params: { status: "open" }, perms: ["transport.view"] },
+    { key: "contested", level: "MEDIA", count: e.payouts.contested, text: `${e.payouts.contested} pagamento(s) de transporte reclamado(s) (${money(e.payouts.contestedValue)})`, route: "BoPayouts", perms: ["transport.view"] },
+    { key: "pending", level: "MEDIA", count: t.pending, text: `${t.pending} transportador(es) à espera de verificação`, route: "BoTransportVerification", perms: ["transport.manage"] },
+    { key: "points", level: "MEDIA", count: e.servicePoints.pending, text: `${e.servicePoints.pending} posto(s) ou oficina(s) sugerido(s) por analisar`, route: "BoServicePoints", params: { status: "PENDENTE" }, perms: ["transport.view"] },
+    { key: "problems", level: "MEDIA", count: d.last7Days.problems, text: `${d.last7Days.problems} problema(s) de entrega comunicado(s) nos últimos 7 dias`, route: "BoDeliveryProblems", perms: ["transport.view"] },
+    { key: "overdue", level: "INFO", count: e.payouts.overdue, text: `${e.payouts.overdue} pagamento(s) de transporte por receber há mais de 3 dias (${money(e.payouts.overdueValue)})`, route: "BoPayouts", params: { status: "OVERDUE" }, perms: ["transport.view"] },
+  ].filter((a) => a.count > 0 && adminCan(...a.perms));
 
   const tiles: [string, string][] = [
     ["🚛 Transportadores", formatNumber(t.total)],
@@ -65,7 +81,7 @@ export default function BoTransportScreen({ navigation }: any) {
               <Card>
                 <View style={u.between}>
                   <Text style={[u.strong, { flex: 1, marginRight: 8 }]}>{a.text}</Text>
-                  <Badge label={a.level === "ALTA" ? "Urgente" : "Atenção"} color={a.level === "ALTA" ? "#C62828" : "#EF6C00"} />
+                  <Badge label={a.level === "ALTA" ? "Urgente" : a.level === "MEDIA" ? "Atenção" : "Info"} color={a.level === "ALTA" ? "#C62828" : a.level === "MEDIA" ? "#EF6C00" : "#757575"} />
                 </View>
               </Card>
             </TouchableOpacity>
