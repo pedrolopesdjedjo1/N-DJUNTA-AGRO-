@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import * as AuthModule from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import * as LanguageModule from '../context/LanguageContext';
 import * as ClientModule from '../api/client';
 
@@ -49,7 +49,9 @@ const TEXTOS: Record<string, Record<string, string>> = {
     destaques: 'Produtos em destaque',
     verTudo: 'Ver tudo',
     semProdutos: 'Ainda não há produtos em destaque.',
-    atalhos: 'O seu espaço',
+    atalhos: 'Mais ferramentas',
+    minhaArea: 'A minha área',
+    minhaAreaSub: 'Abra o seu espaço de trabalho',
     vender: 'Vender',
     precos: 'Preços',
     clima: 'Clima',
@@ -61,15 +63,17 @@ const TEXTOS: Record<string, Record<string, string>> = {
     admin: 'Admin',
     denuncias: 'Denúncias',
     verificacoes: 'Verificações',
+    conteudo: 'Conteúdo',
+    zona: 'Zona protegida',
+    ferramentas: 'Ferramentas',
+    busca: 'Busca avançada',
+    calculadora: 'Calculadora',
+    aparencia: 'Aparência',
     oportunidades: 'Oportunidades de negócio e emprego',
     oportunidadesSub: 'Veja o que está a acontecer perto de si',
-    inicio: 'Início',
-    produtos: 'Produtos',
-    mensagens: 'Mensagens',
     perfil: 'Perfil',
     sair: 'Sair',
     slogan: 'JUNTOS, FAZEMOS ACONTECER.',
-    verProdutos: 'Ver todos os produtos',
   },
   fr: {
     manha: 'Bonjour',
@@ -84,8 +88,10 @@ const TEXTOS: Record<string, Record<string, string>> = {
     comercio: 'Commerce',
     destaques: 'Produits en vedette',
     verTudo: 'Voir tout',
-    semProdutos: "Pas encore de produits en vedette.",
-    atalhos: 'Votre espace',
+    semProdutos: 'Pas encore de produits en vedette.',
+    atalhos: "Plus d'outils",
+    minhaArea: 'Mon espace',
+    minhaAreaSub: 'Ouvrez votre espace de travail',
     vender: 'Vendre',
     precos: 'Prix',
     clima: 'Météo',
@@ -97,15 +103,17 @@ const TEXTOS: Record<string, Record<string, string>> = {
     admin: 'Admin',
     denuncias: 'Signalements',
     verificacoes: 'Vérifications',
+    conteudo: 'Contenu',
+    zona: 'Zone protégée',
+    ferramentas: 'Outils',
+    busca: 'Recherche avancée',
+    calculadora: 'Calculatrice',
+    aparencia: 'Apparence',
     oportunidades: "Opportunités d'affaires et d'emploi",
     oportunidadesSub: 'Voyez ce qui se passe près de vous',
-    inicio: 'Accueil',
-    produtos: 'Produits',
-    mensagens: 'Messages',
     perfil: 'Profil',
     sair: 'Quitter',
     slogan: 'ENSEMBLE, NOUS FAISONS AVANCER.',
-    verProdutos: 'Voir tous les produits',
   },
   en: {
     manha: 'Good morning',
@@ -121,7 +129,9 @@ const TEXTOS: Record<string, Record<string, string>> = {
     destaques: 'Featured products',
     verTudo: 'See all',
     semProdutos: 'No featured products yet.',
-    atalhos: 'Your space',
+    atalhos: 'More tools',
+    minhaArea: 'My area',
+    minhaAreaSub: 'Open your workspace',
     vender: 'Sell',
     precos: 'Prices',
     clima: 'Weather',
@@ -133,47 +143,32 @@ const TEXTOS: Record<string, Record<string, string>> = {
     admin: 'Admin',
     denuncias: 'Reports',
     verificacoes: 'Verifications',
+    conteudo: 'Content',
+    zona: 'Protected zone',
+    ferramentas: 'Tools',
+    busca: 'Advanced search',
+    calculadora: 'Calculator',
+    aparencia: 'Appearance',
     oportunidades: 'Business and job opportunities',
     oportunidadesSub: 'See what is happening near you',
-    inicio: 'Home',
-    produtos: 'Products',
-    mensagens: 'Messages',
     perfil: 'Profile',
     sair: 'Log out',
     slogan: 'TOGETHER, WE MAKE IT HAPPEN.',
-    verProdutos: 'See all products',
   },
 };
 
-type Atalho = {
-  chave: string;
-  icone: keyof typeof Ionicons.glyphMap;
-  texto: string;
-  rotas: string[];
-  perfis?: string[];
-  cor?: string;
+// Cada perfil abre a sua área (nomes iguais aos do AppNavigator).
+const AREA_POR_PERFIL: Record<string, { rota: string; icone: keyof typeof Ionicons.glyphMap }> = {
+  AGRICULTOR: { rota: 'Agricultor', icone: 'leaf' },
+  PESCADOR: { rota: 'Pescador', icone: 'fish' },
+  COMPRADOR: { rota: 'Comprador', icone: 'cart' },
+  COMERCIANTE: { rota: 'Comerciante', icone: 'storefront' },
+  AGENTE_DIGITAL: { rota: 'Agente', icone: 'headset' },
+  TRANSPORTADOR: { rota: 'Transportador', icone: 'car' },
+  GOVERNO: { rota: 'Governo', icone: 'business' },
+  ONG: { rota: 'Ong', icone: 'heart' },
+  ADMIN: { rota: 'Admin', icone: 'construct' },
 };
-
-const ATALHOS: Atalho[] = [
-  { chave: 'vender', icone: 'add-circle', texto: 'vender', rotas: ['AddProduct'], perfis: VENDEDORES },
-  { chave: 'precos', icone: 'pricetag', texto: 'precos', rotas: ['MarketPrices', 'Prices', 'PrecosMercado'] },
-  { chave: 'clima', icone: 'partly-sunny', texto: 'clima', rotas: ['Weather', 'WeatherAlerts', 'Clima'] },
-  { chave: 'transporte', icone: 'car', texto: 'transporte', rotas: ['Transport', 'Transports', 'Transporte'] },
-  { chave: 'coop', icone: 'people', texto: 'cooperativas', rotas: ['Cooperatives', 'Cooperativas'] },
-  { chave: 'verif', icone: 'shield-checkmark', texto: 'verificacao', rotas: ['Verification'] },
-  { chave: 'painel', icone: 'stats-chart', texto: 'painel', rotas: ['Dashboard'], perfis: ['ADMIN', 'GOVERNO', 'ONG'] },
-  { chave: 'admin', icone: 'construct', texto: 'admin', rotas: ['Admin'], perfis: ['ADMIN'] },
-  { chave: 'denuncias', icone: 'flag', texto: 'denuncias', rotas: ['AdminReports'], perfis: ['ADMIN'], cor: COR.vermelho },
-  { chave: 'verifs', icone: 'checkmark-done-circle', texto: 'verificacoes', rotas: ['AdminVerifications'], perfis: ['ADMIN'] },
-  { chave: 'idioma', icone: 'language', texto: 'idioma', rotas: ['Language'] },
-];
-
-const CATEGORIAS: { valor: string; icone: keyof typeof Ionicons.glyphMap; texto: string; cor: string }[] = [
-  { valor: 'AGRICOLA', icone: 'leaf', texto: 'agricultura', cor: COR.verde },
-  { valor: 'PESCA', icone: 'fish', texto: 'pesca', cor: '#2B6CB0' },
-  { valor: 'ARTESANATO', icone: 'color-palette', texto: 'artesanato', cor: '#9A5B2A' },
-  { valor: 'COMERCIO', icone: 'storefront', texto: 'comercio', cor: COR.dourado },
-];
 
 const ROTULO_PERFIL: Record<string, string> = {
   AGRICULTOR: 'Agricultor',
@@ -188,17 +183,69 @@ const ROTULO_PERFIL: Record<string, string> = {
   ADMIN: 'Administrador',
 };
 
+type Atalho = {
+  chave: string;
+  icone: keyof typeof Ionicons.glyphMap;
+  texto: string;
+  rota: string;
+  perfis?: string[];
+  cor?: string;
+};
+
+const ATALHOS: Atalho[] = [
+  { chave: 'vender', icone: 'add-circle', texto: 'vender', rota: 'AddProduct', perfis: VENDEDORES },
+  { chave: 'precos', icone: 'pricetag', texto: 'precos', rota: 'MarketPrices' },
+  { chave: 'clima', icone: 'partly-sunny', texto: 'clima', rota: 'WeatherAlerts' },
+  { chave: 'transporte', icone: 'car', texto: 'transporte', rota: 'Transport' },
+  { chave: 'coop', icone: 'people', texto: 'cooperativas', rota: 'Cooperatives' },
+  { chave: 'ferramentas', icone: 'hammer', texto: 'ferramentas', rota: 'Ferramentas' },
+  { chave: 'calculadora', icone: 'calculator', texto: 'calculadora', rota: 'Calculadora' },
+  { chave: 'busca', icone: 'options', texto: 'busca', rota: 'BuscaAvancada' },
+  { chave: 'verif', icone: 'shield-checkmark', texto: 'verificacao', rota: 'Verification' },
+  { chave: 'painel', icone: 'stats-chart', texto: 'painel', rota: 'Dashboard', perfis: ['ADMIN', 'GOVERNO', 'ONG'] },
+  { chave: 'admin', icone: 'construct', texto: 'admin', rota: 'Admin', perfis: ['ADMIN'] },
+  { chave: 'denuncias', icone: 'flag', texto: 'denuncias', rota: 'AdminReports', perfis: ['ADMIN'], cor: COR.vermelho },
+  { chave: 'verifs', icone: 'checkmark-done-circle', texto: 'verificacoes', rota: 'AdminVerifications', perfis: ['ADMIN'] },
+  { chave: 'conteudo', icone: 'document-text', texto: 'conteudo', rota: 'AdminConteudo', perfis: ['ADMIN'] },
+  { chave: 'zona', icone: 'lock-closed', texto: 'zona', rota: 'ZonaProtegida', perfis: ['ADMIN'] },
+  { chave: 'aparencia', icone: 'color-palette', texto: 'aparencia', rota: 'Aparencia' },
+  { chave: 'idioma', icone: 'language', texto: 'idioma', rota: 'Language' },
+];
+
+const CATEGORIAS: { valor: string; icone: keyof typeof Ionicons.glyphMap; texto: string; cor: string }[] = [
+  { valor: 'AGRICOLA', icone: 'leaf', texto: 'agricultura', cor: COR.verde },
+  { valor: 'PESCA', icone: 'fish', texto: 'pesca', cor: '#2B6CB0' },
+  { valor: 'ARTESANATO', icone: 'color-palette', texto: 'artesanato', cor: '#9A5B2A' },
+  { valor: 'COMERCIO', icone: 'storefront', texto: 'comercio', cor: COR.dourado },
+];
+
 function formatarPreco(valor: any): string {
   const n = Number(valor);
   if (!isFinite(n)) return '';
   return `${n.toLocaleString('pt-PT')} FCFA`;
 }
 
+// Junta os nomes das rotas deste navegador e de todos os navegadores "pai"
+// (o início agora vive dentro do menu inferior).
+function nomesDeRotas(navigation: any): string[] {
+  const nomes = new Set<string>();
+  let nav = navigation;
+  while (nav) {
+    try {
+      (nav.getState()?.routeNames ?? []).forEach((r: string) => nomes.add(r));
+    } catch {
+      // ignora
+    }
+    nav = nav.getParent ? nav.getParent() : undefined;
+  }
+  return Array.from(nomes);
+}
+
 export function HomeScreen() {
   const navigation: any = useNavigation();
   const insets = useSafeAreaInsets();
 
-  const auth: any = (AuthModule as any).useAuth ? (AuthModule as any).useAuth() : {};
+  const auth: any = useAuth();
   const idiomaCtx: any = (LanguageModule as any).useLanguage ? (LanguageModule as any).useLanguage() : {};
   const usuario = auth?.user ?? null;
   const sair = auth?.logout ?? auth?.signOut ?? auth?.sair;
@@ -213,25 +260,14 @@ export function HomeScreen() {
   const [busca, setBusca] = useState('');
   const entrada = useRef(new Animated.Value(0)).current;
 
-  const rotasExistentes: string[] = useMemo(() => {
-    try {
-      return navigation.getState()?.routeNames ?? [];
-    } catch {
-      return [];
-    }
-  }, [navigation]);
-
-  const rotaDe = useCallback(
-    (candidatas: string[]) => candidatas.find((r) => rotasExistentes.includes(r)),
-    [rotasExistentes],
-  );
+  const rotasExistentes: string[] = useMemo(() => nomesDeRotas(navigation), [navigation]);
+  const existe = useCallback((rota: string) => rotasExistentes.includes(rota), [rotasExistentes]);
 
   const ir = useCallback(
-    (candidatas: string[], params?: any) => {
-      const r = rotaDe(candidatas);
-      if (r) navigation.navigate(r, params);
+    (rota: string, params?: any) => {
+      if (existe(rota)) navigation.navigate(rota, params);
     },
-    [navigation, rotaDe],
+    [navigation, existe],
   );
 
   const carregarProdutos = useCallback(async () => {
@@ -262,24 +298,35 @@ export function HomeScreen() {
   const inicial = (primeiroNome || '?').charAt(0).toUpperCase();
 
   const atalhosVisiveis = ATALHOS.filter(
-    (a) => rotaDe(a.rotas) && (!a.perfis || a.perfis.includes(perfil)),
+    (a) => existe(a.rota) && (!a.perfis || a.perfis.includes(perfil)),
   );
-  const temOportunidades = !!rotaDe(['Opportunities', 'Oportunidades']);
 
-  const abrirProdutos = (params?: any) => ir(['Products'], params);
+  // A área do perfil abre pelo separador "Area" (mantém o menu inferior visível).
+  const area = AREA_POR_PERFIL[perfil];
+  const rotaArea = existe('Area') ? 'Area' : area && existe(area.rota) ? area.rota : '';
+  const temArea = !!area && !!rotaArea;
+  const temOportunidades = existe('Opportunities') || existe('Oportunidades');
+
+  // Se o início estiver dentro do menu inferior, o menu vem do navegador.
+  const abrirProdutos = (params?: any) => ir('Products', params);
 
   return (
     <View style={[styles.tela, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" backgroundColor={COR.creme} />
 
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 110 + insets.bottom }}
+        contentContainerStyle={{ paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={carregando} onRefresh={carregarProdutos} tintColor={COR.verde} colors={[COR.verde]} />
         }
       >
-        <Animated.View style={{ opacity: entrada, transform: [{ translateY: entrada.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }] }}>
+        <Animated.View
+          style={{
+            opacity: entrada,
+            transform: [{ translateY: entrada.interpolate({ inputRange: [0, 1], outputRange: [14, 0] }) }],
+          }}
+        >
           {/* Cabeçalho da marca */}
           <View style={styles.marca}>
             <View style={{ flex: 1 }}>
@@ -292,15 +339,15 @@ export function HomeScreen() {
               <Text style={styles.slogan}>{t('slogan')}</Text>
             </View>
             <TouchableOpacity
-              accessibilityLabel={t('mensagens')}
+              accessibilityLabel="Notificações"
               style={styles.botaoRedondo}
-              onPress={() => ir(['Notifications'])}
+              onPress={() => ir('Notifications')}
             >
               <Ionicons name="notifications-outline" size={22} color={COR.preto} />
             </TouchableOpacity>
           </View>
 
-          {/* Cartão de boas-vindas e pesquisa */}
+          {/* Boas-vindas e pesquisa */}
           <View style={styles.heroi}>
             <View style={styles.heroiTopo}>
               <View style={{ flex: 1 }}>
@@ -316,23 +363,48 @@ export function HomeScreen() {
                   </View>
                 )}
               </View>
-              <TouchableOpacity style={styles.avatar} onPress={() => ir(['Profile'])} accessibilityLabel={t('perfil')}>
+              <TouchableOpacity style={styles.avatar} onPress={() => ir('Profile')} accessibilityLabel={t('perfil')}>
                 <Text style={styles.avatarTexto}>{inicial}</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.pesquisa}>
-              <Ionicons name="search" size={20} color={COR.cinza} />
-              <TextInput
-                style={styles.pesquisaCampo}
-                placeholder={t('pesquisar')}
-                placeholderTextColor="#8A8D86"
-                value={busca}
-                onChangeText={setBusca}
-                returnKeyType="search"
-                onSubmitEditing={() => abrirProdutos(busca.trim() ? { search: busca.trim() } : undefined)}
-              />
+            <View style={styles.pesquisaLinha}>
+              <View style={styles.pesquisa}>
+                <Ionicons name="search" size={20} color={COR.cinza} />
+                <TextInput
+                  style={styles.pesquisaCampo}
+                  placeholder={t('pesquisar')}
+                  placeholderTextColor="#8A8D86"
+                  value={busca}
+                  onChangeText={setBusca}
+                  returnKeyType="search"
+                  onSubmitEditing={() => abrirProdutos(busca.trim() ? { search: busca.trim() } : undefined)}
+                />
+              </View>
+              {existe('BuscaAvancada') && (
+                <TouchableOpacity
+                  style={styles.botaoFiltro}
+                  onPress={() => ir('BuscaAvancada')}
+                  accessibilityLabel={t('busca')}
+                >
+                  <Ionicons name="options" size={22} color={COR.preto} />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
+
+          {/* A minha área */}
+          {temArea && (
+            <TouchableOpacity style={styles.area} activeOpacity={0.9} onPress={() => ir(rotaArea)}>
+              <View style={styles.areaIcone}>
+                <Ionicons name={area.icone} size={28} color={COR.dourado} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.areaTitulo}>{t('minhaArea')}</Text>
+                <Text style={styles.areaSub}>{t('minhaAreaSub')}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={22} color={COR.branco} />
+            </TouchableOpacity>
+          )}
 
           {/* Categorias */}
           <Text style={styles.titulo}>{t('categorias')}</Text>
@@ -368,7 +440,12 @@ export function HomeScreen() {
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.carrossel}>
               {produtos.map((p: any, i: number) => (
-                <TouchableOpacity key={String(p?.id ?? i)} style={styles.produto} activeOpacity={0.9} onPress={() => abrirProdutos()}>
+                <TouchableOpacity
+                  key={String(p?.id ?? i)}
+                  style={styles.produto}
+                  activeOpacity={0.9}
+                  onPress={() => abrirProdutos()}
+                >
                   {p?.imageUrl ? (
                     <Image source={{ uri: p.imageUrl }} style={styles.produtoFoto} resizeMode="cover" />
                   ) : (
@@ -397,7 +474,11 @@ export function HomeScreen() {
 
           {/* Oportunidades (só aparece quando existir a rota) */}
           {temOportunidades && (
-            <TouchableOpacity style={styles.oportunidade} activeOpacity={0.9} onPress={() => ir(['Opportunities', 'Oportunidades'])}>
+            <TouchableOpacity
+              style={styles.oportunidade}
+              activeOpacity={0.9}
+              onPress={() => ir(existe('Opportunities') ? 'Opportunities' : 'Oportunidades')}
+            >
               <View style={{ flex: 1 }}>
                 <Text style={styles.oportunidadeTitulo}>{t('oportunidades')}</Text>
                 <Text style={styles.oportunidadeSub}>{t('oportunidadesSub')}</Text>
@@ -406,17 +487,17 @@ export function HomeScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Atalhos por perfil */}
+          {/* Atalhos */}
           {atalhosVisiveis.length > 0 && (
             <>
               <Text style={styles.titulo}>{t('atalhos')}</Text>
               <View style={styles.grade}>
                 {atalhosVisiveis.map((a) => (
-                  <TouchableOpacity key={a.chave} style={styles.atalho} activeOpacity={0.85} onPress={() => ir(a.rotas)}>
+                  <TouchableOpacity key={a.chave} style={styles.atalho} activeOpacity={0.85} onPress={() => ir(a.rota)}>
                     <View style={[styles.atalhoIcone, { backgroundColor: a.cor ? '#FBE4E0' : COR.verdeClaro }]}>
                       <Ionicons name={a.icone} size={24} color={a.cor ?? COR.verde} />
                     </View>
-                    <Text style={styles.atalhoTexto} numberOfLines={1}>
+                    <Text style={styles.atalhoTexto} numberOfLines={2}>
                       {t(a.texto)}
                     </Text>
                   </TouchableOpacity>
@@ -433,36 +514,7 @@ export function HomeScreen() {
           )}
         </Animated.View>
       </ScrollView>
-
-      {/* Menu inferior */}
-      <View style={[styles.menu, { paddingBottom: Math.max(insets.bottom, 10) }]}>
-        <ItemMenu icone="home" texto={t('inicio')} ativo onPress={() => {}} />
-        <ItemMenu icone="basket" texto={t('produtos')} onPress={() => abrirProdutos()} />
-        <ItemMenu icone="chatbubbles" texto={t('mensagens')} onPress={() => ir(['Conversations'])} />
-        <ItemMenu icone="person" texto={t('perfil')} onPress={() => ir(['Profile'])} />
-      </View>
     </View>
-  );
-}
-
-function ItemMenu({
-  icone,
-  texto,
-  ativo,
-  onPress,
-}: {
-  icone: keyof typeof Ionicons.glyphMap;
-  texto: string;
-  ativo?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.8} accessibilityLabel={texto}>
-      <View style={[styles.menuPilula, ativo && { backgroundColor: COR.verdeClaro }]}>
-        <Ionicons name={icone} size={22} color={ativo ? COR.verde : '#8A8D86'} />
-      </View>
-      <Text style={[styles.menuTexto, ativo && { color: COR.verde, fontWeight: '700' }]}>{texto}</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -525,17 +577,48 @@ const styles = StyleSheet.create({
     borderColor: '#F4CB63',
   },
   avatarTexto: { fontSize: 22, fontWeight: '900', color: COR.preto },
+  pesquisaLinha: { flexDirection: 'row', alignItems: 'center', marginTop: 16, gap: 10 },
   pesquisa: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COR.branco,
     borderRadius: 16,
     paddingHorizontal: 14,
     height: 52,
-    marginTop: 16,
     gap: 10,
   },
   pesquisaCampo: { flex: 1, fontSize: 15, color: COR.preto, paddingVertical: 0 },
+  botaoFiltro: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: COR.dourado,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  area: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 14,
+    backgroundColor: COR.preto,
+    borderRadius: 22,
+    padding: 16,
+    gap: 14,
+    ...sombra,
+  },
+  areaIcone: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    backgroundColor: '#2A2A28',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  areaTitulo: { color: COR.branco, fontSize: 18, fontWeight: '900' },
+  areaSub: { color: '#C9C9C4', fontSize: 13, marginTop: 2 },
 
   titulo: { fontSize: 19, fontWeight: '800', color: COR.preto, marginTop: 24, marginBottom: 12, paddingHorizontal: 20 },
   tituloLinha: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingRight: 20 },
@@ -616,22 +699,6 @@ const styles = StyleSheet.create({
     backgroundColor: COR.branco,
   },
   sairTexto: { color: COR.vermelho, fontWeight: '800', fontSize: 15 },
-
-  menu: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    backgroundColor: COR.branco,
-    borderTopWidth: 1,
-    borderTopColor: COR.linha,
-    paddingTop: 8,
-    ...sombra,
-  },
-  menuItem: { flex: 1, alignItems: 'center' },
-  menuPilula: { width: 56, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  menuTexto: { fontSize: 11, color: '#8A8D86', marginTop: 3, fontWeight: '600' },
 });
 
 export default HomeScreen;
