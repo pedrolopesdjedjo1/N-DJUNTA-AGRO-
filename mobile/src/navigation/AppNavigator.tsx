@@ -6,13 +6,10 @@ import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { AparenciaProvider } from "../context/AparenciaContext";
 import { colors } from "../theme/colors";
+import MainTabs from "./MainTabs";
 import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
-import HomeScreen from "../screens/HomeScreen";
-import ProductsScreen from "../screens/ProductsScreen";
 import AddProductScreen from "../screens/AddProductScreen";
-import ProfileScreen from "../screens/ProfileScreen";
-import ConversationsScreen from "../screens/ConversationsScreen";
 import ChatScreen from "../screens/ChatScreen";
 import NotificationsScreen from "../screens/NotificationsScreen";
 import MarketPricesScreen from "../screens/MarketPricesScreen";
@@ -44,6 +41,18 @@ import PerfilVendedorScreen from "../screens/PerfilVendedorScreen";
 
 const Stack = createNativeStackNavigator();
 
+// Identidade visual NÔ DJUNTA: verde, dourado, preto e branco.
+const VERDE = "#1B7F3B";
+
+const estiloCabecalho = {
+  headerStyle: { backgroundColor: VERDE },
+  headerTintColor: "#FFFFFF",
+  headerTitleStyle: { fontWeight: "800" as const, fontSize: 18 },
+  headerShadowVisible: false,
+  statusBarStyle: "light" as const,
+  animation: "slide_from_right" as const,
+};
+
 export default function AppNavigator() {
   const { user, loading } = useAuth();
   const { t } = useLanguage();
@@ -51,7 +60,7 @@ export default function AppNavigator() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <ActivityIndicator size="large" color={VERDE} />
       </View>
     );
   }
@@ -59,29 +68,16 @@ export default function AppNavigator() {
   return (
     <AparenciaProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator screenOptions={{ headerShown: false, ...estiloCabecalho }}>
           {user ? (
             <>
-              <Stack.Screen name="Home" component={HomeScreen} />
-              <Stack.Screen
-                name="Products"
-                component={ProductsScreen}
-                options={{ headerShown: true, title: "Produtos" }}
-              />
+              {/* Menu inferior: Início, Produtos, A minha área, Mensagens, Perfil */}
+              <Stack.Screen name="Main" component={MainTabs} />
+
               <Stack.Screen
                 name="AddProduct"
                 component={AddProductScreen}
                 options={{ headerShown: true, title: "Cadastrar Produto" }}
-              />
-              <Stack.Screen
-                name="Profile"
-                component={ProfileScreen}
-                options={{ headerShown: true, title: t("profile") }}
-              />
-              <Stack.Screen
-                name="Conversations"
-                component={ConversationsScreen}
-                options={{ headerShown: true, title: t("messages") }}
               />
               <Stack.Screen
                 name="Chat"
