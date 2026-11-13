@@ -1,15 +1,28 @@
-// Paleta de cores do NôdjuntaAgro GB - verde, branco e preto
+// Paleta de cores do NôdjuntaAgro GB — identidade NÔ DJUNTA:
+// verde, dourado, preto e branco, com fundo creme quente.
 
 export const colors = {
-  primary: "#1B5E20", // verde escuro - cor principal
-  primaryLight: "#4CAF50", // verde mais claro - destaques
-  background: "#FFFFFF", // branco - fundo
-  surface: "#F5F5F5", // cinza bem claro - cartões/campos
-  text: "#000000", // preto - texto principal
-  textSecondary: "#5A5A5A", // cinza escuro - texto secundário
-  border: "#DDDDDD", // cinza claro - bordas
-  error: "#C62828", // vermelho - erros
-  success: "#2E7D32", // verde - sucesso
+  // Nomes que o app já usa (não mudam)
+  primary: "#1B7F3B", // verde da marca - cor principal
+  primaryLight: "#3FA35C", // verde mais claro - destaques
+  background: "#FBF6EA", // creme quente - fundo dos ecrãs
+  surface: "#FFFFFF", // branco - cartões e campos
+  text: "#141413", // preto da marca - texto principal
+  textSecondary: "#5F635C", // cinza escuro - texto secundário
+  border: "#EADFC6", // creme escuro - bordas
+  error: "#C8402F", // vermelho - erros
+  success: "#1B7F3B", // verde - sucesso
   white: "#FFFFFF",
-  black: "#000000",
+  black: "#141413",
+
+  // Nomes novos da marca
+  primaryDark: "#0F5A28", // verde escuro - barras e pressionado
+  primarySoft: "#E3F1E7", // verde muito claro - fundos de destaque
+  gold: "#E3A81B", // dourado - botões de ação e selos
+  goldSoft: "#FBF0D2", // dourado claro - fundos de aviso
+  cream: "#FBF6EA", // creme - igual ao fundo
+  muted: "#8A8D86", // cinza para ícones inativos
+  errorSoft: "#FBE4E0", // vermelho muito claro
 };
+
+export default colors;
