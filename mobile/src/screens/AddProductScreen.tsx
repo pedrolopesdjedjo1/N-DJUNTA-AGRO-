@@ -1,11 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, Image, Alert } from "react-native";
-import { Page, Title, Field, Chip, Btn, u } from "../components/ui";
+import { View, Text, Image, Alert, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Page, Card, Field, Chip, Btn, u } from "../components/ui";
 import { DEPARTMENTS, departmentOf, ESTADOS, TIPOS } from "../constants/market";
 import { pickImage, uploadImageBase64, pickVideo, uploadVideo, PickedVideo } from "../utils/storage";
 import { createProduct, updateProduct } from "../api/products";
 import { getApiErrorMessage } from "../api/errorMessage";
 import { colors } from "../theme/colors";
+
+function Section({ icon, title, children }: { icon: any; title: string; children: React.ReactNode }) {
+  return (
+    <Card>
+      <View style={s.sectionHead}>
+        <View style={s.sectionIcon}>
+          <Ionicons name={icon} size={18} color={colors.primary} />
+        </View>
+        <Text style={s.sectionTitle}>{title}</Text>
+      </View>
+      {children}
+    </Card>
+  );
+}
 
 export default function AddProductScreen({ navigation, route }: any) {
   const editing = route?.params?.product;
@@ -115,99 +130,157 @@ export default function AddProductScreen({ navigation, route }: any) {
 
   return (
     <Page>
-      <Title>{editing ? "✏️ Atualizar produto" : artisan ? "🧵 Cadastrar artesanato" : "➕ Publicar produto"}</Title>
-
-      <Text style={u.label}>📸 Foto</Text>
-      {imageUri ? (
-        <Image source={{ uri: imageUri }} style={{ width: "100%", height: 200, borderRadius: 8 }} />
-      ) : (
-        <Text style={u.muted}>Nenhuma foto escolhida</Text>
-      )}
-      <View style={u.row}>
-        <Btn small kind="outline" label="Galeria" onPress={() => takeImage(false)} />
-        <Btn small kind="outline" label="Câmera" onPress={() => takeImage(true)} />
+      <View style={s.hero}>
+        <Text style={s.heroTitle}>{editing ? "Atualizar produto" : artisan ? "Cadastrar artesanato" : "Publicar produto"}</Text>
+        <Text style={s.heroSub}>Uma boa foto ajuda a vender mais depressa.</Text>
       </View>
 
-      <Text style={u.label}>🎥 Vídeo (até 30 segundos)</Text>
-      {video ? (
-        <Text style={{ color: colors.primary }}>🎬 Vídeo novo escolhido ({video.info})</Text>
-      ) : (
-        <Text style={u.muted}>{editing?.videoUrl ? "Já tem vídeo. Escolha outro para trocar." : "Nenhum vídeo escolhido"}</Text>
-      )}
-      <View style={u.row}>
-        <Btn small kind="outline" label="Escolher vídeo" onPress={() => takeVideo(false)} />
-        <Btn small kind="outline" label="Gravar vídeo" onPress={() => takeVideo(true)} />
-        {video ? <Btn small kind="danger" label="Remover" onPress={() => setVideo(null)} /> : null}
-      </View>
+      {/* Foto e vídeo */}
+      <Section icon="camera-outline" title="Foto e vídeo">
+        <TouchableOpacity activeOpacity={0.85} onPress={() => takeImage(false)} style={s.photoBox}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={s.photo} resizeMode="cover" />
+          ) : (
+            <View style={s.photoEmpty}>
+              <Ionicons name="image-outline" size={44} color={colors.muted} />
+              <Text style={s.photoHint}>Toque para escolher uma foto</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <View style={u.row}>
+          <Btn small kind="outline" label="Galeria" onPress={() => takeImage(false)} />
+          <Btn small kind="outline" label="Câmera" onPress={() => takeImage(true)} />
+        </View>
 
-      <Field label="Nome do produto" value={title} onChangeText={setTitle} placeholder="Ex: Cesto de palha" />
+        <Text style={[u.label, { marginTop: 14 }]}>Vídeo (até 30 segundos)</Text>
+        {video ? (
+          <Text style={s.videoOk}>Vídeo novo escolhido ({video.info})</Text>
+        ) : (
+          <Text style={u.muted}>{editing?.videoUrl ? "Já tem vídeo. Escolha outro para trocar." : "Nenhum vídeo escolhido"}</Text>
+        )}
+        <View style={u.row}>
+          <Btn small kind="outline" label="Escolher vídeo" onPress={() => takeVideo(false)} />
+          <Btn small kind="outline" label="Gravar vídeo" onPress={() => takeVideo(true)} />
+          {video ? <Btn small kind="danger" label="Remover" onPress={() => setVideo(null)} /> : null}
+        </View>
+      </Section>
 
-      <Text style={u.label}>Departamento</Text>
-      <View style={u.row}>
-        {DEPARTMENTS.map((dep) => (
-          <Chip
-            key={dep.value}
-            label={`${dep.icon} ${dep.label}`}
-            active={department === dep.value}
-            onPress={() => {
-              setDepartment(dep.value);
-              setSubcategory("");
-            }}
-          />
-        ))}
-      </View>
+      {/* Dados principais */}
+      <Section icon="pricetag-outline" title="Dados do produto">
+        <Field label="Nome do produto" value={title} onChangeText={setTitle} placeholder="Ex: Cesto de palha" />
 
-      {subcategories.length > 0 && (
-        <>
-          <Text style={u.label}>Subcategoria</Text>
-          <View style={u.row}>
-            {subcategories.map((s) => (
-              <Chip key={s} label={s} active={subcategory === s} onPress={() => setSubcategory(s)} />
-            ))}
-          </View>
-        </>
-      )}
+        <Text style={u.label}>Departamento</Text>
+        <View style={u.row}>
+          {DEPARTMENTS.map((dep) => (
+            <Chip
+              key={dep.value}
+              label={`${dep.icon} ${dep.label}`}
+              active={department === dep.value}
+              onPress={() => {
+                setDepartment(dep.value);
+                setSubcategory("");
+              }}
+            />
+          ))}
+        </View>
 
-      <Text style={u.label}>Tipo</Text>
-      <View style={u.row}>
-        {TIPOS.map((t) => (
-          <Chip key={t.value} label={t.label} active={tipo === t.value} onPress={() => setTipo(t.value)} />
-        ))}
-      </View>
+        {subcategories.length > 0 && (
+          <>
+            <Text style={u.label}>Subcategoria</Text>
+            <View style={u.row}>
+              {subcategories.map((sub) => (
+                <Chip key={sub} label={sub} active={subcategory === sub} onPress={() => setSubcategory(sub)} />
+              ))}
+            </View>
+          </>
+        )}
 
-      <Field label="Descrição" value={description} onChangeText={setDescription} multiline placeholder="Descreva o produto" />
-      <Field label="Preço (FCFA)" value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="Ex: 5000" />
-      <Field label="Quantidade disponível" value={quantity} onChangeText={setQuantity} keyboardType="numeric" placeholder="Ex: 10" />
-      {!editing && <Field label="Unidade" value={unit} onChangeText={setUnit} placeholder="Ex: unidade, kg, par" />}
+        <Text style={u.label}>Tipo</Text>
+        <View style={u.row}>
+          {TIPOS.map((t) => (
+            <Chip key={t.value} label={t.label} active={tipo === t.value} onPress={() => setTipo(t.value)} />
+          ))}
+        </View>
 
-      {artisan ? (
-        <>
-          <Field label="Materiais utilizados" value={materials} onChangeText={setMaterials} placeholder="Ex: palha, fibra de palmeira" />
-          <Field label="Tamanho" value={size} onChangeText={setSize} placeholder="Ex: 30 cm de altura" />
-          <Field label="Cores" value={colors2} onChangeText={setColors2} placeholder="Ex: natural, castanho" />
-          <Field label="Peso" value={weight} onChangeText={setWeight} placeholder="Ex: 500 g" />
-          <Field label="Tempo necessário para produzir" value={productionTime} onChangeText={setProductionTime} placeholder="Ex: 3 dias" />
-        </>
-      ) : (
-        <>
-          <Field label="Marca" value={brand} onChangeText={setBrand} />
-          <Field label="Modelo" value={model} onChangeText={setModel} />
-          <Text style={u.label}>Estado</Text>
-          <View style={u.row}>
-            {ESTADOS.map((e) => (
-              <Chip key={e.value} label={e.label} active={estado === e.value} onPress={() => setEstado(estado === e.value ? "" : e.value)} />
-            ))}
-          </View>
-          <Field label="Cor" value={color} onChangeText={setColor} />
-          <Field label="Tamanho" value={size} onChangeText={setSize} />
-        </>
-      )}
+        <Field label="Descrição" value={description} onChangeText={setDescription} multiline placeholder="Descreva o produto" />
+      </Section>
 
-      <Field label="Localização" value={location} onChangeText={setLocation} placeholder="Ex: Bissau" />
-      <Field label="Opções de entrega" value={deliveryOptions} onChangeText={setDeliveryOptions} placeholder="Ex: entrego em Bissau / recolha na loja" />
-      <Field label="Condições de venda" value={saleConditions} onChangeText={setSaleConditions} multiline placeholder="Ex: pagamento na entrega" />
+      {/* Preço e stock */}
+      <Section icon="cash-outline" title="Preço e quantidade">
+        <Field label="Preço (FCFA)" value={price} onChangeText={setPrice} keyboardType="numeric" placeholder="Ex: 5000" />
+        <Field label="Quantidade disponível" value={quantity} onChangeText={setQuantity} keyboardType="numeric" placeholder="Ex: 10" />
+        {!editing && <Field label="Unidade" value={unit} onChangeText={setUnit} placeholder="Ex: unidade, kg, par" />}
+      </Section>
 
-      <Btn label={loading ? "A guardar..." : editing ? "Guardar alterações" : "Publicar"} onPress={submit} disabled={loading} />
+      {/* Características */}
+      <Section icon="list-outline" title="Características">
+        {artisan ? (
+          <>
+            <Field label="Materiais utilizados" value={materials} onChangeText={setMaterials} placeholder="Ex: palha, fibra de palmeira" />
+            <Field label="Tamanho" value={size} onChangeText={setSize} placeholder="Ex: 30 cm de altura" />
+            <Field label="Cores" value={colors2} onChangeText={setColors2} placeholder="Ex: natural, castanho" />
+            <Field label="Peso" value={weight} onChangeText={setWeight} placeholder="Ex: 500 g" />
+            <Field label="Tempo necessário para produzir" value={productionTime} onChangeText={setProductionTime} placeholder="Ex: 3 dias" />
+          </>
+        ) : (
+          <>
+            <Field label="Marca" value={brand} onChangeText={setBrand} />
+            <Field label="Modelo" value={model} onChangeText={setModel} />
+            <Text style={u.label}>Estado</Text>
+            <View style={u.row}>
+              {ESTADOS.map((e) => (
+                <Chip key={e.value} label={e.label} active={estado === e.value} onPress={() => setEstado(estado === e.value ? "" : e.value)} />
+              ))}
+            </View>
+            <Field label="Cor" value={color} onChangeText={setColor} />
+            <Field label="Tamanho" value={size} onChangeText={setSize} />
+          </>
+        )}
+      </Section>
+
+      {/* Entrega */}
+      <Section icon="car-outline" title="Localização e entrega">
+        <Field label="Localização" value={location} onChangeText={setLocation} placeholder="Ex: Bissau" />
+        <Field label="Opções de entrega" value={deliveryOptions} onChangeText={setDeliveryOptions} placeholder="Ex: entrego em Bissau / recolha na loja" />
+        <Field label="Condições de venda" value={saleConditions} onChangeText={setSaleConditions} multiline placeholder="Ex: pagamento na entrega" />
+      </Section>
+
+      <Btn label={loading ? "A guardar..." : editing ? "Guardar alterações" : "Publicar"} kind="gold" onPress={submit} disabled={loading} />
     </Page>
   );
 }
+
+const s = StyleSheet.create({
+  hero: {
+    backgroundColor: colors.primary,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 12,
+  },
+  heroTitle: { color: colors.white, fontSize: 22, fontWeight: "900" },
+  heroSub: { color: colors.primarySoft, fontSize: 13, marginTop: 4 },
+  sectionHead: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  sectionTitle: { fontSize: 16, fontWeight: "800", color: colors.text },
+  photoBox: {
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.cream,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+  photo: { width: "100%", height: 210 },
+  photoEmpty: { height: 150, alignItems: "center", justifyContent: "center" },
+  photoHint: { color: colors.textSecondary, fontSize: 13, marginTop: 8 },
+  videoOk: { color: colors.primary, fontWeight: "700", marginBottom: 4 },
+});
