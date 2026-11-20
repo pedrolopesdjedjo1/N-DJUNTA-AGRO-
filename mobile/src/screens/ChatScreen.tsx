@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet,
   KeyboardAvoidingView, Alert, Image, Linking, ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -54,13 +55,20 @@ function lerMidia(content: string): { tipo: Tipo; url: string } | null {
 }
 const ROTULO: Record<Tipo, string> = { foto: "📷 Foto", video: "🎬 Vídeo", audio: "🎤 Áudio" };
 
+function horaDe(value?: string): string {
+  if (!value) return "";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "";
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
 const extra: Record<string, Record<string, string>> = {
   pt: {
     deleteTitle: "Apagar mensagem", deleteAsk: "Apagar esta mensagem para todos?", del: "Apagar",
     deleteFail: "Não foi possível apagar a mensagem.",
-    photoCamera: "📷 Tirar foto", photoGallery: "🖼️ Foto da galeria", videoCamera: "🎬 Gravar vídeo",
-    videoGallery: "📁 Vídeo da galeria", close: "Fechar", sending: "Enviando...",
-    recording: "🔴 Gravando... toque no ⏹ para enviar", mediaFail: "Não foi possível enviar. Tente de novo.",
+    photoCamera: "Tirar foto", photoGallery: "Foto da galeria", videoCamera: "Gravar vídeo",
+    videoGallery: "Vídeo da galeria", close: "Fechar", sending: "Enviando...",
+    recording: "🔴 Gravando... toque no quadrado para enviar", mediaFail: "Não foi possível enviar. Tente de novo.",
     permTitle: "Permissão", permCamera: "Permita o acesso à câmera.", permGallery: "Permita o acesso à galeria.",
     permMic: "Permita o acesso ao microfone para gravar áudio.",
     videoLong: "Escolha um vídeo de até 30 segundos.", videoHeavy: "Escolha um vídeo de até 30 MB.",
@@ -68,9 +76,9 @@ const extra: Record<string, Record<string, string>> = {
   },
   crl: {
     deleteTitle: "Apaga mensaji", deleteAsk: "Apaga e mensaji pa tudu?", del: "Apaga", deleteFail: "Ka konsigi apaga mensaji.",
-    photoCamera: "📷 Tira foto", photoGallery: "🖼️ Foto di galeria", videoCamera: "🎬 Grava vídeu",
-    videoGallery: "📁 Vídeu di galeria", close: "Fecha", sending: "Na manda...",
-    recording: "🔴 Na grava... toka na ⏹ pa manda", mediaFail: "Ka konsigi manda. Tenta di novu.",
+    photoCamera: "Tira foto", photoGallery: "Foto di galeria", videoCamera: "Grava vídeu",
+    videoGallery: "Vídeu di galeria", close: "Fecha", sending: "Na manda...",
+    recording: "🔴 Na grava... toka na kuadradu pa manda", mediaFail: "Ka konsigi manda. Tenta di novu.",
     permTitle: "Pirmison", permCamera: "Dexa kamara abri.", permGallery: "Dexa galeria abri.",
     permMic: "Dexa mikrofoni abri pa grava áudiu.",
     videoLong: "Skodje un vídeu di até 30 sigundu.", videoHeavy: "Skodje un vídeu di até 30 MB.",
@@ -79,9 +87,9 @@ const extra: Record<string, Record<string, string>> = {
   fr: {
     deleteTitle: "Supprimer le message", deleteAsk: "Supprimer ce message pour tous ?", del: "Supprimer",
     deleteFail: "Impossible de supprimer le message.",
-    photoCamera: "📷 Prendre une photo", photoGallery: "🖼️ Photo de la galerie", videoCamera: "🎬 Filmer une vidéo",
-    videoGallery: "📁 Vidéo de la galerie", close: "Fermer", sending: "Envoi...",
-    recording: "🔴 Enregistrement... touchez ⏹ pour envoyer", mediaFail: "Envoi impossible. Réessayez.",
+    photoCamera: "Prendre une photo", photoGallery: "Photo de la galerie", videoCamera: "Filmer une vidéo",
+    videoGallery: "Vidéo de la galerie", close: "Fermer", sending: "Envoi...",
+    recording: "🔴 Enregistrement... touchez le carré pour envoyer", mediaFail: "Envoi impossible. Réessayez.",
     permTitle: "Autorisation", permCamera: "Autorisez l'accès à la caméra.", permGallery: "Autorisez l'accès à la galerie.",
     permMic: "Autorisez le microphone pour enregistrer un audio.",
     videoLong: "Choisissez une vidéo de 30 secondes maximum.", videoHeavy: "Choisissez une vidéo de 30 Mo maximum.",
@@ -117,7 +125,7 @@ function AudioBolha({ url, cor, tocar, pausar }: { url: string; cor: string; toc
   };
   return (
     <TouchableOpacity onPress={alternar}>
-      <Text style={{ color: cor, fontWeight: "600" }}>{status.playing ? pausar : tocar}</Text>
+      <Text style={{ color: cor, fontWeight: "700" }}>{status.playing ? pausar : tocar}</Text>
     </TouchableOpacity>
   );
 }
@@ -161,11 +169,11 @@ function BotaoGravar({
 
   return (
     <TouchableOpacity
-      style={[s.mic, gravando && { backgroundColor: "#B71C1C" }, desativado && { opacity: 0.5 }]}
+      style={[s.round, gravando && { backgroundColor: colors.error }, desativado && { opacity: 0.5 }]}
       onPress={alternar}
       disabled={desativado}
     >
-      <Text style={s.sendText}>{gravando ? "⏹" : "🎤"}</Text>
+      <Ionicons name={gravando ? "stop" : "mic"} size={22} color={colors.white} />
     </TouchableOpacity>
   );
 }
@@ -303,7 +311,7 @@ export default function ChatScreen() {
   }
 
   function conteudoDaMensagem(item: Message, isMine: boolean) {
-    const cor = isMine ? colors.white : colors.text;
+    const cor = isMine ? colors.white : colors.primary;
     const midia = lerMidia(item.content);
     if (!midia) {
       return <Text style={isMine ? s.textMine : s.textTheirs}>{item.content}</Text>;
@@ -323,7 +331,7 @@ export default function ChatScreen() {
           <TouchableOpacity
             onPress={() => (VideoMod ? setVideoAbertoId(aberto ? null : item.id) : Linking.openURL(midia.url))}
           >
-            <Text style={{ color: cor, fontWeight: "600" }}>
+            <Text style={{ color: cor, fontWeight: "700" }}>
               {aberto && VideoMod ? tr("closeVideo") : tr("playVideo")}
             </Text>
           </TouchableOpacity>
@@ -336,7 +344,7 @@ export default function ChatScreen() {
     }
     return (
       <TouchableOpacity onPress={() => Linking.openURL(midia.url)}>
-        <Text style={{ color: cor, fontWeight: "600" }}>{tr("playAudio")}</Text>
+        <Text style={{ color: cor, fontWeight: "700" }}>{tr("playAudio")}</Text>
       </TouchableOpacity>
     );
   }
@@ -350,18 +358,26 @@ export default function ChatScreen() {
         data={messages}
         extraData={videoAbertoId}
         keyExtractor={(item, index) => String(item.id ?? index)}
-        contentContainerStyle={{ padding: 12 }}
+        contentContainerStyle={{ padding: 12, flexGrow: 1 }}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
-        ListEmptyComponent={<Text style={s.empty}>{t("noMessages")}</Text>}
+        ListEmptyComponent={
+          <View style={s.emptyBox}>
+            <View style={s.emptyIcon}>
+              <Ionicons name="chatbubbles-outline" size={34} color={colors.primary} />
+            </View>
+            <Text style={s.empty}>{t("noMessages")}</Text>
+          </View>
+        }
         renderItem={({ item }) => {
           const isMine = String(item.senderId) === String(user?.id);
           return (
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               onLongPress={isMine ? () => askDelete(item) : undefined}
               style={[s.bubble, isMine ? s.mine : s.theirs]}
             >
               {conteudoDaMensagem(item, isMine)}
+              <Text style={[s.hora, isMine ? s.horaMine : s.horaTheirs]}>{horaDe(item.createdAt)}</Text>
             </TouchableOpacity>
           );
         }}
@@ -384,18 +400,23 @@ export default function ChatScreen() {
       {menu && !gravando ? (
         <View style={s.menu}>
           <TouchableOpacity style={s.menuItem} onPress={() => escolherFoto(true)}>
+            <View style={s.menuIcon}><Ionicons name="camera-outline" size={20} color={colors.primary} /></View>
             <Text style={s.menuText}>{tr("photoCamera")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.menuItem} onPress={() => escolherFoto(false)}>
+            <View style={s.menuIcon}><Ionicons name="image-outline" size={20} color={colors.primary} /></View>
             <Text style={s.menuText}>{tr("photoGallery")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.menuItem} onPress={() => escolherVideo(true)}>
+            <View style={s.menuIcon}><Ionicons name="videocam-outline" size={20} color={colors.primary} /></View>
             <Text style={s.menuText}>{tr("videoCamera")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.menuItem} onPress={() => escolherVideo(false)}>
+            <View style={s.menuIcon}><Ionicons name="film-outline" size={20} color={colors.primary} /></View>
             <Text style={s.menuText}>{tr("videoGallery")}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={s.menuItem} onPress={() => setMenu(false)}>
+          <TouchableOpacity style={[s.menuItem, { borderBottomWidth: 0 }]} onPress={() => setMenu(false)}>
+            <View style={s.menuIcon}><Ionicons name="close" size={20} color={colors.textSecondary} /></View>
             <Text style={[s.menuText, { color: colors.textSecondary }]}>{tr("close")}</Text>
           </TouchableOpacity>
         </View>
@@ -407,11 +428,12 @@ export default function ChatScreen() {
           onPress={() => setMenu(!menu)}
           disabled={enviando || gravando}
         >
-          <Text style={s.clipText}>📎</Text>
+          <Ionicons name={menu ? "close" : "attach"} size={26} color={colors.primary} />
         </TouchableOpacity>
         <TextInput
           style={s.input}
           placeholder={t("chatPlaceholder")}
+          placeholderTextColor={colors.muted}
           value={text}
           onChangeText={setText}
           multiline
@@ -425,8 +447,8 @@ export default function ChatScreen() {
             onPronto={(uri) => enviarMidia("audio", uri)}
           />
         ) : (
-          <TouchableOpacity style={s.send} onPress={handleSend}>
-            <Text style={s.sendText}>{t("send")}</Text>
+          <TouchableOpacity style={s.round} onPress={handleSend} accessibilityLabel={t("send")}>
+            <Ionicons name="send" size={20} color={colors.white} />
           </TouchableOpacity>
         )}
       </View>
@@ -436,25 +458,92 @@ export default function ChatScreen() {
 
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  empty: { textAlign: "center", color: colors.textSecondary, marginTop: 40 },
-  error: { color: "#B71C1C", textAlign: "center", paddingHorizontal: 12, paddingVertical: 6 },
-  bubble: { maxWidth: "75%", padding: 10, borderRadius: 12, marginBottom: 8 },
-  mine: { backgroundColor: colors.primary, alignSelf: "flex-end" },
-  theirs: { backgroundColor: colors.surface, alignSelf: "flex-start", borderWidth: 1, borderColor: colors.border },
-  textMine: { color: colors.white },
-  textTheirs: { color: colors.text },
-  foto: { width: 220, height: 160, borderRadius: 8, backgroundColor: "#ddd" },
-  video: { width: 220, height: 160, borderRadius: 8, backgroundColor: "#000", marginBottom: 6 },
+  emptyBox: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 60 },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: colors.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  empty: { textAlign: "center", color: colors.textSecondary, fontSize: 15 },
+  error: { color: colors.error, textAlign: "center", paddingHorizontal: 12, paddingVertical: 6 },
+  bubble: { maxWidth: "78%", paddingHorizontal: 12, paddingTop: 9, paddingBottom: 6, borderRadius: 18, marginBottom: 8 },
+  mine: { backgroundColor: colors.primary, alignSelf: "flex-end", borderBottomRightRadius: 4 },
+  theirs: {
+    backgroundColor: colors.surface,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderBottomLeftRadius: 4,
+  },
+  textMine: { color: colors.white, fontSize: 15 },
+  textTheirs: { color: colors.text, fontSize: 15 },
+  hora: { fontSize: 10, marginTop: 3, alignSelf: "flex-end" },
+  horaMine: { color: colors.primarySoft },
+  horaTheirs: { color: colors.muted },
+  foto: { width: 220, height: 160, borderRadius: 12, backgroundColor: colors.border },
+  video: { width: 220, height: 160, borderRadius: 12, backgroundColor: "#000", marginBottom: 6 },
   statusRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 6 },
   statusText: { color: colors.textSecondary, marginLeft: 8 },
-  menu: { borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background },
-  menuItem: { paddingVertical: 14, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
+  menu: {
+    marginHorizontal: 12,
+    marginBottom: 6,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    overflow: "hidden",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  menuIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
   menuText: { fontSize: 15, color: colors.text, fontWeight: "600" },
-  inputRow: { flexDirection: "row", padding: 10, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background, alignItems: "flex-end" },
-  clip: { borderRadius: 20, paddingHorizontal: 10, paddingVertical: 10, justifyContent: "center", alignItems: "center", marginRight: 6 },
-  clipText: { fontSize: 20 },
-  input: { flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, marginRight: 8, maxHeight: 100 },
-  send: { backgroundColor: colors.primary, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, justifyContent: "center", alignItems: "center" },
-  mic: { backgroundColor: colors.primary, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, justifyContent: "center", alignItems: "center" },
-  sendText: { color: colors.white, fontWeight: "bold" },
+  inputRow: {
+    flexDirection: "row",
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: "flex-end",
+  },
+  clip: { width: 40, height: 44, justifyContent: "center", alignItems: "center", marginRight: 2 },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.cream,
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 8,
+    maxHeight: 110,
+    fontSize: 15,
+    color: colors.text,
+  },
+  round: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
