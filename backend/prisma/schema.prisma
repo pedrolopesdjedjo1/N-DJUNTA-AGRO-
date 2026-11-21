@@ -1616,3 +1616,116 @@ model PartyReview {
   @@unique([deliveryId,authorId,targetId])
   @@map("party_reviews")
 }
+
+// =====================================================================
+// Listas de valores usadas pelo código (so geram constantes no cliente Prisma).
+// Nenhum campo usa estas listas: os campos continuam String. Nao alteram o banco.
+// =====================================================================
+
+enum OrderStatus {
+  NOVO
+  ACEITO
+  EM_PREPARACAO
+  PRONTO
+  ENVIADO
+  CONCLUIDO
+  CANCELADO
+  @@map("OrderStatus")
+}
+
+enum DeliveryStatus {
+  SOLICITADA
+  ACEITA
+  RECOLHIDA
+  EM_TRANSITO
+  ENTREGUE
+  CANCELADA
+  @@map("DeliveryStatus")
+}
+
+enum TicketStatus {
+  ABERTO
+  EM_ANALISE
+  RESOLVIDO
+  @@map("TicketStatus")
+}
+
+enum TicketKind {
+  EMERGENCIA
+  PEDIDO
+  PAGAMENTO
+  ENTREGA
+  RECLAMACAO
+  SUGESTAO
+  OUTRO
+  @@map("TicketKind")
+}
+
+enum SosStatus {
+  ABERTO
+  EM_RESGATE
+  RESOLVIDO
+  CANCELADO
+  @@map("SosStatus")
+}
+
+enum SosKind {
+  SOS
+  MOTOR
+  BARCO_AVARIADO
+  COMBUSTIVEL
+  HOMEM_AO_MAR
+  MAU_TEMPO
+  OUTRO
+  @@map("SosKind")
+}
+
+enum PromotionKind {
+  DESCONTO
+  OFERTA_ESPECIAL
+  DESTAQUE
+  CAMPANHA
+  @@map("PromotionKind")
+}
+
+enum EventKind {
+  FEIRA
+  EVENTO_CULTURAL
+  MERCADO_LOCAL
+  EXPOSICAO
+  OUTRO
+  @@map("EventKind")
+}
+
+enum LearningCategory {
+  GUIA
+  CULTIVO
+  COLHEITA
+  CONSERVACAO
+  PRAGAS
+  CONSELHOS
+  SEGURANCA_MAR
+  MANUSEAMENTO
+  NAVEGACAO
+  MANUTENCAO
+  SUSTENTAVEL
+  TECNICA
+  CURSO
+  TUTORIAL
+  VIDEO
+  NEGOCIOS
+  FOTOGRAFIA
+  PRECOS
+  VENDAS
+  @@map("LearningCategory")
+}
+
+enum CommunityPostKind {
+  CONHECIMENTO
+  VENDA_COLETIVA
+  COMPRA_COLETIVA
+  PARTILHA_EQUIPAMENTO
+  EVENTO
+  AVISO
+  @@map("CommunityPostKind")
+}
