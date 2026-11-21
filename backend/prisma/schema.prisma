@@ -459,17 +459,16 @@ model AgentActivity {
   createdAt DateTime @default(now())
   @@map("agent_activities")
 }
-
 model UserAddress {
   id String @id @default(uuid())
   userId String
-  isDefault Boolean
+  isDefault Boolean @default(false)
   label String
-  name String
+  name String?
   address String
-  region String
-  lat Float
-  lng Float
+  region String?
+  lat Float?
+  lng Float?
   createdAt DateTime @default(now())
   @@map("user_addresses")
 }
