@@ -8,8 +8,9 @@
   },
   "scripts": {
     "prisma:generate": "prisma generate",
-    "dev": "npm run prisma:generate && ts-node-dev --respawn src/server.ts",
-    "build": "npm run prisma:generate && (tsc || echo 'Avisos de tipos ignorados')",
+    "dev": "npm run prisma:generate && ts-node-dev --transpile-only --respawn src/server.ts",
+    "build": "npm run prisma:generate && node build.js",
+    "build:check": "tsc --noEmit",
     "start": "node --max-old-space-size=400 dist/server.js",
     "typecheck": "tsc --noEmit",
     "prisma:studio": "prisma studio"
