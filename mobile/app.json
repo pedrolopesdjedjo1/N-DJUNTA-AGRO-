@@ -5,14 +5,29 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#FBF6EA",
     "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "backgroundColor": "#1B7F3B",
+      "resizeMode": "contain"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "gw.nodjunta.agro"
     },
     "android": {
+      "package": "gw.nodjunta.agro",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#1B5E20"
-      }
+        "backgroundColor": "#1B7F3B"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     }
   }
 }
