@@ -134,7 +134,9 @@ import BoUserScreen from "../screens/BoUserScreen";
 import BoUsersScreen from "../screens/BoUsersScreen";
 import BuscaAvancadaScreen from "../screens/BuscaAvancadaScreen";
 import CalculadoraScreen from "../screens/CalculadoraScreen";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
 import ChatScreen from "../screens/ChatScreen";
+import ClientAddressesScreen from "../screens/ClientAddressesScreen";
 import ClientCartScreen from "../screens/ClientCartScreen";
 import ClientCheckoutScreen from "../screens/ClientCheckoutScreen";
 import ClientExploreScreen from "../screens/ClientExploreScreen";
@@ -151,6 +153,8 @@ import ClientReceiptScreen from "../screens/ClientReceiptScreen";
 import ClientReviewScreen from "../screens/ClientReviewScreen";
 import ClientSellerScreen from "../screens/ClientSellerScreen";
 import ClientSupportScreen from "../screens/ClientSupportScreen";
+import ConversationsScreen from "../screens/ConversationsScreen";
+import CooperativesScreen from "../screens/CooperativesScreen";
 import DevicesScreen from "../screens/DevicesScreen";
 import EventsScreen from "../screens/EventsScreen";
 import FarmerCooperativeScreen from "../screens/FarmerCooperativeScreen";
@@ -209,6 +213,7 @@ import GovVerificationScreen from "../screens/GovVerificationScreen";
 import GovWeatherScreen from "../screens/GovWeatherScreen";
 import HelpScreen from "../screens/HelpScreen";
 import HomeScreen from "../screens/HomeScreen";
+import LanguageScreen from "../screens/LanguageScreen";
 import LearningScreen from "../screens/LearningScreen";
 import LegalScreen from "../screens/LegalScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -268,6 +273,7 @@ import NgoTrainingPublicScreen from "../screens/NgoTrainingPublicScreen";
 import NgoTrainingScreen from "../screens/NgoTrainingScreen";
 import NgoVerificationScreen from "../screens/NgoVerificationScreen";
 import NgoVerificationsAdminScreen from "../screens/NgoVerificationsAdminScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
 import PerfilVendedorScreen from "../screens/PerfilVendedorScreen";
 import ProductsScreen from "../screens/ProductsScreen";
 import RegisterScreen from "../screens/RegisterScreen";
@@ -306,6 +312,7 @@ import TrVehicleFormScreen from "../screens/TrVehicleFormScreen";
 import TrVehicleScreen from "../screens/TrVehicleScreen";
 import TransportOffersScreen from "../screens/TransportOffersScreen";
 import TransporterVerificationScreen from "../screens/TransporterVerificationScreen";
+import VerificationScreen from "../screens/VerificationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -389,7 +396,7 @@ const PALAVRAS: Record<string, string> = {
   Addresses: "Moradas", Methods: "Métodos", Area: "Área", Institutions: "Instituições",
   Communication: "Comunicação", Track: "Rastreio", Reputation: "Reputação", Combine: "Combinar",
   Suggest: "Sugerir", History: "Histórico", Business: "Negócio", Invite: "Convidar",
-  Assist: "Ajuda ao cliente", 
+  Assist: "Ajuda ao cliente", Needs2: "Necessidades", Public2: "Público",
 };
 
 function titulo(nome: string): string {
@@ -697,7 +704,9 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
   ["BoUsers", BoUsersScreen],
   ["BuscaAvancada", BuscaAvancadaScreen],
   ["Calculadora", CalculadoraScreen],
+  ["ChangePassword", ChangePasswordScreen],
   ["Chat", ChatScreen],
+  ["ClientAddresses", ClientAddressesScreen],
   ["ClientCart", ClientCartScreen],
   ["ClientCheckout", ClientCheckoutScreen],
   ["ClientExplore", ClientExploreScreen],
@@ -714,6 +723,8 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
   ["ClientReview", ClientReviewScreen],
   ["ClientSeller", ClientSellerScreen],
   ["ClientSupport", ClientSupportScreen],
+  ["Conversations", ConversationsScreen],
+  ["Cooperatives", CooperativesScreen],
   ["Devices", DevicesScreen],
   ["Events", EventsScreen],
   ["FarmerCooperative", FarmerCooperativeScreen],
@@ -771,6 +782,7 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
   ["GovVerification", GovVerificationScreen],
   ["GovWeather", GovWeatherScreen],
   ["Help", HelpScreen],
+  ["Language", LanguageScreen],
   ["Learning", LearningScreen],
   ["Legal", LegalScreen],
   ["MerchantCustomers", MerchantCustomersScreen],
@@ -829,6 +841,7 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
   ["NgoTraining", NgoTrainingScreen],
   ["NgoVerification", NgoVerificationScreen],
   ["NgoVerificationsAdmin", NgoVerificationsAdminScreen],
+  ["Notifications", NotificationsScreen],
   ["PerfilVendedor", PerfilVendedorScreen],
   ["Products", ProductsScreen],
   ["ReportCreate", ReportCreateScreen],
@@ -866,6 +879,13 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
   ["TrVehicle", TrVehicleScreen],
   ["TransportOffers", TransportOffersScreen],
   ["TransporterVerification", TransporterVerificationScreen],
+  ["Verification", VerificationScreen],
+  ["TransporterProfileForm", TrProfileEditScreen],
+  ["NgoAdminVerifications", NgoVerificationsAdminScreen],
+  ["NgoTrainings", NgoTrainingBrowseScreen],
+  ["FisherTransport", FarmerTransportScreen],
+  ["Weather", FarmerWeatherScreen],
+  ["FisherCooperative", FarmerCooperativeScreen],
 ];
 
 export default function AppNavigator() {
