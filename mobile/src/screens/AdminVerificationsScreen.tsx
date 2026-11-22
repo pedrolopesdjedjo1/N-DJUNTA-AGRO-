@@ -1,19 +1,59 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl, Alert } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
+  Image,
+  Modal,
+  TextInput,
+} from "react-native";
 import { useLanguage } from "../context/LanguageContext";
-import { listVerifications, reviewVerification, verificationErrorMessage, VerificationRequest, VerificationStatus } from "../api/verification";
+import { listBoIdentity, reviewBoIdentity } from "../api/backoffice";
 
-const FILTERS: { key: string; value?: VerificationStatus }[] = [
-  { key: "filterAll", value: undefined },
-  { key: "status_PENDENTE", value: "PENDENTE" },
-  { key: "status_APROVADO", value: "APROVADO" },
-  { key: "status_REJEITADO", value: "REJEITADO" },
+type Status = "PENDENTE" | "APROVADA" | "RECUSADA";
+
+type IdentityItem = {
+  id: string;
+  userId: string;
+  status: Status;
+  documentKind: string;
+  documentUrl?: string | null;
+  selfieUrl?: string | null;
+  note?: string | null;
+  reviewNote?: string | null;
+  createdAt: string;
+  user?: { id: string; name: string; phone?: string | null; role?: string; roleName?: string; location?: string | null } | null;
+};
+
+const FILTERS: { value: Status; label: string }[] = [
+  { value: "PENDENTE", label: "Em análise" },
+  { value: "APROVADA", label: "Aprovadas" },
+  { value: "RECUSADA", label: "Recusadas" },
 ];
 
-const STATUS_COLOR: Record<VerificationStatus, string> = {
+const STATUS_LABEL: Record<Status, string> = {
+  PENDENTE: "Em análise",
+  APROVADA: "Aprovada",
+  RECUSADA: "Recusada",
+};
+
+const STATUS_COLOR: Record<Status, string> = {
   PENDENTE: "#F9A825",
-  APROVADO: "#2E7D32",
-  REJEITADO: "#C62828",
+  APROVADA: "#2E7D32",
+  RECUSADA: "#C62828",
+};
+
+const KIND_LABEL: Record<string, string> = {
+  BI: "Bilhete de identidade",
+  PASSAPORTE: "Passaporte",
+  CARTA_CONDUCAO: "Carta de condução",
+  CARTAO_ELEITOR: "Cartão de eleitor",
+  OUTRO: "Outro documento",
 };
 
 function formatDate(value: string) {
@@ -24,21 +64,36 @@ function formatDate(value: string) {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
+function errorMessage(err: any): string {
+  return (
+    err?.response?.data?.error ||
+    err?.response?.data?.message ||
+    err?.message ||
+    "Ocorreu um erro. Tente novamente."
+  );
+}
+
 export default function AdminVerificationsScreen() {
   const { t } = useLanguage();
-  const [items, setItems] = useState<VerificationRequest[]>([]);
-  const [filter, setFilter] = useState<VerificationStatus | undefined>(undefined);
+  const [items, setItems] = useState<IdentityItem[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [filter, setFilter] = useState<Status>("PENDENTE");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
 
+  const [rejectItem, setRejectItem] = useState<IdentityItem | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
+
   const load = useCallback(async () => {
     try {
       setError("");
-      setItems(await listVerifications(filter));
+      const data = await listBoIdentity({ status: filter });
+      setItems(Array.isArray(data?.items) ? data.items : []);
+      setCounts(data?.counts || {});
     } catch (err: any) {
-      setError(verificationErrorMessage(err));
+      setError(errorMessage(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -50,27 +105,44 @@ export default function AdminVerificationsScreen() {
     load();
   }, [load]);
 
-  async function review(item: VerificationRequest, approve: boolean) {
+  async function approve(item: IdentityItem) {
     try {
       setBusyId(item.id);
-      await reviewVerification(item.id, approve);
+      await reviewBoIdentity(item.id, { approve: true });
       await load();
     } catch (err: any) {
-      Alert.alert(t("error"), verificationErrorMessage(err));
+      Alert.alert(t("error"), errorMessage(err));
     } finally {
       setBusyId(null);
     }
   }
 
-  function confirmReview(item: VerificationRequest, approve: boolean) {
-    Alert.alert(
-      approve ? t("approveTitle") : t("rejectTitle"),
-      `${item.user?.name ?? t("defaultUser")} - ${item.documentType}`,
-      [
-        { text: t("cancel"), style: "cancel" },
-        { text: approve ? t("approve") : t("reject"), style: approve ? "default" : "destructive", onPress: () => review(item, approve) },
-      ]
-    );
+  function confirmApprove(item: IdentityItem) {
+    Alert.alert("Aprovar verificação", `${item.user?.name ?? "Utilizador"} - ${KIND_LABEL[item.documentKind] ?? item.documentKind}`, [
+      { text: t("cancel"), style: "cancel" },
+      { text: t("approve"), onPress: () => approve(item) },
+    ]);
+  }
+
+  async function confirmReject() {
+    if (!rejectItem) return;
+    const note = rejectNote.trim();
+    if (note.length < 3) {
+      Alert.alert(t("error"), "Explique o motivo da recusa, para a pessoa corrigir.");
+      return;
+    }
+    const item = rejectItem;
+    try {
+      setBusyId(item.id);
+      await reviewBoIdentity(item.id, { approve: false, note });
+      setRejectItem(null);
+      setRejectNote("");
+      await load();
+    } catch (err: any) {
+      Alert.alert(t("error"), errorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   return (
@@ -80,9 +152,13 @@ export default function AdminVerificationsScreen() {
       <View style={s.filters}>
         {FILTERS.map((f) => {
           const active = filter === f.value;
+          const total = counts[f.value];
           return (
-            <TouchableOpacity key={f.key} style={[s.chip, active && s.chipActive]} onPress={() => setFilter(f.value)}>
-              <Text style={[s.chipText, active && s.chipTextActive]}>{t(f.key)}</Text>
+            <TouchableOpacity key={f.value} style={[s.chip, active && s.chipActive]} onPress={() => setFilter(f.value)}>
+              <Text style={[s.chipText, active && s.chipTextActive]}>
+                {f.label}
+                {typeof total === "number" ? ` (${total})` : ""}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -96,29 +172,48 @@ export default function AdminVerificationsScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} />}
-          ListEmptyComponent={<Text style={s.empty}>{t("noRequests")}</Text>}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                load();
+              }}
+            />
+          }
+          ListEmptyComponent={<Text style={s.empty}>Nenhum pedido encontrado.</Text>}
           renderItem={({ item }) => (
             <View style={s.card}>
               <View style={s.cardHeader}>
-                <Text style={s.name}>{item.user?.name ?? t("defaultUser")}</Text>
+                <Text style={s.name}>{item.user?.name ?? "Utilizador"}</Text>
                 <View style={[s.badge, { backgroundColor: STATUS_COLOR[item.status] ?? "#999" }]}>
-                  <Text style={s.badgeText}>{t(`status_${item.status}`)}</Text>
+                  <Text style={s.badgeText}>{STATUS_LABEL[item.status] ?? item.status}</Text>
                 </View>
               </View>
 
-              <Text style={s.line}>{t("documentLabel")}: {item.documentType}</Text>
-              {item.documentNote ? <Text style={s.line}>{t("noteLabel")}: {item.documentNote}</Text> : null}
-              {item.user?.role ? <Text style={s.meta}>{t("roleLabel")}: {item.user.role}</Text> : null}
-              {item.user?.phone ? <Text style={s.meta}>{t("phoneLabel")}: {item.user.phone}</Text> : null}
+              <Text style={s.line}>Documento: {KIND_LABEL[item.documentKind] ?? item.documentKind}</Text>
+              {item.note ? <Text style={s.line}>Nota: {item.note}</Text> : null}
+              {item.reviewNote ? <Text style={s.line}>Resposta da equipa: {item.reviewNote}</Text> : null}
+              {item.user?.roleName || item.user?.role ? <Text style={s.meta}>Perfil: {item.user?.roleName || item.user?.role}</Text> : null}
+              {item.user?.phone ? <Text style={s.meta}>Telefone: {item.user.phone}</Text> : null}
               <Text style={s.meta}>{formatDate(item.createdAt)}</Text>
+
+              {item.documentUrl ? <Image source={{ uri: item.documentUrl }} style={s.photo} resizeMode="cover" /> : null}
+              {item.selfieUrl ? <Image source={{ uri: item.selfieUrl }} style={s.photo} resizeMode="cover" /> : null}
 
               {item.status === "PENDENTE" && (
                 <View style={s.actions}>
-                  <TouchableOpacity style={[s.actionBtn, s.approveBtn]} onPress={() => confirmReview(item, true)} disabled={busyId === item.id}>
+                  <TouchableOpacity style={[s.actionBtn, s.approveBtn]} onPress={() => confirmApprove(item)} disabled={busyId === item.id}>
                     <Text style={s.approveText}>{t("approve")}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[s.actionBtn, s.rejectBtn]} onPress={() => confirmReview(item, false)} disabled={busyId === item.id}>
+                  <TouchableOpacity
+                    style={[s.actionBtn, s.rejectBtn]}
+                    onPress={() => {
+                      setRejectNote("");
+                      setRejectItem(item);
+                    }}
+                    disabled={busyId === item.id}
+                  >
                     <Text style={s.rejectText}>{t("reject")}</Text>
                   </TouchableOpacity>
                 </View>
@@ -127,6 +222,31 @@ export default function AdminVerificationsScreen() {
           )}
         />
       )}
+
+      <Modal visible={!!rejectItem} transparent animationType="fade" onRequestClose={() => setRejectItem(null)}>
+        <View style={s.modalBg}>
+          <View style={s.modalCard}>
+            <Text style={s.modalTitle}>Motivo da recusa</Text>
+            <Text style={s.modalHint}>Escreva o que a pessoa deve corrigir. Ela vai ver esta mensagem.</Text>
+            <TextInput
+              style={s.input}
+              value={rejectNote}
+              onChangeText={setRejectNote}
+              placeholder="Ex.: foto do documento sem nitidez"
+              multiline
+              maxLength={300}
+            />
+            <View style={s.actions}>
+              <TouchableOpacity style={[s.actionBtn, { borderColor: "#999" }]} onPress={() => setRejectItem(null)}>
+                <Text style={{ color: "#555", fontWeight: "600" }}>{t("cancel")}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[s.actionBtn, s.rejectBtn]} onPress={confirmReject} disabled={!!busyId}>
+                <Text style={s.rejectText}>{t("reject")}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -148,10 +268,16 @@ const s = StyleSheet.create({
   badgeText: { color: "#fff", fontSize: 12, fontWeight: "600" },
   line: { fontSize: 14, color: "#222", marginBottom: 4 },
   meta: { fontSize: 12, color: "#888", marginBottom: 2 },
+  photo: { width: "100%", height: 180, borderRadius: 8, marginTop: 8, backgroundColor: "#f2f2f2" },
   actions: { flexDirection: "row", marginTop: 10 },
   actionBtn: { borderWidth: 1, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 16, marginRight: 10 },
   approveBtn: { borderColor: "#1B5E20" },
   approveText: { color: "#1B5E20", fontWeight: "600" },
   rejectBtn: { borderColor: "#B71C1C" },
   rejectText: { color: "#B71C1C", fontWeight: "600" },
+  modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.45)", justifyContent: "center", padding: 20 },
+  modalCard: { backgroundColor: "#fff", borderRadius: 12, padding: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "bold", color: "#111", marginBottom: 4 },
+  modalHint: { fontSize: 13, color: "#666", marginBottom: 10 },
+  input: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, padding: 10, minHeight: 80, textAlignVertical: "top" },
 });
