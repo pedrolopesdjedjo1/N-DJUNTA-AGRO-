@@ -21,7 +21,7 @@ import { authText } from "../i18n/authTexts";
 import AuthLanguageBar from "../components/AuthLanguageBar";
 
 // Cliente (COMPRADOR) vem primeiro e já marcado: qualquer pessoa pode ter conta
-const ROLES = ["COMPRADOR", "AGRICULTOR", "PESCADOR", "COMERCIANTE", "TRANSPORTADOR"];
+const ROLES = ["COMPRADOR", "AGRICULTOR", "PESCADOR", "COMERCIANTE", "TRANSPORTADOR", "ARTESANATO"];
 
 const ROLE_ICON: Record<string, any> = {
   COMPRADOR: "bag-handle-outline",
@@ -29,12 +29,43 @@ const ROLE_ICON: Record<string, any> = {
   PESCADOR: "fish-outline",
   COMERCIANTE: "storefront-outline",
   TRANSPORTADOR: "car-outline",
+  ARTESANATO: "color-palette-outline",
+};
+
+// Textos de reserva (usados só se o ficheiro authTexts não tiver a chave)
+const FALLBACK: Record<string, Record<string, string>> = {
+  pt: {
+    role_ARTESANATO: "Artesanato",
+    clientHint: "Quer só comprar? Escolha Comprador. Qualquer pessoa pode ter conta.",
+  },
+  kr: {
+    role_ARTESANATO: "Artizanatu",
+    clientHint: "Bu misti so kumpra? Skodja Kumpradur. Kualker pesoa pode ten kunta.",
+  },
+  fr: {
+    role_ARTESANATO: "Artisanat",
+    clientHint: "Vous voulez seulement acheter ? Choisissez Acheteur. Tout le monde peut créer un compte.",
+  },
 };
 
 export default function RegisterScreen({ navigation }: any) {
   const { register } = useAuth();
   const { language } = useLanguage();
   const tx = (key: string) => authText(language, key);
+
+  const lang = String(language || "").toLowerCase();
+  const fbLang = lang.startsWith("fr")
+    ? "fr"
+    : lang.startsWith("kr") || lang.startsWith("cr") || lang.includes("kri")
+    ? "kr"
+    : "pt";
+
+  // Usa o texto do authTexts; se não existir (devolve a própria chave), usa o de reserva
+  const t = (key: string) => {
+    const v = tx(key);
+    if (v && v !== key) return v;
+    return FALLBACK[fbLang][key] ?? key;
+  };
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -155,12 +186,12 @@ export default function RegisterScreen({ navigation }: any) {
               return (
                 <TouchableOpacity key={r} style={[s.roleChip, active && s.roleChipActive]} onPress={() => setRole(r)} activeOpacity={0.85}>
                   <Ionicons name={ROLE_ICON[r]} size={16} color={active ? colors.white : colors.primary} />
-                  <Text style={[s.roleText, active && s.roleTextActive]}>{tx(`role_${r}`)}</Text>
+                  <Text style={[s.roleText, active && s.roleTextActive]}>{t(`role_${r}`)}</Text>
                 </TouchableOpacity>
               );
             })}
           </View>
-          <Text style={s.hint}>{tx("clientHint")}</Text>
+          <Text style={s.hint}>{t("clientHint")}</Text>
 
           <TouchableOpacity style={[s.button, loading && s.buttonOff]} onPress={handleRegister} disabled={loading} activeOpacity={0.85}>
             {loading ? <ActivityIndicator color={colors.white} /> : <Text style={s.buttonText}>{tx("createAccount")}</Text>}
