@@ -8,10 +8,10 @@
   },
   "scripts": {
     "prisma:generate": "prisma generate",
-    "dev": "npm run prisma:generate && ts-node-dev --transpile-only --respawn src/server.ts",
+    "dev": "npm run prisma:generate && ts-node-dev --transpile-only --respawn -r ./enumsShim.js src/server.ts",
     "build": "npm run prisma:generate && node build.js",
     "build:check": "tsc --noEmit",
-    "start": "node --max-old-space-size=400 dist/server.js",
+    "start": "node --max-old-space-size=400 -r ./enumsShim.js dist/server.js",
     "typecheck": "tsc --noEmit",
     "prisma:studio": "prisma studio"
   },
