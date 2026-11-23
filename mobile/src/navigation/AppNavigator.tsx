@@ -332,6 +332,7 @@ const AREA_POR_PERFIL: Record<string, string> = {
   AGRICULTOR: "FarmerHome",
   PESCADOR: "FisherHome",
   COMERCIANTE: "MerchantHome",
+  ARTESANATO: "ArtisanHome",
   ARTESAO: "ArtisanHome",
   COMPRADOR: "ClientHome",
   TRANSPORTADOR: "TrHome",
@@ -403,7 +404,6 @@ function titulo(nome: string): string {
   const partes = nome.match(/[A-Z][a-z0-9]*/g) ?? [nome];
   return partes.map((p) => PALAVRAS[p] ?? p).join(" ");
 }
-
 // Estas telas têm o seu próprio menu/cabeçalho, por isso não mostram o cabeçalho do sistema
 const SEM_CABECALHO = new Set<string>([
 
