@@ -21,6 +21,7 @@ enum UserRole {
   GOVERNO
   ONG
   ADMIN
+  ARTESANATO
 }
 
 model User {
@@ -626,7 +627,6 @@ model NgoProject {
   updatedAt DateTime @default(now()) @updatedAt
   @@map("ngo_projects")
 }
-
 model Delivery {
   id String @id @default(uuid())
   status String @default("")
@@ -1204,7 +1204,6 @@ model UserDevice {
   @@unique([userId,deviceId])
   @@map("user_devices")
 }
-
 model Event {
   id String @id @default(uuid())
   startsAt DateTime
