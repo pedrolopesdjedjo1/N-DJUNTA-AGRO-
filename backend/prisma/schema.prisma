@@ -597,3 +597,1144 @@ model ContentVisibility {
   @@unique([kind,refId])
   @@map("content_visibilities")
 }
+
+model CooperativeReview {
+  id String @id @default(uuid())
+  cooperativeId String @unique
+  status String
+  note String
+  reviewedBy String
+  reviewedAt DateTime?
+  @@map("cooperative_reviews")
+}
+
+model NgoProject {
+  id String @id @default(uuid())
+  status String @default("")
+  ownerId String?
+  endDate DateTime?
+  name String @default("")
+  isPublic Boolean @default(false)
+  area Float @default(0)
+  region String?
+  startDate DateTime?
+  budget Float @default(0)
+  targetBeneficiaries String?
+  coverUrl String?
+  lat Float?
+  lng Float?
+  description String?
+  focus String?
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("ngo_projects")
+}
+
+model Delivery {
+  id String @id @default(uuid())
+  status String @default("")
+  transporterId String?
+  orderId String? @unique
+  lastLocationAt DateTime?
+  lastLocation String?
+  lastLat Float?
+  lastLng Float?
+  price Float @default(0)
+  pickupAt DateTime?
+  createdAt DateTime @default(now())
+  order Order? @relation(fields: [orderId], references: [id])
+  @@map("deliveries")
+}
+
+model DeliveryEvent {
+  id String @id @default(uuid())
+  kind String
+  deliveryId String
+  actorId String
+  message String
+  category String @default("")
+  lat Float?
+  lng Float?
+  photoUrl String?
+  createdAt DateTime @default(now())
+  @@map("delivery_events")
+}
+
+model GovProgram {
+  id String @id @default(uuid())
+  status String @default("")
+  ownerId String?
+  endDate DateTime?
+  name String @default("")
+  isPublic Boolean @default(false)
+  regions String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("gov_programs")
+}
+
+model IdentityVerification {
+  id String @id @default(uuid())
+  status String @default("")
+  userId String
+  documentKind String
+  documentUrl String
+  selfieUrl String?
+  note String?
+  reviewNote String?
+  reviewedAt DateTime?
+  reviewedBy String?
+  createdAt DateTime @default(now())
+  @@map("identity_verifications")
+}
+
+model TransporterProfile {
+  id String @id @default(uuid())
+  verificationStatus String?
+  isAvailable Boolean @default(false)
+  userId String @unique
+  emergencyContacts String?
+  vehicleStatus String?
+  vehicleStatusNote String?
+  notifyNewLoads Boolean @default(false)
+  vehicleType String?
+  submittedAt DateTime?
+  verificationNote String?
+  reviewedAt DateTime?
+  reviewedBy String?
+  regions String[]
+  transporterKind String?
+  vehicleBrand String?
+  vehicleModel String?
+  vehicleYear Int @default(0)
+  vehiclePhotos String[]
+  cargoTypes String[]
+  capacityKg Float @default(0)
+  bio String?
+  @@map("transporter_profiles")
+}
+
+model AgentCase {
+  id String @id @default(uuid())
+  status String @default("")
+  orderId String?
+  agentId String
+  clientId String
+  category String
+  title String
+  description String
+  resolution String?
+  resolvedAt DateTime?
+  escalatedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("agent_cases")
+}
+
+model AgentSecurityReport {
+  id String @id @default(uuid())
+  status String @default("")
+  reporterId String
+  targetUserId String?
+  kind String
+  description String
+  adminNote String?
+  createdAt DateTime @default(now())
+  @@map("agent_security_reports")
+}
+
+model ContentReport {
+  id String @id @default(uuid())
+  status String @default("")
+  targetType String
+  targetId String?
+  decision String?
+  decisionNote String?
+  decidedBy String?
+  decidedAt DateTime?
+  reporterId String
+  reportedUserId String?
+  category String
+  description String
+  assignedTo String?
+  createdAt DateTime @default(now())
+  @@map("content_reports")
+}
+
+model OrderDisputeEvent {
+  id String @id @default(uuid())
+  disputeId String
+  authorId String
+  kind String
+  message String
+  createdAt DateTime @default(now())
+  @@map("order_dispute_events")
+}
+
+model OrderDispute {
+  id String @id @default(uuid())
+  orderId String
+  status String @default("")
+  openedBy String
+  reason String
+  description String
+  againstId String
+  assignedTo String?
+  decision String?
+  decisionNote String?
+  refundAmount Float @default(0)
+  decidedBy String?
+  decidedAt DateTime?
+  createdAt DateTime @default(now())
+  @@map("order_disputes")
+}
+
+model OrderPayment {
+  id String @id @default(uuid())
+  orderId String
+  status String @default("")
+  buyerId String
+  method String
+  amount Float
+  reference String
+  phone String
+  createdAt DateTime @default(now())
+  @@map("order_payments")
+}
+
+model Refund {
+  id String @id @default(uuid())
+  status String @default("")
+  paidAt DateTime?
+  amount Float
+  orderId String
+  disputeId String?
+  buyerId String
+  reason String
+  requestedBy String
+  decisionNote String?
+  decidedBy String?
+  decidedAt DateTime?
+  paidNote String?
+  paidBy String?
+  createdAt DateTime @default(now())
+  @@map("refunds")
+}
+
+model AgentCommission {
+  id String @id @default(uuid())
+  status String
+  amount Float
+  paidAt DateTime
+  agentId String
+  note String
+  orderId String
+  orderCompletedAt DateTime
+  paidBy String
+  createdAt DateTime @default(now())
+  @@map("agent_commissions")
+}
+
+model OrderItem {
+  id String @id @default(uuid())
+  orderId String
+  productId String?
+  title String
+  quantity Float
+  unitPrice Float
+  price Float
+  order Order @relation(fields: [orderId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
+  @@map("order_items")
+}
+
+model FinanceFlagReview {
+  id String @id @default(uuid())
+  key String @unique
+  note String
+  reviewedBy String
+  reviewedAt DateTime?
+  @@map("finance_flag_reviews")
+}
+
+model PublicService {
+  id String @id @default(uuid())
+  isPublished Boolean @default(false)
+  status String @default("")
+  name String @default("")
+  category String @default("")
+  region String?
+  address String?
+  lat Float?
+  lng Float?
+  schedule String?
+  ownerId String?
+  statusNote String?
+  createdAt DateTime @default(now())
+  @@map("public_services")
+}
+
+model GovPlace {
+  id String @id @default(uuid())
+  kind String @default("")
+  isPublic Boolean @default(false)
+  region String?
+  name String @default("")
+  subtype String?
+  lat Float?
+  lng Float?
+  status String @default("")
+  schedule String?
+  ownerId String?
+  @@map("gov_places")
+}
+
+model Publication {
+  id String @id @default(uuid())
+  ownerId String?
+  notifiedRegion Boolean @default(false)
+  isPublished Boolean @default(false)
+  region String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("publications")
+}
+
+model CitizenReport {
+  id String @id @default(uuid())
+  institutionId String?
+  status String @default("")
+  priority String?
+  protocol String @unique
+  category String
+  title String
+  region String
+  requesterId String
+  message String
+  location String
+  lat Float
+  lng Float
+  placeId String
+  imageUrls String[]
+  handledById String?
+  answer String?
+  resolvedAt DateTime?
+  anonymous Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("citizen_reports")
+}
+
+model GovProgramProject {
+  id String @id @default(uuid())
+  programId String
+  projectId String @unique
+  createdAt DateTime @default(now())
+  @@map("gov_program_projects")
+}
+
+model ProductModeration {
+  id String @id @default(uuid())
+  productId String? @unique
+  status String @default("")
+  wasAvailable Boolean?
+  @@map("product_moderations")
+}
+
+model MarketCategory {
+  id String @id @default(uuid())
+  department String? @unique
+  @@map("market_categories")
+}
+
+model OrderNote {
+  id String @id @default(uuid())
+  orderId String
+  authorId String
+  message String
+  createdAt DateTime @default(now())
+  @@map("order_notes")
+}
+
+model Opportunity {
+  id String @id @default(uuid())
+  status String @default("")
+  ownerId String?
+  deadline DateTime?
+  title String @default("")
+  createdAt DateTime @default(now())
+  @@map("opportunities")
+}
+
+model OrganizationDocument {
+  id String @id @default(uuid())
+  organizationId String
+  kind String
+  name String
+  url String
+  createdAt DateTime @default(now())
+  @@map("organization_documents")
+}
+
+model ContentReportEvent {
+  id String @id @default(uuid())
+  reportId String
+  authorId String
+  kind String
+  message String
+  createdAt DateTime @default(now())
+  @@map("content_report_events")
+}
+
+model AdminSession {
+  id String @id @default(uuid())
+  adminId String
+  tokenHash String
+  revokedAt DateTime?
+  expiresAt DateTime
+  lastSeenAt DateTime?
+  userAgent String
+  method String
+  ip String
+  createdAt DateTime @default(now())
+  @@map("admin_sessions")
+}
+
+model SupportTicketState {
+  id String @id @default(uuid())
+  ticketId String @unique
+  status String
+  updatedBy String
+  assignedTo String
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("support_ticket_states")
+}
+
+model SupportReply {
+  id String @id @default(uuid())
+  ticketId String
+  authorId String
+  message String
+  isInternal Boolean
+  createdAt DateTime @default(now())
+  @@map("support_replies")
+}
+
+model AgentRating {
+  id String @id @default(uuid())
+  authorId String
+  agentId String
+  rating Float
+  comment String
+  @@unique([agentId,authorId])
+  @@map("agent_ratings")
+}
+
+model AgentNeed {
+  id String @id @default(uuid())
+  agentId String?
+  status String @default("")
+  regionKey String?
+  forwardedAt DateTime?
+  institutionId String?
+  reportId String?
+  protocol String?
+  clientId String?
+  category String @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  @@map("agent_needs")
+}
+
+model AgentTask {
+  id String @id @default(uuid())
+  agentId String?
+  status String @default("")
+  doneAt DateTime?
+  @@map("agent_tasks")
+}
+
+model Training {
+  id String @id @default(uuid())
+  ownerId String?
+  status String @default("")
+  startsAt DateTime?
+  title String @default("")
+  region String?
+  location String?
+  lat Float?
+  lng Float?
+  isOnline Boolean @default(false)
+  endsAt DateTime?
+  kind String @default("")
+  projectId String?
+  capacity Float @default(0)
+  hours Int @default(0)
+  @@map("trainings")
+}
+
+model AgentDocument {
+  id String @id @default(uuid())
+  agentId String
+  kind String
+  name String
+  url String
+  createdAt DateTime @default(now())
+  @@map("agent_documents")
+}
+
+model EventRegistration {
+  id String @id @default(uuid())
+  userId String
+  eventId String
+  createdAt DateTime @default(now())
+  event Event @relation(fields: [eventId], references: [id])
+  @@map("event_registrations")
+}
+
+model Store {
+  id String @id @default(uuid())
+  ownerId String? @unique
+  name String @default("")
+  logoUrl String?
+  photoUrls String[] @default([])
+  description String?
+  contact String?
+  location String?
+  openingHours String?
+  categories String[] @default([])
+  @@map("stores")
+}
+
+model Promotion {
+  id String @id @default(uuid())
+  productId String
+  isActive Boolean @default(false)
+  startsAt DateTime
+  endsAt DateTime?
+  ownerId String
+  kind String
+  title String
+  description String
+  discountPercent Float?
+  createdAt DateTime @default(now())
+  @@map("promotions")
+}
+
+model CartItem {
+  id String @id @default(uuid())
+  userId String
+  productId String
+  quantity Float
+  createdAt DateTime @default(now())
+  @@map("cart_items")
+}
+
+model UserSettings {
+  id String @id @default(uuid())
+  userId String @unique
+  @@map("user_settings")
+}
+
+model OfferNotice {
+  id String @id @default(uuid())
+  userId String
+  productId String
+  @@map("offer_notices")
+}
+
+model PaymentMethod {
+  id String @id @default(uuid())
+  userId String
+  isDefault Boolean
+  kind String
+  label String
+  phone String
+  createdAt DateTime @default(now())
+  @@map("payment_methods")
+}
+
+model FavoriteSeller {
+  id String @id @default(uuid())
+  userId String
+  sellerId String
+  notify Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@map("favorite_sellers")
+}
+
+model OrderReview {
+  id String @id @default(uuid())
+  authorId String
+  orderId String
+  kind String
+  productId String
+  targetId String
+  productTitle String
+  rating Float
+  comment String
+  imageUrl String
+  createdAt DateTime @default(now())
+  @@map("order_reviews")
+}
+
+model CommunityPost {
+  id String @id @default(uuid())
+  authorId String
+  cooperativeId String?
+  kind String
+  title String
+  content String
+  createdAt DateTime @default(now())
+  cooperative Cooperative? @relation(fields: [cooperativeId], references: [id])
+  @@map("community_posts")
+}
+
+model ImportantContact {
+  id String @id @default(uuid())
+  kind String
+  name String
+  createdById String
+  phone String
+  region String
+  description String
+  @@map("important_contacts")
+}
+
+model UserDevice {
+  id String @id @default(uuid())
+  userId String
+  deviceId String
+  lastSeenAt DateTime?
+  ip String
+  userAgent String
+  label String
+  platform String
+  firstSeenAt DateTime?
+  @@unique([userId,deviceId])
+  @@map("user_devices")
+}
+
+model Event {
+  id String @id @default(uuid())
+  startsAt DateTime
+  createdById String
+  kind String
+  title String
+  description String
+  location String
+  endsAt DateTime
+  organizerName String
+  organizerContact String
+  area String
+  registrations EventRegistration[]
+  @@map("events")
+}
+
+model FishCatch {
+  id String @id @default(uuid())
+  userId String
+  caughtAt DateTime
+  quantity Float
+  weightKg Float
+  species String
+  otherSpecies String[]
+  available Int
+  unit String
+  location String
+  freshness String
+  notes String
+  isSold Boolean @default(false)
+  productId String?
+  imageUrls String[]
+  @@map("fish_catches")
+}
+
+model NgoCommunity {
+  id String @id @default(uuid())
+  ownerId String
+  name String
+  region String
+  type String
+  population Float
+  lat Float
+  lng Float
+  description String
+  @@map("ngo_communities")
+}
+
+model NgoBeneficiary {
+  id String @id @default(uuid())
+  ownerId String?
+  userId String?
+  phone String?
+  name String @default("")
+  communityId String?
+  region String?
+  projectId String?
+  sector String?
+  gender String?
+  birthYear Int @default(0)
+  createdAt DateTime @default(now())
+  @@map("ngo_beneficiaries")
+}
+
+model SosAlert {
+  id String @id @default(uuid())
+  status String @default("")
+  userId String
+  kind String
+  message String
+  lat Float
+  lng Float
+  locationText String
+  contactPhone String
+  locationUpdatedAt DateTime?
+  resolvedAt DateTime?
+  handledById String?
+  createdAt DateTime @default(now())
+  @@map("sos_alerts")
+}
+
+model NgoProjectUpdate {
+  id String @id @default(uuid())
+  authorId String
+  projectId String
+  progress Float
+  title String
+  body String
+  createdAt DateTime @default(now())
+  @@map("ngo_project_updates")
+}
+
+model NgoNeed {
+  id String @id @default(uuid())
+  ownerId String
+  status String @default("")
+  priority String
+  communityId String
+  projectId String
+  region String
+  category String
+  description String
+  peopleAffected Int
+  createdAt DateTime @default(now())
+  @@map("ngo_needs")
+}
+
+model OpportunityApplication {
+  id String @id @default(uuid())
+  opportunityId String
+  status String @default("")
+  applicantId String
+  message String
+  phone String
+  answer String?
+  createdAt DateTime @default(now())
+  @@map("opportunity_applications")
+}
+
+model NgoResult {
+  id String @id @default(uuid())
+  projectId String
+  indicator String
+  value Float
+  recordedAt DateTime
+  ownerId String
+  label String
+  unit String
+  note String
+  @@map("ngo_results")
+}
+
+model CitizenReportEvent {
+  id String @id @default(uuid())
+  reportId String
+  authorId String
+  kind String
+  status String
+  message String
+  isInternal Boolean
+  createdAt DateTime @default(now())
+  @@map("citizen_report_events")
+}
+
+model TrainingEnrollment {
+  id String @id @default(uuid())
+  status String @default("")
+  trainingId String
+  certificateCode String? @unique
+  certifiedAt DateTime?
+  userId String?
+  name String?
+  phone String?
+  createdAt DateTime @default(now())
+  @@map("training_enrollments")
+}
+
+model LearningItem {
+  id String @id @default(uuid())
+  createdById String
+  category String
+  area String
+  title String
+  body String
+  videoUrl String
+  imageUrl String
+  createdAt DateTime @default(now())
+  @@map("learning_items")
+}
+
+model FavoriteCustomer {
+  id String @id @default(uuid())
+  ownerId String
+  customerId String
+  @@map("favorite_customers")
+}
+
+model NgoPartner {
+  id String @id @default(uuid())
+  name String @default("")
+  ownerId String?
+  @@map("ngo_partners")
+}
+
+model NgoFunding {
+  id String @id @default(uuid())
+  ownerId String
+  projectId String
+  partnerId String
+  kind String
+  title String
+  amount Float
+  status String
+  requestedAt DateTime?
+  approvedAt DateTime?
+  receivedAt DateTime?
+  dueDate DateTime?
+  notes String
+  createdAt DateTime @default(now())
+  @@map("ngo_fundings")
+}
+
+model NgoExpense {
+  id String @id @default(uuid())
+  spentAt DateTime
+  ownerId String
+  projectId String
+  fundingId String
+  category String
+  description String
+  amount Float
+  receiptUrl String
+  @@map("ngo_expenses")
+}
+
+model NgoSupportRequest {
+  id String @id @default(uuid())
+  organizationId String?
+  status String @default("")
+  requesterId String
+  category String
+  title String
+  message String
+  region String
+  community String
+  answer String?
+  handledById String?
+  createdAt DateTime @default(now())
+  @@map("ngo_support_requests")
+}
+
+model NgoProjectPartner {
+  id String @id @default(uuid())
+  partnerId String
+  projectId String
+  role String
+  createdAt DateTime @default(now())
+  @@map("ngo_project_partners")
+}
+
+model NgoProjectMedia {
+  id String @id @default(uuid())
+  projectId String
+  kind String
+  url String
+  caption String
+  createdAt DateTime @default(now())
+  @@map("ngo_project_medias")
+}
+
+model PriceAlert {
+  id String @id @default(uuid())
+  userId String
+  isActive Boolean @default(false)
+  direction String
+  targetPrice Float
+  lastTriggeredAt DateTime?
+  productName String
+  region String
+  createdAt DateTime @default(now())
+  @@map("price_alerts")
+}
+
+model SupportTicket {
+  id String @id @default(uuid())
+  userId String
+  status String @default("")
+  orderId String
+  kind String
+  subject String
+  message String
+  createdAt DateTime @default(now())
+  @@map("support_tickets")
+}
+
+model TrainingMaterial {
+  id String @id @default(uuid())
+  trainingId String
+  kind String
+  title String
+  url String
+  createdAt DateTime @default(now())
+  @@map("training_materials")
+}
+
+model TransporterIncident {
+  id String @id @default(uuid())
+  status String @default("")
+  kind String
+  transporterId String
+  adminNote String?
+  handledBy String?
+  description String
+  lat Float
+  lng Float
+  locationShared Boolean
+  deliveryId String
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+  @@map("transporter_incidents")
+}
+
+model ServicePoint {
+  id String @id @default(uuid())
+  status String @default("")
+  kind String @default("")
+  regionKey String?
+  name String @default("")
+  reviewedBy String?
+  reviewedAt DateTime?
+  reviewNote String?
+  suggestedBy String?
+  address String?
+  phone String?
+  hours String?
+  createdAt DateTime @default(now())
+  @@map("service_points")
+}
+
+model TransportPayout {
+  id String @id @default(uuid())
+  status String @default("")
+  netAmount Float
+  note String?
+  deliveryId String @unique
+  orderId String
+  transporterId String
+  amount Float
+  commissionPercent Float
+  commissionAmount Float
+  receivedAt DateTime?
+  method String?
+  reference String?
+  createdAt DateTime @default(now())
+  @@map("transport_payouts")
+}
+
+model ContactLog {
+  id String @id @default(uuid())
+  targetId String
+  userId String
+  deliveryId String
+  via String
+  createdAt DateTime @default(now())
+  @@map("contact_logs")
+}
+
+model DeliveryDismissal {
+  id String @id @default(uuid())
+  transporterId String
+  deliveryId String
+  @@unique([transporterId,deliveryId])
+  @@map("delivery_dismissals")
+}
+
+model TransporterExpense {
+  id String @id @default(uuid())
+  transporterId String
+  spentAt DateTime
+  kind String
+  amount Float
+  note String
+  deliveryId String
+  receiptUrl String
+  createdAt DateTime @default(now())
+  @@map("transporter_expenses")
+}
+
+model TransporterDocument {
+  id String @id @default(uuid())
+  transporterId String
+  kind String
+  name String
+  url String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@map("transporter_documents")
+}
+
+model TransportRequest {
+  id String @id @default(uuid())
+  offerId String
+  status String @default("")
+  response String?
+  requesterId String
+  orderId String
+  message String
+  createdAt DateTime @default(now())
+  @@map("transport_requests")
+}
+
+model LoadNotice {
+  id String @id @default(uuid())
+  kind String
+  deliveryId String
+  transporterId String
+  @@map("load_notices")
+}
+
+model PartyReview {
+  id String @id @default(uuid())
+  authorId String
+  deliveryId String
+  targetId String
+  targetRole String
+  rating Float
+  comment String?
+  createdAt DateTime @default(now())
+  @@unique([deliveryId,authorId,targetId])
+  @@map("party_reviews")
+}
+
+// =====================================================================
+// Listas de valores usadas pelo código (so geram constantes no cliente Prisma).
+// Nenhum campo usa estas listas: os campos continuam String. Nao alteram o banco.
+// =====================================================================
+
+enum OrderStatus {
+  NOVO
+  ACEITO
+  EM_PREPARACAO
+  PRONTO
+  ENVIADO
+  CONCLUIDO
+  CANCELADO
+  @@map("OrderStatus")
+}
+
+enum DeliveryStatus {
+  SOLICITADA
+  ACEITA
+  RECOLHIDA
+  EM_TRANSITO
+  ENTREGUE
+  CANCELADA
+  @@map("DeliveryStatus")
+}
+
+enum TicketStatus {
+  ABERTO
+  EM_ANALISE
+  RESOLVIDO
+  @@map("TicketStatus")
+}
+
+enum TicketKind {
+  EMERGENCIA
+  PEDIDO
+  PAGAMENTO
+  ENTREGA
+  RECLAMACAO
+  SUGESTAO
+  OUTRO
+  @@map("TicketKind")
+}
+
+enum SosStatus {
+  ABERTO
+  EM_RESGATE
+  RESOLVIDO
+  CANCELADO
+  @@map("SosStatus")
+}
+
+enum SosKind {
+  SOS
+  MOTOR
+  BARCO_AVARIADO
+  COMBUSTIVEL
+  HOMEM_AO_MAR
+  MAU_TEMPO
+  OUTRO
+  @@map("SosKind")
+}
+
+enum PromotionKind {
+  DESCONTO
+  OFERTA_ESPECIAL
+  DESTAQUE
+  CAMPANHA
+  @@map("PromotionKind")
+}
+
+enum EventKind {
+  FEIRA
+  EVENTO_CULTURAL
+  MERCADO_LOCAL
+  EXPOSICAO
+  OUTRO
+  @@map("EventKind")
+}
+
+enum LearningCategory {
+  GUIA
+  CULTIVO
+  COLHEITA
+  CONSERVACAO
+  PRAGAS
+  CONSELHOS
+  SEGURANCA_MAR
+  MANUSEAMENTO
+  NAVEGACAO
+  MANUTENCAO
+  SUSTENTAVEL
+  TECNICA
+  CURSO
+  TUTORIAL
+  VIDEO
+  NEGOCIOS
+  FOTOGRAFIA
+  PRECOS
+  VENDAS
+  @@map("LearningCategory")
+}
+
+enum CommunityPostKind {
+  CONHECIMENTO
+  VENDA_COLETIVA
+  COMPRA_COLETIVA
+  PARTILHA_EQUIPAMENTO
+  EVENTO
+  AVISO
+  @@map("CommunityPostKind")
+}
