@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { ArtisanLayout } from "../components/MerchantTabs";
-import { Page, Title, SubTitle, Card, useLoader, u } from "../components/ui";
+import { Page, Title, SubTitle, Card, Btn, useLoader, u } from "../components/ui";
 import { getArtisanDashboard } from "../api/artisan";
 import { money, formatDateTime } from "../constants/market";
 
@@ -20,9 +20,10 @@ const EMPTY = {
 };
 
 const MENU = [
-  ["🧺", "Meus artesanatos", "ArtisanProducts"],
-  ["🛍️", "Vender", "ArtisanSell"],
-  ["📦", "Pedidos", "ArtisanOrders"],
+  ["➕", "Publicar produto", "AddProduct"],
+  ["🧺", "Meus artesanatos", "MerchantProducts"],
+  ["🛍️", "Preços e stock", "ArtisanSell"],
+  ["📦", "Pedidos", "MerchantOrders"],
   ["🚚", "Entrega", "MerchantDeliveries"],
   ["💰", "Vendas e ganhos", "MerchantSales"],
   ["🛒", "Materiais e fornecedores", "ArtisanMaterials"],
@@ -33,7 +34,7 @@ const MENU = [
   ["💬", "Mensagens", "Conversations"],
   ["🔔", "Notificações", "Notifications"],
   ["⭐", "Avaliações", "ArtisanReviews"],
-  ["👤", "Meu perfil", "ArtisanProfile"],
+  ["👤", "Perfil da loja", "StoreProfile"],
   ["✅", "Verificação", "Verification"],
   ["🆘", "Ajuda e suporte", "Help"],
   ["🌐", "Idioma", "Language"],
@@ -61,9 +62,13 @@ export default function ArtisanHomeScreen({ navigation }: any) {
   const hasAlerts =
     a.lowStock.length > 0 || a.staleOrders > 0 || a.unreadNotifications > 0 || a.upcomingEvents.length > 0;
 
+  function publish() {
+    navigation.navigate("AddProduct", { category: "ARTESANATO" });
+  }
+
   function open(route: string) {
-    if (route === "ArtisanReviews") {
-      navigation.navigate("ArtisanReviews");
+    if (route === "AddProduct") {
+      publish();
     } else {
       navigation.navigate(route);
     }
@@ -73,6 +78,8 @@ export default function ArtisanHomeScreen({ navigation }: any) {
     <ArtisanLayout active="ArtisanHome">
       <Page loader={loader}>
         <Title>🧺 Olá, {user?.name}</Title>
+
+        <Btn label="➕ Publicar produto" onPress={publish} />
 
         <View style={u.grid}>
           {tiles.map(([label, value]) => (
