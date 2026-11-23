@@ -20,12 +20,14 @@ export const MERCHANT_TABS: TabDef[] = [
   { key: "StoreProfile", icon: "👤", label: "Perfil" },
 ];
 
+// O Artesanato usa os mesmos ecrãs completos do Comerciante,
+// com o nome "Artesanatos" no lugar de "Produtos".
 export const ARTISAN_TABS: TabDef[] = [
-  { key: "ArtisanHome", icon: "🏠", label: "Início" },
-  { key: "ArtisanProducts", icon: "🧺", label: "Artesanatos" },
-  { key: "ArtisanSell", icon: "🛍️", label: "Vender" },
-  { key: "ArtisanOrders", icon: "📦", label: "Pedidos" },
-  { key: "ArtisanProfile", icon: "👤", label: "Perfil" },
+  { key: "MerchantHome", icon: "🏠", label: "Início" },
+  { key: "MerchantProducts", icon: "🧺", label: "Artesanatos" },
+  { key: "MerchantOrders", icon: "🛒", label: "Pedidos" },
+  { key: "MerchantSales", icon: "💰", label: "Vendas" },
+  { key: "StoreProfile", icon: "👤", label: "Perfil" },
 ];
 
 export const FARMER_TABS: TabDef[] = [
@@ -140,7 +142,7 @@ export function MerchantLayout({ active, children }: { active: string; children:
   const { user } = useAuth();
   const role = user?.role as string | undefined;
   const tabs =
-    role === "ARTESAO"
+    role === "ARTESANATO" || role === "ARTESAO"
       ? ARTISAN_TABS
       : role === "AGRICULTOR"
       ? FARMER_TABS
