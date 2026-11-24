@@ -1,330 +1,273 @@
-export type Lang = "pt" | "fr" | "crl";
+import { Alert, Text, TextInput } from "react-native";
+import type { Lang } from "./translations";
 
-export const LANGUAGES: { code: Lang; label: string }[] = [
-  { code: "pt", label: "Português" },
-  { code: "crl", label: "Kriol" },
-  { code: "fr", label: "Français" },
+// [Português, Kriol, Français]
+// Para traduzir mais textos, basta acrescentar linhas nesta lista.
+const WORDS: [string, string, string][] = [
+  // Geral
+  ["Início", "Inísiu", "Accueil"],
+  ["Produtos", "Produtus", "Produits"],
+  ["Pedidos", "Pedidus", "Commandes"],
+  ["Vendas", "Bendas", "Ventes"],
+  ["Perfil", "Perfil", "Profil"],
+  ["Mais", "Mas", "Plus"],
+  ["Menu", "Menu", "Menu"],
+  ["Voltar", "Torna", "Retour"],
+  ["Guardar", "Guarda", "Enregistrer"],
+  ["Guardar loja", "Guarda loja", "Enregistrer la boutique"],
+  ["Cancelar", "Kansela", "Annuler"],
+  ["Enviar", "Manda", "Envoyer"],
+  ["Apagar", "Apaga", "Supprimer"],
+  ["Remover", "Tira", "Retirer"],
+  ["Pausar", "Pausa", "Mettre en pause"],
+  ["Ativar", "Ativa", "Activer"],
+  ["Editar", "Edita", "Modifier"],
+  ["Atualizar", "Atualiza", "Mettre à jour"],
+  ["Sim", "Sin", "Oui"],
+  ["Não", "Nau", "Non"],
+  ["Sair", "Sai", "Déconnexion"],
+  ["Entrar", "Entra", "Se connecter"],
+  ["Erro", "Erru", "Erreur"],
+  ["Pronto", "Prontu", "Terminé"],
+  ["Enviado", "Mandadu", "Envoyé"],
+  ["Ver tudo", "Odja tudu", "Voir tout"],
+  ["Todos", "Tudu", "Tous"],
+  ["Todas", "Tudu", "Toutes"],
+  ["Novos", "Novus", "Nouveaux"],
+  ["Aceites", "Aseitadus", "Acceptées"],
+  ["Em preparação", "Na prepara", "En préparation"],
+  ["Enviados", "Mandadus", "Envoyées"],
+  ["Nenhum pedido aqui.", "Ka ten pedidu li.", "Aucune commande ici."],
+  ["Idioma", "Lingua", "Langue"],
+  ["Suporte", "Sopórti", "Assistance"],
+  ["Verificação", "Verifikason", "Vérification"],
+  ["Avaliações", "Avaliasons", "Avis"],
+  ["Notificações", "Notifikasons", "Notifications"],
+  ["Mensagens", "Mensajens", "Messages"],
+  ["Ajuda e suporte", "Ajuda i sopórti", "Aide et assistance"],
+  ["Configurações", "Konfigurasons", "Paramètres"],
+  ["Aprender", "Prende", "Apprendre"],
+  ["Feiras e eventos", "Feras i eventus", "Foires et événements"],
+  ["Mercado", "Mérkadu", "Marché"],
+  ["Entrega", "Entrega", "Livraison"],
+  ["Meu perfil", "Meu perfil", "Mon profil"],
+
+  // Início do cliente
+  ["Bom dia", "Bon dia", "Bonjour"],
+  ["Boa tarde", "Boa tardi", "Bon après-midi"],
+  ["Boa noite", "Boa noti", "Bonsoir"],
+  ["Olá", "Olá", "Bonjour"],
+  ["O que precisa hoje?", "Kuse ki bu meste ozi?", "De quoi avez-vous besoin aujourd'hui ?"],
+  ["Pesquisar produtos, vendedor…", "Buska produtus, vendedor…", "Rechercher produits, vendeur…"],
+  ["A minha área", "Meu área", "Mon espace"],
+  ["Abra o seu espaço de trabalho", "Abri bu spasu di trabadju", "Ouvrez votre espace de travail"],
+  ["Categorias", "Kategorias", "Catégories"],
+  ["Comércio", "Komérsiu", "Commerce"],
+  ["Produtos em destaque", "Produtus na distake", "Produits en vedette"],
+  ["Juntos, fazemos acontecer.", "Djuntu, no ta fasi ta akontesi.", "Ensemble, faisons que ça arrive."],
+
+  // Categorias
+  ["Alimentação", "Alimentason", "Alimentation"],
+  ["Roupa e Moda", "Ropa i Moda", "Vêtements et mode"],
+  ["Casa", "Kasa", "Maison"],
+  ["Construção", "Konstrukson", "Construction"],
+  ["Tecnologia", "Tecnolojia", "Technologie"],
+  ["Veículos", "Veíkulus", "Véhicules"],
+  ["Agricultura", "Agrikultura", "Agriculture"],
+  ["Pesca", "Peska", "Pêche"],
+  ["Artesanato", "Artizanatu", "Artisanat"],
+  ["Outros", "Otrus", "Autres"],
+
+  // Área do comerciante
+  ["Ganhos", "Gañus", "Gains"],
+  ["Produtos publicados", "Produtus publikadu", "Produits publiés"],
+  ["Disponíveis", "Disponíveis", "Disponibles"],
+  ["Disponível", "Disponível", "Disponible"],
+  ["Indisponível", "Indisponível", "Indisponible"],
+  ["Novos pedidos", "Pedidus novu", "Nouvelles commandes"],
+  ["Em andamento", "Na andamentu", "En cours"],
+  ["Clientes", "Klientis", "Clients"],
+  ["Alertas", "Alertas", "Alertes"],
+  ["Estoque baixo", "Stoki baxu", "Stock faible"],
+  ["Estoque", "Stoki", "Stock"],
+  ["Restam", "Ta resta", "Il reste"],
+  ["Meus produtos", "Meus produtus", "Mes produits"],
+  ["Publicar produto", "Publika produtu", "Publier un produit"],
+  ["Cadastrar produto", "Rejista produtu", "Enregistrer un produit"],
+  ["Pesquisar nos meus produtos", "Buska na meus produtus", "Rechercher dans mes produits"],
+
+  // Vendas
+  ["Vendas e ganhos", "Bendas i gañus", "Ventes et gains"],
+  ["Vendas de hoje", "Bendas di ozi", "Ventes du jour"],
+  ["Vendas da semana", "Bendas di simana", "Ventes de la semaine"],
+  ["Vendas do mês", "Bendas di mês", "Ventes du mois"],
+  ["Total recebido", "Total risibidu", "Total reçu"],
+  ["Pagamentos pendentes", "Pagamentus pendenti", "Paiements en attente"],
+  ["Relatório dos últimos 14 dias", "Relatóriu di últimus 14 dias", "Rapport des 14 derniers jours"],
+  ["Total no período", "Total na períodu", "Total sur la période"],
+  ["Histórico", "Istóriku", "Historique"],
+  ["Ainda não há vendas.", "Inda ka ten bendas.", "Pas encore de ventes."],
+
+  // Perfil da loja
+  ["Perfil da loja", "Perfil di loja", "Profil de la boutique"],
+  ["Perfil da loja guardado.", "Perfil di loja guardadu.", "Profil de la boutique enregistré."],
+  ["Ainda não verificado", "Inda ka verifikadu", "Pas encore vérifié"],
+  ["Logo", "Logu", "Logo"],
+  ["Escolher logo", "Skodja logu", "Choisir le logo"],
+  ["Nome da loja", "Nómi di loja", "Nom de la boutique"],
+  ["Descrição", "Diskrison", "Description"],
+  ["Contacto", "Kontaktu", "Contact"],
+  ["Localização", "Lokalizason", "Localisation"],
+  ["Horário", "Orariu", "Horaires"],
+  ["Categorias da loja", "Kategorias di loja", "Catégories de la boutique"],
+  ["Fotos da loja", "Fotus di loja", "Photos de la boutique"],
+  ["Galeria", "Galeria", "Galerie"],
+  ["Câmera", "Kámera", "Appareil photo"],
+  ["Câmara", "Kámera", "Appareil photo"],
+
+  // Área do artesão
+  ["Meus artesanatos", "Meus artizanatus", "Mes créations"],
+  ["Artesanatos", "Artizanatus", "Créations"],
+  ["Vender", "Bende", "Vendre"],
+  ["Preços e stock", "Presus i stoki", "Prix et stock"],
+  ["Materiais e fornecedores", "Materiais i fornesedoris", "Matériaux et fournisseurs"],
+  ["Cooperativas e comunidades", "Kooperativas i komunidadis", "Coopératives et communautés"],
+  ["Pedidos recebidos", "Pedidus risibidu", "Commandes reçues"],
+  ["Produtos vendidos", "Produtus bendidu", "Produits vendus"],
+  ["Ganhos do dia", "Gañus di dia", "Gains du jour"],
+  ["Ganhos do mês", "Gañus di mês", "Gains du mois"],
+  ["Avaliação", "Avaliason", "Évaluation"],
+  ["Em produção", "Na produson", "En production"],
+  ["Prontos", "Prontus", "Prêts"],
+  ["Alertas importantes", "Alertas importanti", "Alertes importantes"],
+  ["Tudo em dia. Nenhum alerta por agora.", "Tudu na orden. Ka ten alerta pa agora.", "Tout est à jour. Aucune alerte pour le moment."],
+  ["Marcar como vendido", "Marka komu bendidu", "Marquer comme vendu"],
+  ["À venda", "Na venda", "En vente"],
+  ["Pesquisar nos meus artesanatos", "Buska na meus artizanatus", "Rechercher dans mes créations"],
+  ["Ainda não cadastrou artesanatos.", "Inda bu ka rejista artizanatus.", "Vous n'avez pas encore enregistré de créations."],
+
+  // Verificação
+  ["Verificação de identidade", "Verifikason di identidadi", "Vérification d'identité"],
+  ["Envie uma foto do seu documento para receber o selo de conta verificada. Isto dá mais confiança a quem compra e vende consigo.", "Manda un foto di bu dokumentu pa risibi selu di konta verifikadu. Kel-li ta da mas konfiansa a kil ki ta kumpra i bende ku bo.", "Envoyez une photo de votre document pour recevoir le badge de compte vérifié. Cela inspire plus de confiance à ceux qui achètent et vendent avec vous."],
+  ["Tipo de documento", "Tipu di dokumentu", "Type de document"],
+  ["Bilhete de identidade", "Bilhete di identidadi", "Carte d'identité"],
+  ["Passaporte", "Pasaporti", "Passeport"],
+  ["Carta de condução", "Karta di kondusaun", "Permis de conduire"],
+  ["Cartão de eleitor", "Kartau di eleitor", "Carte d'électeur"],
+  ["Selfie com o documento (opcional)", "Selfi ku dokumentu (opsional)", "Selfie avec le document (facultatif)"],
+  ["Nota (opcional)", "Nota (opsional)", "Note (facultatif)"],
+  ["Algo que a equipa deva saber", "Algu kusa ki ekipa debe sabe", "Quelque chose que l'équipe doit savoir"],
+  ["Enviar pedido", "Manda pedidu", "Envoyer la demande"],
+  ["Os meus pedidos", "Meus pedidus", "Mes demandes"],
+  ["O seu pedido foi enviado e vai ser analisado.", "Bu pedidu foi mandadu i ta ser analizadu.", "Votre demande a été envoyée et sera examinée."],
 ];
 
-type Dict = Record<string, string>;
+type Entry = { crl: string; fr: string };
+const MAP: Record<string, Entry> = {};
+WORDS.forEach(([pt, crl, fr]) => {
+  MAP[pt.trim().toLowerCase()] = { crl, fr };
+});
 
-export const translations: Record<Lang, Dict> = {
-  pt: {
-    welcome: "Bem-vindo",
-    roleLabel: "Perfil",
-    homeInfo: "Esta é a tela inicial. Explore os produtos disponíveis no mercado.",
-    products: "Ver Produtos",
-    profile: "Meu Perfil",
-    messages: "Mensagens",
-    notifications: "Notificações",
-    marketPrices: "Preços de Mercado",
-    weather: "Clima e Alertas",
-    transport: "Transporte",
-    cooperatives: "Cooperativas",
-    verification: "Verificação de identidade",
-    verifications: "Verificações",
-    dashboard: "Dashboard e relatórios",
-    admin: "Painel do Admin",
-    language: "Idioma",
-    chooseLanguage: "Escolha o idioma",
-    logout: "Sair",
+let current: Lang = "pt";
 
-    productsTitle: "Produtos",
-    searchProduct: "Buscar produto...",
-    loadError: "Não foi possível carregar os produtos.",
-    addProduct: "+ Cadastrar Produto",
-    noProducts: "Nenhum produto encontrado.",
-    reviews: "Ver avaliações",
-    contactSeller: "Falar com vendedor",
-    seller: "Vendedor",
-    cat_AGRICOLA: "Agrícola",
-    cat_PESCA: "Pesca",
-    cat_ARTESANATO: "Artesanato",
-    cat_OUTRO: "Outro",
+export function setCurrentLang(lang: Lang) {
+  current = lang;
+}
 
-    report: "Denunciar",
-    reportProduct: "Denunciar produto",
-    reportWhy: "Qual o motivo?",
-    reportDetails: "Detalhes (opcional)",
-    reportPlaceholder: "Conte o que aconteceu",
-    reportSend: "Enviar denúncia",
-    reportChoose: "Escolha um motivo.",
-    reportThanks: "Obrigado",
-    reportSent: "Sua denúncia foi enviada e será analisada pela equipe.",
-    reportError: "Não foi possível enviar a denúncia.",
-    error: "Erro",
-    cancel: "Cancelar",
-    reasonFraud: "Golpe ou fraude",
-    reasonFake: "Produto falso ou enganoso",
-    reasonPrice: "Preço abusivo",
-    reasonContent: "Conteúdo impróprio",
-    reasonOther: "Outro motivo",
+function lookup(s: string): string | null {
+  const e = MAP[s.trim().toLowerCase()];
+  if (!e) return null;
+  return current === "crl" ? e.crl : current === "fr" ? e.fr : null;
+}
 
-    chatPlaceholder: "Escreva uma mensagem...",
-    send: "Enviar",
-    noMessages: "Nenhuma mensagem ainda.",
-    sendError: "Não foi possível enviar a mensagem.",
-    noConversations: "Nenhuma conversa ainda",
-    conversationsError: "Não foi possível carregar as conversas.",
-    defaultUser: "Usuário",
+const KEEP = /[A-Za-zÀ-ÿ0-9]/;
 
-    verifIntro: "Contas verificadas passam mais confiança para compradores e vendedores.",
-    docType: "Tipo de documento",
-    doc_BI: "Bilhete de Identidade",
-    doc_PASSAPORTE: "Passaporte",
-    doc_ELEITOR: "Cartão de eleitor",
-    doc_CARTA: "Carta de condução",
-    doc_OUTRO: "Outro",
-    docNote: "Observação (opcional)",
-    docNotePlaceholder: "Ex.: número do documento",
-    submitRequest: "Enviar pedido",
-    chooseDoc: "Escolha o tipo de documento.",
-    verifiedTitle: "Conta verificada",
-    verifiedInfo: "Sua identidade já foi verificada pela equipe.",
-    sentTitle: "Pedido enviado",
-    sentInfo: "Sua solicitação foi enviada. A equipe vai analisar e você receberá o resultado. Saia e entre de novo no app depois da aprovação para ver o selo de verificado.",
+export function tr(s: any): any {
+  if (typeof s !== "string" || current === "pt" || s.trim() === "") return s;
 
-    filterAll: "Todas",
-    status_PENDENTE: "Pendente",
-    status_APROVADO: "Aprovado",
-    status_REJEITADO: "Rejeitado",
-    documentLabel: "Documento",
-    noteLabel: "Obs.",
-    phoneLabel: "Telefone",
-    approve: "Aprovar",
-    reject: "Rejeitar",
-    noRequests: "Nenhum pedido encontrado.",
-    approveTitle: "Aprovar verificação",
-    rejectTitle: "Rejeitar verificação",
+  // 1. Texto completo
+  const full = lookup(s);
+  if (full) return full;
 
-    dashTitle: "Dashboard",
-    dashUsers: "Usuários",
-    dashProducts: "Produtos",
-    dashTransactions: "Transações",
-    usersByRole: "Usuários por perfil",
-    productsByCategory: "Produtos por categoria",
-    productsByLocation: "Produtos por local",
-    newUsersByMonth: "Novos usuários por mês",
-    noData: "Sem dados ainda.",
-    noDataShort: "Sem dados.",
-    noCategory: "Sem categoria",
-    noLocation: "Sem local",
-    dashLoadError: "Não foi possível carregar o dashboard.",
+  // 2. Sem símbolos/emojis no início e sem pontuação no fim
+  let a = 0;
+  while (a < s.length && !KEEP.test(s[a])) a++;
+  let b = s.length;
+  while (b > a && /[\s:.!?…,]/.test(s[b - 1])) b--;
+  const core = s.slice(a, b);
+  if (core) {
+    const t = lookup(core);
+    if (t) return s.slice(0, a) + t + s.slice(b);
+  }
 
-    addProductTitle: "Cadastrar Produto",
-    reviewsTitle: "Avaliações",
-    reportsTitle: "Denúncias",
-  },
-  crl: {
-    welcome: "Bon bindu",
-    roleLabel: "Perfil",
-    homeInfo: "Esta é tela inicial. Odja produtus ki ta bai na mérkadu.",
-    products: "Odja Produtus",
-    profile: "Meu Perfil",
-    messages: "Mensajens",
-    notifications: "Notifikasons",
-    marketPrices: "Presu di Mérkadu",
-    weather: "Tempu i Alertas",
-    transport: "Transporti",
-    cooperatives: "Kooperativas",
-    verification: "Verifikason di identidadi",
-    verifications: "Verifikasons",
-    dashboard: "Painel di dadus",
-    admin: "Painel di Admin",
-    language: "Lingua",
-    chooseLanguage: "Skodja lingua",
-    logout: "Sai",
+  // 3. "Rótulo: valor" e "Olá, Nome"
+  for (const sep of [": ", ", "]) {
+    const i = s.indexOf(sep);
+    if (i > 0) {
+      const left = s.slice(0, i);
+      const right = s.slice(i + sep.length);
+      const tl = lookup(left);
+      if (tl) {
+        const trr = lookup(right);
+        return tl + sep + (trr ?? right);
+      }
+    }
+  }
+  return s;
+}
 
-    productsTitle: "Produtus",
-    searchProduct: "Buska produtu...",
-    loadError: "Ka konsigi karga produtus.",
-    addProduct: "+ Rejista Produtu",
-    noProducts: "Ka ten produtu.",
-    reviews: "Odja avaliasons",
-    contactSeller: "Papia ku vendedor",
-    seller: "Vendedor",
-    cat_AGRICOLA: "Agrikultura",
-    cat_PESCA: "Pesca",
-    cat_ARTESANATO: "Artizanatu",
-    cat_OUTRO: "Otru",
+function mapChildren(ch: any): any {
+  if (typeof ch === "string") return tr(ch);
+  if (Array.isArray(ch)) return ch.map(mapChildren);
+  return ch;
+}
 
-    report: "Denunsia",
-    reportProduct: "Denunsia produtu",
-    reportWhy: "Kal ki é motivu?",
-    reportDetails: "Detalhi (opsional)",
-    reportPlaceholder: "Konta ki ki pasa",
-    reportSend: "Manda denúnsia",
-    reportChoose: "Skodja un motivu.",
-    reportThanks: "Obrigadu",
-    reportSent: "Bu denúnsia manda i ekipa ta analiza-l.",
-    reportError: "Ka konsigi manda denúnsia.",
-    error: "Erru",
-    cancel: "Kansela",
-    reasonFraud: "Golpi ou fraudi",
-    reasonFake: "Produtu falsu ou ngananti",
-    reasonPrice: "Presu abusivu",
-    reasonContent: "Konteúdu inapropriadu",
-    reasonOther: "Otru motivu",
+function patchRender(Comp: any, fn: (props: any) => any) {
+  try {
+    if (!Comp || typeof Comp.render !== "function" || Comp.__nodjuntaPatched) return;
+    const orig = Comp.render;
+    Comp.render = function (props: any, ref: any) {
+      let next = props;
+      try {
+        if (current !== "pt") next = fn(props);
+      } catch (e) {
+        next = props;
+      }
+      return orig.call(this, next, ref);
+    };
+    Comp.__nodjuntaPatched = true;
+  } catch (e) {
+    // se o componente não puder ser alterado, a app continua normal
+  }
+}
 
-    chatPlaceholder: "Skrebi un mensaji...",
-    send: "Manda",
-    noMessages: "Ainda ka ten mensaji.",
-    sendError: "Ka konsigi manda mensaji.",
-    noConversations: "Ainda ka ten konbersa",
-    conversationsError: "Ka konsigi karga konbersas.",
-    defaultUser: "Usuáriu",
+let installed = false;
 
-    verifIntro: "Kontas verifikadu ta da mas konfiansa pa kompradoris i vendedoris.",
-    docType: "Tipu di dokumentu",
-    doc_BI: "Bilhete di Identidadi",
-    doc_PASSAPORTE: "Pasaporti",
-    doc_ELEITOR: "Kartau di eleitor",
-    doc_CARTA: "Karta di kondusaun",
-    doc_OUTRO: "Otru",
-    docNote: "Obsevason (opsional)",
-    docNotePlaceholder: "Ex.: númeru di dokumentu",
-    submitRequest: "Manda pedidu",
-    chooseDoc: "Skodja tipu di dokumentu.",
-    verifiedTitle: "Konta verifikadu",
-    verifiedInfo: "Bu identidadi ja foi verifikadu pa ekipa.",
-    sentTitle: "Pedidu mandadu",
-    sentInfo: "Bu pedidu foi mandadu. Ekipa ta analiza i bu ta risibi rizultadu. Sai i entra di nobu na app dipus di aprovason pa odja selu di verifikadu.",
+export function installAutoTranslate() {
+  if (installed) return;
+  installed = true;
 
-    filterAll: "Tudu",
-    status_PENDENTE: "Pendenti",
-    status_APROVADO: "Aprovadu",
-    status_REJEITADO: "Rijeitadu",
-    documentLabel: "Dokumentu",
-    noteLabel: "Obs.",
-    phoneLabel: "Telefoni",
-    approve: "Aprova",
-    reject: "Rijeita",
-    noRequests: "Ka ten pedidu.",
-    approveTitle: "Aprova verifikason",
-    rejectTitle: "Rijeita verifikason",
+  patchRender(Text, (p) => (p && p.children !== undefined ? { ...p, children: mapChildren(p.children) } : p));
 
-    dashTitle: "Painel di dadus",
-    dashUsers: "Usuárius",
-    dashProducts: "Produtus",
-    dashTransactions: "Transasons",
-    usersByRole: "Usuárius pur perfil",
-    productsByCategory: "Produtus pur kategoria",
-    productsByLocation: "Produtus pur lokal",
-    newUsersByMonth: "Novu usuárius pur mês",
-    noData: "Ainda ka ten dadus.",
-    noDataShort: "Ka ten dadus.",
-    noCategory: "Sin kategoria",
-    noLocation: "Sin lokal",
-    dashLoadError: "Ka konsigi karga painel di dadus.",
+  patchRender(TextInput, (p) =>
+    p && typeof p.placeholder === "string" ? { ...p, placeholder: tr(p.placeholder) } : p
+  );
 
-    addProductTitle: "Rejista Produtu",
-    reviewsTitle: "Avaliasons",
-    reportsTitle: "Denúnsias",
-  },
-  fr: {
-    welcome: "Bienvenue",
-    roleLabel: "Profil",
-    homeInfo: "Ceci est l'écran d'accueil. Explorez les produits disponibles sur le marché.",
-    products: "Voir les produits",
-    profile: "Mon profil",
-    messages: "Messages",
-    notifications: "Notifications",
-    marketPrices: "Prix du marché",
-    weather: "Météo et alertes",
-    transport: "Transport",
-    cooperatives: "Coopératives",
-    verification: "Vérification d'identité",
-    verifications: "Vérifications",
-    dashboard: "Tableau de bord",
-    admin: "Panneau admin",
-    language: "Langue",
-    chooseLanguage: "Choisissez la langue",
-    logout: "Déconnexion",
+  try {
+    const origAlert = Alert.alert;
+    (Alert as any).alert = (title: any, message?: any, buttons?: any[], options?: any) =>
+      origAlert.call(
+        Alert,
+        tr(title),
+        tr(message),
+        Array.isArray(buttons)
+          ? buttons.map((b) => (b && typeof b.text === "string" ? { ...b, text: tr(b.text) } : b))
+          : buttons,
+        options
+      );
+  } catch (e) {
+    // ignora
+  }
+}
 
-    productsTitle: "Produits",
-    searchProduct: "Rechercher un produit...",
-    loadError: "Impossible de charger les produits.",
-    addProduct: "+ Ajouter un produit",
-    noProducts: "Aucun produit trouvé.",
-    reviews: "Voir les avis",
-    contactSeller: "Contacter le vendeur",
-    seller: "Vendeur",
-    cat_AGRICOLA: "Agricole",
-    cat_PESCA: "Pêche",
-    cat_ARTESANATO: "Artisanat",
-    cat_OUTRO: "Autre",
-
-    report: "Signaler",
-    reportProduct: "Signaler le produit",
-    reportWhy: "Quel est le motif ?",
-    reportDetails: "Détails (facultatif)",
-    reportPlaceholder: "Racontez ce qui s'est passé",
-    reportSend: "Envoyer le signalement",
-    reportChoose: "Choisissez un motif.",
-    reportThanks: "Merci",
-    reportSent: "Votre signalement a été envoyé et sera examiné par l'équipe.",
-    reportError: "Impossible d'envoyer le signalement.",
-    error: "Erreur",
-    cancel: "Annuler",
-    reasonFraud: "Arnaque ou fraude",
-    reasonFake: "Produit faux ou trompeur",
-    reasonPrice: "Prix abusif",
-    reasonContent: "Contenu inapproprié",
-    reasonOther: "Autre motif",
-
-    chatPlaceholder: "Écrivez un message...",
-    send: "Envoyer",
-    noMessages: "Aucun message pour le moment.",
-    sendError: "Impossible d'envoyer le message.",
-    noConversations: "Aucune conversation pour le moment",
-    conversationsError: "Impossible de charger les conversations.",
-    defaultUser: "Utilisateur",
-
-    verifIntro: "Les comptes vérifiés inspirent plus de confiance aux acheteurs et aux vendeurs.",
-    docType: "Type de document",
-    doc_BI: "Carte d'identité",
-    doc_PASSAPORTE: "Passeport",
-    doc_ELEITOR: "Carte d'électeur",
-    doc_CARTA: "Permis de conduire",
-    doc_OUTRO: "Autre",
-    docNote: "Remarque (facultatif)",
-    docNotePlaceholder: "Ex. : numéro du document",
-    submitRequest: "Envoyer la demande",
-    chooseDoc: "Choisissez le type de document.",
-    verifiedTitle: "Compte vérifié",
-    verifiedInfo: "Votre identité a déjà été vérifiée par l'équipe.",
-    sentTitle: "Demande envoyée",
-    sentInfo: "Votre demande a été envoyée. L'équipe va l'examiner et vous recevrez le résultat. Après l'approbation, déconnectez-vous puis reconnectez-vous pour voir le badge de vérification.",
-
-    filterAll: "Toutes",
-    status_PENDENTE: "En attente",
-    status_APROVADO: "Approuvée",
-    status_REJEITADO: "Rejetée",
-    documentLabel: "Document",
-    noteLabel: "Remarque",
-    phoneLabel: "Téléphone",
-    approve: "Approuver",
-    reject: "Rejeter",
-    noRequests: "Aucune demande trouvée.",
-    approveTitle: "Approuver la vérification",
-    rejectTitle: "Rejeter la vérification",
-
-    dashTitle: "Tableau de bord",
-    dashUsers: "Utilisateurs",
-    dashProducts: "Produits",
-    dashTransactions: "Transactions",
-    usersByRole: "Utilisateurs par profil",
-    productsByCategory: "Produits par catégorie",
-    productsByLocation: "Produits par lieu",
-    newUsersByMonth: "Nouveaux utilisateurs par mois",
-    noData: "Pas encore de données.",
-    noDataShort: "Pas de données.",
-    noCategory: "Sans catégorie",
-    noLocation: "Sans lieu",
-    dashLoadError: "Impossible de charger le tableau de bord.",
-
-    addProductTitle: "Ajouter un produit",
-    reviewsTitle: "Avis",
-    reportsTitle: "Signalements",
-  },
-};
+installAutoTranslate();
