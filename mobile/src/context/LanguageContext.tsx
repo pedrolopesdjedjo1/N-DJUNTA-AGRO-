@@ -59,8 +59,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {/* A chave faz a app redesenhar todos os ecrãs quando o idioma muda */}
-      <React.Fragment key={language}>{children}</React.Fragment>
+      {children}
     </LanguageContext.Provider>
   );
 }
