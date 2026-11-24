@@ -11,6 +11,14 @@ import { setCurrentLang } from "../i18n/autoTranslate";
 
 const STORAGE_KEY = "@nodjuntaagro:language";
 
+// Aceita também outros nomes usados na app para o mesmo idioma
+function normalize(code: any): Lang {
+  const c = String(code ?? "").toLowerCase();
+  if (c === "fr") return "fr";
+  if (c === "crl" || c === "kr" || c === "kriol" || c === "cv") return "crl";
+  return "pt";
+}
+
 type LanguageContextValue = {
   language: Lang;
   setLanguage: (lang: Lang) => Promise<void>;
@@ -30,9 +38,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved === "pt" || saved === "fr" || saved === "crl") {
-          setCurrentLang(saved);
-          setLanguageState(saved);
+        if (saved) {
+          const lang = normalize(saved);
+          setCurrentLang(lang);
+          setLanguageState(lang);
         }
       } catch (e) {
         console.log("Erro ao ler idioma", e);
@@ -40,7 +49,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const setLanguage = useCallback(async (lang: Lang) => {
+  const setLanguage = useCallback(async (code: Lang) => {
+    const lang = normalize(code);
     setCurrentLang(lang);
     setLanguageState(lang);
     try {
@@ -52,7 +62,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const t = useCallback(
     (key: string) => {
-      return translations[language][key] ?? translations.pt[key] ?? key;
+      const all: any = translations;
+      const dict = (all && all[language]) || (all && all.pt) || {};
+      const pt = (all && all.pt) || {};
+      return dict[key] ?? pt[key] ?? key;
     },
     [language]
   );
