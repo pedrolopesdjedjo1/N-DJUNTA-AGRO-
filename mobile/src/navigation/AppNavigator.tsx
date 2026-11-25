@@ -3,6 +3,8 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
+import { tr } from "../i18n/autoTranslate";
 import { AparenciaProvider } from "../context/AparenciaContext";
 import { colors } from "../theme/colors";
 
@@ -400,9 +402,178 @@ const PALAVRAS: Record<string, string> = {
   Assist: "Ajuda ao cliente", Needs2: "Necessidades", Public2: "Público",
 };
 
-function titulo(nome: string): string {
+// Tradução dos títulos: texto em português -> [Kriol, Français]
+// Para traduzir mais títulos, acrescente linhas nesta lista.
+const TRAD: Record<string, [string, string]> = {
+  "Agricultor": ["Agrikultor", "Agriculteur"],
+  "Pescador": ["Piskador", "Pêcheur"],
+  "Cliente": ["Klienti", "Client"],
+  "Clientes": ["Klientis", "Clients"],
+  "Comerciante": ["Komersianti", "Commerçant"],
+  "Artesão": ["Artizon", "Artisan"],
+  "Governo": ["Guvernu", "Gouvernement"],
+  "ONG": ["ONG", "ONG"],
+  "Transportador": ["Transportador", "Transporteur"],
+  "Admin": ["Admin", "Admin"],
+  "Agente": ["Ajenti", "Agent"],
+  "Preços": ["Presus", "Prix"],
+  "Preço": ["Presu", "Prix"],
+  "Pedidos": ["Pedidus", "Commandes"],
+  "Pedido": ["Pedidu", "Commande"],
+  "Produtos": ["Produtus", "Produits"],
+  "Produto": ["Produtu", "Produit"],
+  "Perfil": ["Perfil", "Profil"],
+  "Início": ["Inísiu", "Accueil"],
+  "Vender": ["Bende", "Vendre"],
+  "Clima": ["Klima", "Météo"],
+  "Ajuda": ["Ajuda", "Aide"],
+  "Suporte": ["Sopórti", "Assistance"],
+  "Configurações": ["Konfigurasons", "Paramètres"],
+  "Denúncias": ["Denúnsias", "Signalements"],
+  "Relatório": ["Relatóriu", "Rapport"],
+  "Avaliações": ["Avaliasons", "Avis"],
+  "Avaliação": ["Avaliason", "Évaluation"],
+  "Carrinho": ["Karinhu", "Panier"],
+  "Explorar": ["Splora", "Explorer"],
+  "Favoritos": ["Favoritus", "Favoris"],
+  "Pagamentos": ["Pagamentus", "Paiements"],
+  "Pagamento": ["Pagamentu", "Paiement"],
+  "Verificação": ["Verifikason", "Vérification"],
+  "Verificações": ["Verifikasons", "Vérifications"],
+  "Cooperativas": ["Kooperativas", "Coopératives"],
+  "Cooperativa": ["Kooperativa", "Coopérative"],
+  "Projetos": ["Projetus", "Projets"],
+  "Projeto": ["Projetu", "Projet"],
+  "Comunidades": ["Komunidadis", "Communautés"],
+  "Comunidade": ["Komunidadi", "Communauté"],
+  "Oportunidades": ["Oportunidadis", "Opportunités"],
+  "Oportunidade": ["Oportunidadi", "Opportunité"],
+  "Mapa": ["Mapa", "Carte"],
+  "Formulário": ["Formuláriu", "Formulaire"],
+  "Ganhos": ["Gañus", "Gains"],
+  "Entregas": ["Entregas", "Livraisons"],
+  "Entrega": ["Entrega", "Livraison"],
+  "Veículo": ["Veíkulu", "Véhicule"],
+  "Ferramentas": ["Ferramentas", "Outils"],
+  "Formação": ["Formason", "Formation"],
+  "Formações": ["Formasons", "Formations"],
+  "Parceiros": ["Parseirus", "Partenaires"],
+  "Parceiro": ["Parseiru", "Partenaire"],
+  "Necessidades": ["Nesesidadis", "Besoins"],
+  "Necessidade": ["Nesesidadi", "Besoin"],
+  "Financiamento": ["Finansiamentu", "Financement"],
+  "Alertas": ["Alertas", "Alertes"],
+  "Alerta": ["Alerta", "Alerte"],
+  "Programas": ["Programas", "Programmes"],
+  "Programa": ["Programa", "Programme"],
+  "Serviços": ["Servisus", "Services"],
+  "Serviço": ["Servisu", "Service"],
+  "Locais": ["Lokais", "Lieux"],
+  "Local": ["Lokal", "Lieu"],
+  "Dados": ["Dadus", "Données"],
+  "Equipa": ["Ekipa", "Équipe"],
+  "Utilizadores": ["Utilizadoris", "Utilisateurs"],
+  "Utilizador": ["Utilizador", "Utilisateur"],
+  "Segurança": ["Seguransa", "Sécurité"],
+  "Sistema": ["Sistema", "Système"],
+  "Financeiro": ["Finanseiru", "Financier"],
+  "Mercado": ["Mérkadu", "Marché"],
+  "Vendas": ["Bendas", "Ventes"],
+  "Promoções": ["Promosons", "Promotions"],
+  "Materiais": ["Materiais", "Matériaux"],
+  "Capturas": ["Kapturas", "Captures"],
+  "Mar": ["Mar", "Mer"],
+  "SOS": ["SOS", "SOS"],
+  "Equipamentos": ["Ekipamentus", "Équipements"],
+  "Conservação": ["Konservason", "Conservation"],
+  "Recursos": ["Rikursus", "Ressources"],
+  "Produção": ["Produson", "Production"],
+  "Tarefas": ["Tarefas", "Tâches"],
+  "Tarefa": ["Tarefa", "Tâche"],
+  "Casos": ["Kazus", "Cas"],
+  "Caso": ["Kazu", "Cas"],
+  "Sessões": ["Sesons", "Sessions"],
+  "Comissões": ["Komisons", "Commissions"],
+  "Atividade": ["Atividadi", "Activité"],
+  "Produtores": ["Produtoris", "Producteurs"],
+  "Transporte": ["Transporti", "Transport"],
+  "Contactos": ["Kontaktus", "Contacts"],
+  "Despesas": ["Dispezas", "Dépenses"],
+  "Cargas": ["Kargas", "Chargements"],
+  "Rotas": ["Rotas", "Itinéraires"],
+  "Rota": ["Rota", "Itinéraire"],
+  "Plano": ["Planu", "Plan"],
+  "Emergência": ["Emerjénsia", "Urgence"],
+  "Incidente": ["Insidenti", "Incident"],
+  "Incidentes": ["Insidentis", "Incidents"],
+  "Conteúdo": ["Konteúdu", "Contenu"],
+  "Eventos": ["Eventus", "Événements"],
+  "Evento": ["Eventu", "Événement"],
+  "Disputas": ["Disputas", "Litiges"],
+  "Disputa": ["Disputa", "Litige"],
+  "Reembolsos": ["Rimbolsus", "Remboursements"],
+  "Reembolso": ["Rimbolsu", "Remboursement"],
+  "Banners": ["Banners", "Bannières"],
+  "Avisos": ["Avizus", "Avis"],
+  "Estatísticas": ["Estatístikas", "Statistiques"],
+  "Auditoria": ["Auditoria", "Audit"],
+  "Qualidade": ["Kualidadi", "Qualité"],
+  "Categorias": ["Kategorias", "Catégories"],
+  "Destaques": ["Distakis", "À la une"],
+  "Reclamações": ["Reklamasons", "Réclamations"],
+  "Pedidos de ajuda": ["Pedidus di ajuda", "Demandes d'aide"],
+  "Pedido de ajuda": ["Pedidu di ajuda", "Demande d'aide"],
+  "Transações": ["Transasons", "Transactions"],
+  "Pagamentos a enviar": ["Pagamentus pa manda", "Paiements à envoyer"],
+  "Organizações": ["Organizasons", "Organisations"],
+  "Organização": ["Organizason", "Organisation"],
+  "Público": ["Públiku", "Public"],
+  "Publicações": ["Publikasons", "Publications"],
+  "Publicação": ["Publikason", "Publication"],
+  "Beneficiários": ["Benefisiárius", "Bénéficiaires"],
+  "Beneficiário": ["Benefisiáriu", "Bénéficiaire"],
+  "Monitoramento": ["Monitoramentu", "Suivi"],
+  "Certificado": ["Sertifikadu", "Certificat"],
+  "Candidatos": ["Kandidatus", "Candidats"],
+  "Descobrir": ["Diskubri", "Découvrir"],
+  "Os meus": ["Meus", "Mes"],
+  "Adicionar": ["Adisiona", "Ajouter"],
+  "Criar": ["Kria", "Créer"],
+  "Editar": ["Edita", "Modifier"],
+  "Vendedor": ["Vendedor", "Vendeur"],
+  "Recibo": ["Resibu", "Reçu"],
+  "Encomenda": ["Enkomenda", "Commande"],
+  "Moradas": ["Moradas", "Adresses"],
+  "Métodos": ["Métodus", "Méthodes"],
+  "Área": ["Área", "Espace"],
+  "Instituições": ["Instituisons", "Institutions"],
+  "Comunicação": ["Komunikason", "Communication"],
+  "Rastreio": ["Rastreiu", "Suivi"],
+  "Reputação": ["Reputason", "Réputation"],
+  "Combinar": ["Kombina", "Combiner"],
+  "Sugerir": ["Sujeri", "Suggérer"],
+  "Histórico": ["Istóriku", "Historique"],
+  "Negócio": ["Negósiu", "Entreprise"],
+  "Convidar": ["Konvida", "Inviter"],
+  "Ajuda ao cliente": ["Ajuda ba klienti", "Aide au client"],
+  "Cadastrar Produto": ["Rejista Produtu", "Enregistrer un produit"],
+  "Busca avançada": ["Buska avansadu", "Recherche avancée"],
+  "Calculadora": ["Kalkuladora", "Calculatrice"],
+  "Aparência": ["Aparénsia", "Apparence"],
+  "Denunciar": ["Denunsia", "Signaler"],
+  "As minhas denúncias": ["Meus denúnsias", "Mes signalements"],
+};
+
+function traduz(texto: string, lang: string): string {
+  if (lang === "pt") return texto;
+  const e = TRAD[texto];
+  if (!e) return texto;
+  return lang === "crl" ? e[0] : e[1];
+}
+
+function titulo(nome: string, lang: string): string {
   const partes = nome.match(/[A-Z][a-z0-9]*/g) ?? [nome];
-  return partes.map((p) => PALAVRAS[p] ?? p).join(" ");
+  return partes.map((p) => traduz(PALAVRAS[p] ?? p, lang)).join(" ");
 }
 // Estas telas têm o seu próprio menu/cabeçalho, por isso não mostram o cabeçalho do sistema
 const SEM_CABECALHO = new Set<string>([
@@ -890,6 +1061,7 @@ const TELAS: Array<[string, React.ComponentType<any>]> = [
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  const { language } = useLanguage();
 
   if (loading) {
     return (
@@ -916,9 +1088,9 @@ export default function AppNavigator() {
                     headerShown: !SEM_CABECALHO.has(nome),
                     title:
                       route.params?.userName ||
-                      route.params?.title ||
-                      TITULOS[nome] ||
-                      titulo(nome),
+                      tr(route.params?.title) ||
+                      (TITULOS[nome] ? traduz(TITULOS[nome], language) : "") ||
+                      titulo(nome, language),
                   })}
                 />
               ))}
