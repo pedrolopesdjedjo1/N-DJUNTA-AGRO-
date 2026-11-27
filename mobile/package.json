@@ -28,7 +28,8 @@
     "babel-preset-expo": "~57.0.13"
   },
   "overrides": {
-    "tar": "^7.4.3"
+    "tar": "^7.4.3",
+    "shell-quote": "1.8.3"
   },
   "private": true
 }
