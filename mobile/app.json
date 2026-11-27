@@ -7,10 +7,15 @@
     "userInterfaceStyle": "light",
     "backgroundColor": "#FBF6EA",
     "assetBundlePatterns": ["**/*"],
-    "splash": {
-      "backgroundColor": "#1B7F3B",
-      "resizeMode": "contain"
-    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1B7F3B",
+          "resizeMode": "contain"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "gw.nodjunta.agro"
