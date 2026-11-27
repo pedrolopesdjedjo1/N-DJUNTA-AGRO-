@@ -51,6 +51,7 @@ const WORDS: [string, string, string][] = [
   ["Mercado", "Mérkadu", "Marché"],
   ["Entrega", "Entrega", "Livraison"],
   ["Meu perfil", "Meu perfil", "Mon profil"],
+  ["Pesquisar", "Buska", "Rechercher"],
 
   // Início do cliente
   ["Bom dia", "Bon dia", "Bonjour"],
@@ -65,6 +66,18 @@ const WORDS: [string, string, string][] = [
   ["Comércio", "Komérsiu", "Commerce"],
   ["Produtos em destaque", "Produtus na distake", "Produits en vedette"],
   ["Juntos, fazemos acontecer.", "Djuntu, no ta fasi ta akontesi.", "Ensemble, faisons que ça arrive."],
+
+  // Cliente: ecrã inicial
+  ["Definir a minha localização", "Defini meu lokalizason", "Définir ma position"],
+  ["Pesquisar produtos (ex: arroz, peixe, cesto)", "Buska produtus (ex: aros, pexi, kanastu)", "Rechercher des produits (ex : riz, poisson, panier)"],
+  ["Ainda não há produtos disponíveis. Volte daqui a pouco.", "Inda ka ten produtus disponível. Torna dipus di un pokinhu.", "Pas encore de produits disponibles. Revenez dans un instant."],
+  ["Promoções", "Promosons", "Promotions"],
+  ["Produtos próximos", "Produtus pertu", "Produits à proximité"],
+  ["Defina a sua localização para ver produtos perto de si.", "Defini bu lokalizason pa odja produtus pertu di bo.", "Définissez votre position pour voir les produits près de vous."],
+  ["Definir localização", "Defini lokalizason", "Définir la position"],
+  ["Novos produtos", "Produtus novu", "Nouveaux produits"],
+  ["Recomendado para si", "Rekomendadu pa bo", "Recommandé pour vous"],
+  ["Sugestões", "Sujestons", "Suggestions"],
 
   // Categorias
   ["Alimentação", "Alimentason", "Alimentation"],
@@ -425,6 +438,12 @@ const WORDS: [string, string, string][] = [
   ["NÔDJUNTA AGRO — Juntos pelo desenvolvimento de todos!", "NÔDJUNTA AGRO — Djuntu pa desenvolvimentu di tudu!", "NÔDJUNTA AGRO — Ensemble pour le développement de tous !"],
 ];
 
+// Textos com uma parte fixa no início e um valor que muda (ex.: nome da região)
+// [início em Português, início em Kriol, início em Français]
+const PREFIXES: [string, string, string][] = [
+  ["Entregas em ", "Entregas na ", "Livraisons à "],
+];
+
 type Entry = { crl: string; fr: string };
 const MAP: Record<string, Entry> = {};
 WORDS.forEach(([pt, crl, fr]) => {
@@ -493,6 +512,14 @@ export function tr(s: any): any {
         const trr = lookup(right);
         return tl + sep + (trr ?? right);
       }
+    }
+  }
+
+  // 4. Início fixo + valor variável (ex.: "Entregas em Bissau")
+  const lower = s.toLowerCase();
+  for (const [p, k, f] of PREFIXES) {
+    if (lower.startsWith(p.toLowerCase())) {
+      return (current === "crl" ? k : f) + s.slice(p.length);
     }
   }
 
