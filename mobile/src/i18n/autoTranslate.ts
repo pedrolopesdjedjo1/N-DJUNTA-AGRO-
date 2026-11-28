@@ -236,6 +236,15 @@ const WORDS: [string, string, string][] = [
   ["Restam apenas", "Ta resta so", "Il ne reste que"],
   ["notificação(ões) por ler", "notifikason(s) pa lê", "notification(s) non lue(s)"],
 
+  // Pescador: ecrã inicial
+  ["SOS: emergência no mar", "SOS: emerjénsia na mar", "SOS : urgence en mer"],
+  ["Pescas de hoje", "Peskas di ozi", "Pêches du jour"],
+  ["Capturado hoje", "Kapturadu ozi", "Capturé aujourd'hui"],
+  ["Quantidade hoje", "Kuantidadi di ozi", "Quantité aujourd'hui"],
+  ["Peso na semana", "Pezu na simana", "Poids de la semaine"],
+  ["Pesquisar e explorar", "Buska i splora", "Rechercher et explorer"],
+  ["pedido(s) novo(s) à espera há mais de 1 dia","pedidu(s) novu(s) ta speradu di mas di 1 dia", "commande(s) nouvelle(s) en attente depuis plus d'1 jour"],
+
   // Pescador
   ["A equipa está a tratar do seu pedido. Mantenha o telefone ligado.", "Ekipa sta trata di bu pedidu. Mantem telefoni li ligadu.", "L'équipe s'occupe de votre demande. Gardez le téléphone allumé."],
   ["A equipa foi avisada. Fique calmo e mantenha o telefone ligado.", "Ekipa foi avizadu. Fika kalmu i mantem telefoni ligadu.", "L'équipe a été prévenue. Restez calme et gardez le téléphone allumé."],
