@@ -243,6 +243,117 @@ const WORDS: [string, string, string][] = [
   ["Quantidade hoje", "Kuantidadi di ozi", "Quantité aujourd'hui"],
   ["Peso na semana", "Pezu na simana", "Poids de la semaine"],
   ["Pesquisar e explorar", "Buska i splora", "Rechercher et explorer"],
+
+  // ONG: ecrã inicial
+  ["A minha organização", "Meu organizason", "Mon organisation"],
+  ["Criar projeto", "Kria projetu", "Créer un projet"],
+  ["Projetos ativos", "Projetus ativu", "Projets actifs"],
+  ["Comunidades apoiadas", "Komunidadis apoiadu", "Communautés soutenues"],
+  ["Beneficiários", "Benefisiárius", "Bénéficiaires"],
+  ["Oportunidades abertas", "Oportunidadis abertu", "Opportunités ouvertes"],
+  ["Novos pedidos de apoio", "Pedidus novu di apoiu", "Nouvelles demandes de soutien"],
+  ["pedido(s) de apoio aberto(s) a todas as organizações", "pedidu(s) di apoiu abertu pa tudu organizasons", "demande(s) de soutien ouverte(s) à toutes les organisations"],
+  ["Ver pedidos", "Odja pedidus", "Voir les demandes"],
+  ["Últimas atualizações de projetos", "Últimas atualizasons di projetus", "Dernières mises à jour des projets"],
+  ["Ainda não publicou atualizações.", "Bu inda ka publika atualizasons.", "Vous n'avez pas encore publié de mises à jour."],
+  ["Abrir projeto", "Abri projetu", "Ouvrir le projet"],
+  ["Meus projetos", "Meus projetus", "Mes projets"],
+  ["Apoio às comunidades", "Apoiu pa komunidadis", "Soutien aux communautés"],
+  ["Projetos agrícolas", "Projetus agrikola", "Projets agricoles"],
+  ["Projetos de pesca", "Projetus di peska", "Projets de pêche"],
+  ["Artesanato e empreendedorismo", "Artizanatu i empreendedorismu", "Artisanat et entrepreneuriat"],
+  ["Oportunidades", "Oportunidadis", "Opportunités"],
+  ["Financiamento", "Finansiamentu", "Financement"],
+  ["Monitoramento e resultados", "Monitorizason i rizultadus", "Suivi et résultats"],
+  ["Parceiros", "Parseirus", "Partenaires"],
+  ["Formação", "Formason", "Formation"],
+  ["Publicações", "Publikasons", "Publications"],
+  ["Perfil da ONG", "Perfil di ONG", "Profil de l'ONG"],
+  ["Verificação da organização", "Verifikason di organizason", "Vérification de l'organisation"],
+
+  // Governo: ecrã inicial
+  ["A minha instituição", "Meu instituison", "Mon institution"],
+  ["Instituição verificada ✅", "Instituison verifikadu ✅", "Institution vérifiée ✅"],
+  ["Criar programa", "Kria programa", "Créer un programme"],
+  ["Criar alerta", "Kria alerta", "Créer une alerte"],
+  ["Programas ativos", "Programas ativu", "Programmes actifs"],
+  ["Novos pedidos dos cidadãos", "Pedidus novu di sidadons", "Nouvelles demandes des citoyens"],
+  ["Agricultores no app", "Agrikultoris na app", "Agriculteurs dans l'app"],
+  ["Pescadores no app", "Piskadoris na app", "Pêcheurs dans l'app"],
+  ["Produtos à venda", "Produtus na venda", "Produits en vente"],
+  ["Vendas concluídas (30 dias)", "Bendas konkluídu (30 dias)", "Ventes terminées (30 jours)"],
+  ["Projetos públicos", "Projetus públiku", "Projets publics"],
+  ["Alertas oficiais ativos", "Alertas ofisial ativu", "Alertes officielles actives"],
+  ["Resumo dos programas", "Rezumu di programas", "Résumé des programmes"],
+  ["programa(s)", "programa(s)", "programme(s)"],
+  ["concluído(s)", "konkluídu(s)", "terminé(s)"],
+  ["Ver programas", "Odja programas", "Voir les programmes"],
+  ["Programas públicos", "Programas públiku", "Programmes publics"],
+  ["Novos pedidos das comunidades", "Pedidus novu di komunidadis", "Nouvelles demandes des communautés"],
+  ["Não há pedidos novos.", "Ka ten pedidus novu.", "Il n'y a pas de nouvelles demandes."],
+  ["aberto a todas as instituições", "abertu pa tudu instituisons", "ouvert à toutes les institutions"],
+  ["Ver todos os pedidos e denúncias", "Odja tudu pedidus i denúnsias", "Voir toutes les demandes et signalements"],
+  ["Indicadores principais", "Indikadoris prinsipal", "Indicateurs principaux"],
+  ["Ver dados e estatísticas", "Odja dadus i estatístikas", "Voir les données et statistiques"],
+  ["Programas e projetos", "Programas i projetus", "Programmes et projets"],
+  ["Artesanato e pequenos negócios", "Artizanatu i pikenu negósius", "Artisanat et petites entreprises"],
+  ["Oportunidades públicas", "Oportunidadis públiku", "Opportunités publiques"],
+  ["Mapa do território", "Mapa di teritóriu", "Carte du territoire"],
+  ["Dados e estatísticas", "Dadus i estatístikas", "Données et statistiques"],
+  ["Comunicação oficial", "Komunikason ofisial", "Communication officielle"],
+  ["Pedidos e denúncias", "Pedidus i denúnsias", "Demandes et signalements"],
+  ["Serviços públicos", "Servisus públiku", "Services publics"],
+  ["Infraestruturas, mercados e zonas", "Infraestruturas, mérkadus i zonas", "Infrastructures, marchés et zones"],
+  ["Comunidades atendidas", "Komunidadis atendidu", "Communautés desservies"],
+  ["Perfil da instituição", "Perfil di instituison", "Profil de l'institution"],
+  ["Verificação oficial", "Verifikason ofisial", "Vérification officielle"],
+
+  // Admin: painel (AdminScreen)
+  ["Painel do Admin", "Painel di Admin", "Panneau admin"],
+  ["Ver denúncias", "Odja denúnsias", "Voir les signalements"],
+  ["Acesso restrito a administradores.", "Asesu ristritu pa administradoris.", "Accès réservé aux administrateurs."],
+  ["Não foi possível carregar as estatísticas.", "Ka foi posível karega estatístikas.", "Impossible de charger les statistiques."],
+  ["Nenhuma estatística disponível.", "Nhuma estatístika disponível.", "Aucune statistique disponible."],
+  ["Resumo", "Rezumu", "Résumé"],
+  ["Usuários", "Utilizadoris", "Utilisateurs"],
+  ["Denúncias", "Denúnsias", "Signalements"],
+  ["Favoritos", "Favoritus", "Favoris"],
+  ["Usuários por perfil", "Utilizadoris pur perfil", "Utilisateurs par profil"],
+  ["Produtos por categoria", "Produtus pur kategoria", "Produits par catégorie"],
+  ["Item", "Item", "Élément"],
+
+  // Admin: painel principal (BoDashboardScreen)
+  ["Painel principal", "Painel prinsipal", "Tableau de bord principal"],
+  ["administrador", "administrador", "administrateur"],
+  ["A sua conta ainda não tem autenticação de dois fatores", "Bu konta inda ka ten autentikason di dos fatoris", "Votre compte n'a pas encore l'authentification à deux facteurs"],
+  ["Quem tem acesso à administração deve ativá-la: protege a plataforma se perder o telemóvel ou a palavra-passe.", "Kil ki ten asesu na administrason debe ativa-l: ta protehe plataforma si bu perde telemóvel o palavra-pasi.", "Toute personne ayant accès à l'administration doit l'activer : cela protège la plateforme si vous perdez le téléphone ou le mot de passe."],
+  ["Ativar agora", "Ativa agora", "Activer maintenant"],
+  ["Precisa de atenção", "Meste atensaun", "Nécessite votre attention"],
+  ["Tudo em dia. Nada à espera da equipa.", "Tudu na orden. Nada ta speradu ekipa.", "Tout est à jour. Rien n'attend l'équipe."],
+  ["Resumo da plataforma", "Rezumu di plataforma", "Résumé de la plateforme"],
+  ["Utilizadores ativos", "Utilizadoris ativu", "Utilisateurs actifs"],
+  ["Novos (7 dias)", "Novus (7 dias)", "Nouveaux (7 jours)"],
+  ["Agricultores", "Agrikultoris", "Agriculteurs"],
+  ["Pescadores", "Piskadoris", "Pêcheurs"],
+  ["Artesãos", "Artizanus", "Artisans"],
+  ["Transportadores", "Transportadoris", "Transporteurs"],
+  ["Compradores", "Kumpradoris", "Acheteurs"],
+  ["ONGs", "ONGs", "ONG"],
+  ["Instituições públicas", "Instituisons públiku", "Institutions publiques"],
+  ["Vendas (30 dias)", "Bendas (30 dias)", "Ventes (30 jours)"],
+  ["Transportes em curso", "Transportis na kursu", "Transports en cours"],
+  ["Projetos (ONGs e governo)", "Projetus (ONGs i governu)", "Projets (ONG et gouvernement)"],
+  ["Alertas ativos", "Alertas ativu", "Alertes actives"],
+  ["Relatórios", "Relatórius", "Rapports"],
+  ["Abrir", "Abri", "Ouvrir"],
+  ["conta(s) suspensa(s) ou bloqueada(s). Toque para ver.", "konta(s) suspensu o blokiadu. Toka pa odja.", "compte(s) suspendu(s) ou bloqué(s). Touchez pour voir."],
+  ["Contas novas (14 dias)", "Kontas novu (14 dias)", "Nouveaux comptes (14 jours)"],
+  ["Sem contas novas nestes dias.", "Ka ten kontas novu nes dias.", "Pas de nouveaux comptes ces jours-ci."],
+  ["Vendas concluídas (14 dias)", "Bendas konkluídu (14 dias)", "Ventes terminées (14 jours)"],
+  ["Sem vendas concluídas nestes dias.", "Ka ten bendas konkluídu nes dias.", "Pas de ventes terminées ces jours-ci."],
+  ["Atalhos", "Atalhus", "Raccourcis"],
+  ["Verificações", "Verifikasons", "Vérifications"],
+  ["Enviar aviso", "Manda avizu", "Envoyer un avis"],
   ["pedido(s) novo(s) à espera há mais de 1 dia","pedidu(s) novu(s) ta speradu di mas di 1 dia", "commande(s) nouvelle(s) en attente depuis plus d'1 jour"],
 
   // Pescador
@@ -458,7 +569,10 @@ const WORDS: [string, string, string][] = [
 // [início em Português, início em Kriol, início em Français]
 const PREFIXES: [string, string, string][] = [
   ["Entregas em ", "Entregas na ", "Livraisons à "],
-  [" · colhido em ", " · kolhidu na ", " · récolté le "],
+  ["colhido em ", "kolhidu na ", "récolté le "],
+  ["Denúncias (", "Denúnsias (", "Signalements ("],
+  ["Encomendas (hoje ", "Enkomendas (ozi ", "Commandes (aujourd'hui "],
+  ["Tarefas pendentes (", "Tarefas pendenti (", "Tâches en attente ("],
 ];
 
 type Entry = { crl: string; fr: string };
@@ -505,13 +619,18 @@ export function tr(s: any): any {
 
   // 1. Texto completo
   const full = lookup(s);
-  if (full) return full;
+  if (full) {
+    // mantém os espaços do início e do fim (ex.: " pedido(s) novo(s)...")
+    const lead = (s.match(/^\s*/) || [""])[0];
+    const trail = (s.match(/\s*$/) || [""])[0];
+    return lead + full + trail;
+  }
 
   // 2. Sem símbolos/emojis no início e sem pontuação no fim
   let a = 0;
   while (a < s.length && !KEEP.test(s[a])) a++;
   let b = s.length;
-  while (b > a && /[\s:.!?…,]/.test(s[b - 1])) b--;
+  while (b > a && /[\s:.!?…,·]/.test(s[b - 1])) b--;
   const core = s.slice(a, b);
   if (core) {
     const t = lookup(core);
@@ -533,10 +652,12 @@ export function tr(s: any): any {
   }
 
   // 4. Início fixo + valor variável (ex.: "Entregas em Bissau")
-  const lower = s.toLowerCase();
+  // (ignora emojis e símbolos no início, ex.: "📍 Entregas em Bissau")
+  const rest = s.slice(a);
+  const lowerRest = rest.toLowerCase();
   for (const [p, k, f] of PREFIXES) {
-    if (lower.startsWith(p.toLowerCase())) {
-      return (current === "crl" ? k : f) + s.slice(p.length);
+    if (lowerRest.startsWith(p.toLowerCase())) {
+      return s.slice(0, a) + (current === "crl" ? k : f) + rest.slice(p.length);
     }
   }
 
