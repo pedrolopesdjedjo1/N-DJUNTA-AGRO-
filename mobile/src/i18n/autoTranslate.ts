@@ -229,6 +229,13 @@ const WORDS: [string, string, string][] = [
   ["Transporte", "Transporti", "Transport"],
   ["Vender produtos", "Bende produtus", "Vendre des produits"],
 
+  // Agricultor: ecrã inicial
+  ["Disponíveis para venda", "Disponível pa venda", "Disponibles à la vente"],
+  ["Vendas realizadas", "Bendas feitu", "Ventes réalisées"],
+  ["pedido(s) novo(s) à espera há mais de 2 dias", "pedidu(s) novu(s) ta speradu di mas di 2 dias", "commande(s) nouvelle(s) en attente depuis plus de 2 jours"],
+  ["Restam apenas", "Ta resta so", "Il ne reste que"],
+  ["notificação(ões) por ler", "notifikason(s) pa lê", "notification(s) non lue(s)"],
+
   // Pescador
   ["A equipa está a tratar do seu pedido. Mantenha o telefone ligado.", "Ekipa sta trata di bu pedidu. Mantem telefoni li ligadu.", "L'équipe s'occupe de votre demande. Gardez le téléphone allumé."],
   ["A equipa foi avisada. Fique calmo e mantenha o telefone ligado.", "Ekipa foi avizadu. Fika kalmu i mantem telefoni ligadu.", "L'équipe a été prévenue. Restez calme et gardez le téléphone allumé."],
@@ -442,6 +449,7 @@ const WORDS: [string, string, string][] = [
 // [início em Português, início em Kriol, início em Français]
 const PREFIXES: [string, string, string][] = [
   ["Entregas em ", "Entregas na ", "Livraisons à "],
+  [" · colhido em ", " · kolhidu na ", " · récolté le "],
 ];
 
 type Entry = { crl: string; fr: string };
